@@ -15,12 +15,14 @@
 	document_element,
 	document_element_innerhtml,
 	xml_element,
+	show_xml_element,
+	show_xml_element_visible = false,
 	modal,
 	schemas,
 	cache = {},
 	validation_result,
 	templates = {
-		modal: "<h1>Change Element</h1> <label>Name: <select class=\"nodeName\">{{#nodeNames}}<option value=\"{{name}}\" data-display=\"{{display}}\">{{name}}</option>{{/nodeNames}}</select></label> <hr><button class=\"change\">Change Element</button>"
+		modal: "<h1>Change Element</h1><label><div class='body'>Name: <select class=\"nodeName\">{{#nodeNames}}<option value=\"{{name}}\" data-display=\"{{display}}\">{{name}}</option>{{/nodeNames}}</select></label></div><div class='buttonTray'><button class=\"change\">Change Element</button></div>"
 	},
 	display_types = {
 		block: "block",
@@ -245,7 +247,6 @@
 						xml_string += "\n";
 					}
 					xml_string += "<" + data_element;
-					xml_string += " id=\"" + node.getAttribute("id") + "\"";
 					xml_string += build_xml_attributes_from_json_string(node.getAttribute("data-attributes"));
 					xml_string += ">";
 					if (node.hasChildNodes()) {
@@ -305,10 +306,7 @@
 		}
 	},
 	check_for_text_selection = function(){
-		var selection = get_selection();
-		if(selection.type !== "Range") return;
-	
-		
+		//var selection = get_selection();
 	},
 	update_errors = function(error_lines){
 		var error_line,
@@ -375,6 +373,10 @@
 		}
 		set_errors(document_element.childNodes, error_blocks);
 	},
+	toggle_xml_visibility = function(event){
+        xml_element.style.display = show_xml_element_visible ? "block" : "none";
+        show_xml_element_visible = !show_xml_element_visible;
+	},
 	init = function(){
 		if(typeof console === "undefined") {
 			window.console = {log:function(){}};
@@ -385,10 +387,11 @@
 		$.getJSON("schemas/" + chosen_schema.id + "/display.json", function(data){
 			chosen_schema_settings = data;
 		});
-		
+
 		xml_element = document.getElementById("xml");
 		document_element = document.getElementById("document");
-			
+		show_xml_element = document.getElementById("see_xml");
+
 		cache.templates = {};
 		for(key in templates){
 			cache.templates[key] = Handlebars.compile(templates[key]);
@@ -409,13 +412,14 @@
 		cache.edit_toolbar.appendChild(node);
 
 		validation_result = document.getElementById("validation_result");
-		
+
 		document_element.addEventListener("input", build_xml_soon, false);
 		document_element.addEventListener('click', click_element, false);
 		document_element.addEventListener('keydown', keydown_element, false);
 		document_element.addEventListener('keyup', keyup_element, false);
 		document_element.addEventListener('mouseup', mouseup, false);
-		
+		show_xml_element.addEventListener('click', toggle_xml_visibility);
+
 		try {
 			window.xmllint = new Worker("core/js/rng.js");
         } catch(exception){
@@ -436,6 +440,5 @@
 		};
 		build_xml_soon();
 	};
-	
 	window.onload=init;
 }(jQuery));

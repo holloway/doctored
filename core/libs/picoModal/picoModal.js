@@ -175,7 +175,7 @@ window.picoModal = (function(window, document) {
                 left: "50%",
                 top: "50px",
                 backgroundColor: "white",
-                padding: "20px",
+                padding: "0px",
                 borderRadius: "5px"
             })
             .html(options.content );
