@@ -123,6 +123,7 @@ div.pico-content div.buttonTray button {
             transform: rotate(90deg) translate(1em, 0px);
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
+            cursor: pointer;
         }
         
 
@@ -191,18 +192,19 @@ div.pico-content div.buttonTray button {
             content: attr(data-element);
             color:#666666;
             font-weight:bold;
-            -webkit-tansform-origin: 0 100;
+            -webkit-transform-origin: 0 100;
             -webkit-transform: translate(0px, 0.5em);
-            -moz-tansform-origin: 0 100;
+            -moz-transform-origin: 0 100;
             -moz-transform: translate(0px, 0.5em);
-            -ms-tansform-origin: 0 100;
+            -ms-transform-origin: 0 100 ;
             -ms-transform: translate(0px, 0.5em);
-            -o-tansform-origin: 0 100;
+            -o-transform-origin: 0 100 ;
             -o-transform: translate(0px, 0.5em);
             transform-origin: 0 100;
             transform: translate(0px, 0.8em);
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
+            cursor: pointer;
         }
 
         .doctored .inline-block-changing {

@@ -323,6 +323,7 @@
 			format_errors = function(error_block){
 				var i,
 					error_string = "";
+				if(!error_block) return "";
 				for(i = 0; i < error_block.length; i++){
 					error_string += error_block[i].message + ". ";
 				}
@@ -331,26 +332,23 @@
 			set_errors = function(nodes, error_blocks){
 				var i,
 					node,
-					node_id,
-					error_mes;
+					first_element = true,
+					additional_errors = "";
 				for(i = 0; i < nodes.length; i++){
 					node = nodes[i];
 					if(node.nodeType !== Node.ELEMENT_NODE) continue;
-					if(node.hasChildNodes()) {
-						set_errors(node.childNodes, error_blocks);
+					if(first_element && error_blocks[-1]){
+						additional_errors = format_errors(error_blocks[-1]);
+						first_element = false;
 					}
-					node_id = node.getAttribute("id");
-					if(node_id === undefined) {
-						node.setAttribute("id", "doctored" + (Math.random() * 999999));
-						continue;
-					}
-					if(error_blocks[node_id]){
-						node.setAttribute("data-error", format_errors(error_blocks[node_id]));
+					if(error_blocks[i] || additional_errors.length > 0){
+						node.setAttribute("data-error", format_errors(error_blocks[i]) + additional_errors);
 						node.className += " has_errors";
 					} else {
 						node.setAttribute("data-error", "");
 						node.className = (node.className + " ").replace(/ has_errors /g, "");
 					}
+					additional_errors = "";
 				}
 			};
 
@@ -361,12 +359,15 @@
 				xml_line = xml_lines[xml_line_number];
 				xml_line_id_match = xml_line.match(/id="([^"]*)"/);
 				if(xml_line_id_match && xml_line_id_match.length === 2) {
-					xml_line_id = xml_line_id_match[1];
-					if(error_blocks[xml_line_id] === undefined) {
-						error_blocks[xml_line_id] = [];
-					}
+					xml_line_id = parseInt(xml_line_id_match[1], 10);
+				} else {
+					xml_line_id = -1;
+				}
+				if(error_blocks[xml_line_id] === undefined) {
+					error_blocks[xml_line_id] = [];
+				}
+				if(error_blocks[xml_line_id].indexOf(error_line) === -1){
 					error_blocks[xml_line_id].push(error_line);
-					xml_line_number = 0;
 				}
 				xml_line_number--;
 			} while(xml_line_number >= 0);
@@ -374,7 +375,7 @@
 		set_errors(document_element.childNodes, error_blocks);
 	},
 	toggle_xml_visibility = function(event){
-        xml_element.style.display = show_xml_element_visible ? "block" : "none";
+        xml_element.style.display = !show_xml_element_visible ? "block" : "none";
         show_xml_element_visible = !show_xml_element_visible;
 	},
 	init = function(){
@@ -430,13 +431,12 @@
 			}
         }
 		window.xmllint.onmessage = function(event) {
-			var i;
+			console.log("Worker said : " + event.data, event.data.error_lines);
 			if(event.data.debug) return console.log("WORKER SAID", event.data);
 			validation_result.value = JSON.stringify(event.data);
 			if(event.data && event.data.error_lines){
 				update_errors(event.data.error_lines);
 			}
-			//console.log("Worker said : " + event.data);
 		};
 		build_xml_soon();
 	};
