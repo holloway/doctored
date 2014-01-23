@@ -50,20 +50,23 @@
         Worker_response: function(event){
             var linters = doctored.linters,
                 worker;
-
-            if(event.data.index === undefined || event.data.index === -1) {
+ 
+            if(!event || !event.data || event.data.index === undefined || event.data.index === -1) {
                 return console.log("Unidentified worker response ", event);
             }
             worker = linters.pool[event.data.index];
-            worker.ready = true;
+            worker.ready = true; //worker is now ready for more work
             if(!event.data || !event.data.type) {
-                return event.log("Unknown worker response of ", event);
+                return console.log("Unknown worker response of ", event);
             }
             switch(event.data.type){
                 case "debug":
                     return console.log("DEBUG: Worker#" + event.data.index + " said: " + event.data.message);
                 case "result":
-                    return worker.callback.apply(worker.context, event.data.message);
+                    if(worker.context) {
+                        return worker.callback.bind(worker.context)(event.data.result);
+                    }
+                    return worker.callback(event.data.result);
                 default:
                     return console.log("Unknown worker response of ", event);
             }

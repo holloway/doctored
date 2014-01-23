@@ -16,8 +16,8 @@
 							}
 							self.postMessage({
 								type:    "debug",
-								message: debug_string,
-								index:   current_event.index
+								index:   current_event.index,
+								message: debug_string
 							});
                   }
 				},
@@ -95,8 +95,6 @@
 
 		xmllint_lines = validateXML(module).split("\n");
 
-		console.log("xml string is " + xmllint_lines.toString());
-
 		for(i = 0; i < xmllint_lines.length; i++){
 			xmllint_line = xmllint_lines[i];
 			if(!xmllint_line.length) continue;
@@ -104,18 +102,19 @@
 			if(line["type"] === "error_line"){
 				error_lines.push(line);
 			} else if(line["type"] === "error_summary"){
-				error_summary = line;
+				error_summary += line;
 			} else {
-				console.log(xmllint_line);
+				console.log("Unrecognised xmllint line: " + xmllint_line);
 			}
 		}
 
 		self.postMessage({
 			type:          "result",
-			error_lines:   error_lines,
-			error_summary: error_summary,
-			success:       success,
-			index:         current_event.index
+			index:         current_event.index,
+			result:        {
+							error_lines:   error_lines,
+							error_summary: error_summary
+							}
 		});
 	};
 }(self));
