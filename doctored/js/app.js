@@ -32,10 +32,14 @@
             root_selector: selector,
             cache: {},
             lint: function(){
-                console.log(this);
-                var xml = doctored.util.descend_building_xml(this.root.childNodes);
-
-                console.log(xml);
+                var xml             = '<book xmlns="http://docbook.org/ns/docbook">' + doctored.util.descend_building_xml(this.root.childNodes) + '</book>', //TODO: make this generic, not just DocBook
+                    started_linting = doctored.linters.lint(xml, "../../schemas/docbook5/schema.rng", instance.lint_response, instance); //TODO: make this generic, not just DocBook
+                if(!started_linting) {
+                    //unable to lint ... I guess the workers are busy
+                }
+            },
+            lint_response: function(errors){
+                console.log("ERRORS", errors);
             },
             options: options,
             init: function(){
@@ -43,7 +47,6 @@
                     _this = this;
 
                 if(!doctored.ready) {
-                    //if(console && console.log) console.log("Tried to call " + this.root_selector + " .init() before page was ready. Trying again in " + this.options.retry_init_after_milliseconds + " milliseconds.");
                     if(this.cache.init_timer) clearTimeout(this.cache.init_timer);
                     this.cache.init_timer = setTimeout( function(){ _this.init(); }, this.options.retry_init_after_milliseconds);
                     return;
@@ -56,7 +59,6 @@
                 this.root.contentEditable = true;
                 this.root.classList.add("doctored");
                 this.root.appendChild(default_content);
-
                 this.root.addEventListener("input",   doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this), false);
                 this.root.addEventListener('click',   this.click_element, false);
                 this.root.addEventListener('keydown', this.keydown_element, false);

@@ -15,6 +15,13 @@
                         );
             };
         },
+        increment_but_wrap_at: function(current_value, wrap_at, increment_by){
+            var amount = increment_by || 1;
+
+            current_value += amount;
+            if(current_value >= wrap_at) current_value = 0;
+            return current_value;
+        },
         display_types: {
             block: "block",
             inline: "inline-block",
@@ -100,5 +107,5 @@
             return attributes_string;
         }
     };
-    
+
 }());
