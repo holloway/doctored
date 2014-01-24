@@ -1,4 +1,4 @@
-/*globals doctored, Node, alert*/
+/*globals doctored, Node, alert, console, rangy*/
 (function(){
 	"use strict";
 
@@ -29,6 +29,36 @@
             row: "row",
             cell: "cell",
             root: "root"
+        },
+        get_clipboard_xml_as_html_string: function(clipboard){
+            var html_string,
+                mimetypes_ordered_by_preference_last_most_prefered = ["Text", "text/plain", "text/html", "text/xml"],
+                mimetype,
+                i;
+
+            for(i = 0; i < mimetypes_ordered_by_preference_last_most_prefered.length; i++){
+                mimetype = mimetypes_ordered_by_preference_last_most_prefered[i];
+                if(clipboard.types.indexOf(mimetype) >= 0) {
+                    html_string = clipboard.getData(mimetype);
+                }
+            }
+            return html_string;
+        },
+        insert_html_at_cursor_position: function(html, paste_event){
+            var range,
+                nodes,
+                selection,
+                ins,
+                able_to_paste;
+            
+            able_to_paste = paste_event.clipboardData.setData("text/html", html);
+            if(able_to_paste === false){
+                paste_event.returnValue = false;
+                selection = rangy.getSelection();
+                range = selection.getRangeAt(0);
+                nodes = range.createContextualFragment(html);
+                range.insertNode(nodes);
+            }
         },
         sniff_display_type: function(node){
             if(!node) return;

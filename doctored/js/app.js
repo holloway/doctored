@@ -83,6 +83,11 @@
                 console.log(this);
                 console.log("ERRORS", errors);
             },
+            paste: function(event){
+                var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData);
+                    
+                doctored.util.insert_html_at_cursor_position(html, event);
+            },
             options: options,
             init: function(){
                 var default_content,
@@ -102,6 +107,7 @@
                 this.root.classList.add("doctored");
                 this.root.appendChild(default_content);
                 this.root.addEventListener("input",   doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this), false);
+                this.root.addEventListener('paste',   this.paste, false);
                 this.root.addEventListener('click',   this.click_element, false);
                 this.root.addEventListener('keydown', this.keydown_element, false);
                 this.root.addEventListener('keyup',   this.keyup_element, false);
