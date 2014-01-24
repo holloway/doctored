@@ -58,13 +58,16 @@
             }
             alert("Unknown element type. nodeName was " + node.nodeName);
         },
-        descend_building_xml: function(nodes){
+        descend_building_xml: function(nodes, depth){
             var i,
                 node,
                 xml_string = "",
                 data_element,
                 text_node,
                 display_type;
+            
+            if(depth === undefined) depth = 0;
+
             for(i = 0; i < nodes.length; i++){
                 node = nodes[i];
                 switch(node.nodeType){
@@ -79,12 +82,12 @@
                         xml_string += doctored.util.build_xml_attributes_from_json_string(node.getAttribute("data-attributes"));
                         xml_string += ">";
                         if (node.hasChildNodes()) {
-                            xml_string += doctored.util.descend_building_xml(node.childNodes);
-                        }
-                        if(display_type === doctored.util.display_types.block){
-                            xml_string += "\n";
+                            xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
                         }
                         xml_string += "</" + data_element + ">";
+                        if(depth === 0 && display_type === doctored.util.display_types.block){
+                            xml_string += "\n";
+                        }
                         break;
                     case Node.TEXT_NODE:
                         text_node = node.innerHTML || node.textContent || node.innerText;

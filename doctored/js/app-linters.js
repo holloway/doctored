@@ -35,8 +35,9 @@
             
             linters.pool_cursor = doctored.util.increment_but_wrap_at(linters.pool_cursor, linters.pool.length);
 
-            if(console && console.log) console.log("Gave job to worker #" + worker.index);
+            console.log("xml_string", xml_string);
 
+            if(console && console.log) console.log("Gave job to worker #" + worker.index);
             worker.callback = callback;
             worker.context  = context;
             worker.ready    = false;

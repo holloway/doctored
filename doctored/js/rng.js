@@ -49,7 +49,7 @@
 			if(line.substr(0, xml_file.length + 1) === xml_file + ":" && line.indexOf("Relax-NG validity error") !== -1) {
 				response.type = "error_line";
 				line = line.substr(xml_file.length + 1).trim();
-				response.line_number = parseInt(line.substr(0, line.indexOf(":")), 10);
+				response.line_number = parseInt(line.substr(0, line.indexOf(":")), 10) - 1; //seems to use a 1-based index. Weird.
 				line = line.substr(line.indexOf(":") + 1).trim();
 				if(line.substr(0, "element ".length) === "element ") {
 					line = line.substr("element ".length).trim();
@@ -67,29 +67,28 @@
 				response.message = line.substr(xml_file.length + 1);
 			}
 			return response;
+		},
+		get_schema = function(url){
+			if(!schemas[current_event.schema_url]) {
+				schemas[current_event.schema_url] = sjax(current_event.schema_url);
+			}
+			return schemas[current_event.schema_url];
 		};
+
 
 	self.onmessage = function(event){
 		var module,
 			xmllint_lines,
 			xmllint_line,
 			line,
-			xmllint,
 			i,
 			error_lines = [],
-			error_summary,
-			success;
+			error_summary = "";
 		
 		current_event = event.data;
-
-		if(!schemas[current_event.schema_url]){
-			schemas[current_event.schema_url] = sjax(current_event.schema_url);
-		}
-
-
 		module = {
 			"xml":       to_ncrs(current_event.xml),
-			"schema":    schemas[current_event.schema_url],
+			"schema":    get_schema(current_event.schema_url),
 			"arguments": ["--noout", "--relaxng", rng_file, xml_file]
 		};
 
@@ -102,19 +101,19 @@
 			if(line["type"] === "error_line"){
 				error_lines.push(line);
 			} else if(line["type"] === "error_summary"){
-				error_summary += line;
+				error_summary = line;
 			} else {
 				console.log("Unrecognised xmllint line: " + xmllint_line);
 			}
 		}
 
 		self.postMessage({
-			type:          "result",
-			index:         current_event.index,
-			result:        {
-							error_lines:   error_lines,
-							error_summary: error_summary
-							}
+			type:   "result",
+			index:  current_event.index,
+			result: {
+					error_lines:   error_lines,
+					error_summary: error_summary
+					}
 		});
 	};
 }(self));

@@ -39,6 +39,48 @@
                 }
             },
             lint_response: function(errors){
+                var by_line = {},
+                    error_line,
+                    child_node,
+                    line_number,
+                    i,
+                    error,
+                    format_errors = function(line_errors){
+                        var i,
+                            error_string = "";
+                        for(i = 0; i < line_errors.length; i++){
+                            error_string += line_errors[i].message + ". ";
+                        }
+                        return error_string;
+                    };
+
+                for(i = 0; i < errors.error_lines.length; i++){
+                    error_line = errors.error_lines[i];
+                    if(by_line[error_line.line_number] === undefined) {
+                        by_line[error_line.line_number] = [];
+                    }
+                    by_line[error_line.line_number].push(error_line);
+                }
+
+                console.log("by_line", by_line);
+                console.log("childNodes", this.root.childNodes);
+
+                for(i = 0; i < this.root.childNodes.length; i++){
+                    child_node = this.root.childNodes[i];
+                    line_number = i + 1;
+                    console.log("trying line ", line_number);
+                    if(by_line[line_number]) {
+                        child_node.setAttribute("data-error", format_errors(by_line[line_number]));
+                        child_node.classList.add("has_errors");
+                        child_node.classList.remove("hide_errors");
+                    } else {
+                        child_node.setAttribute("data-error", "");
+                        child_node.classList.remove("has_errors");
+                        child_node.classList.add("hide_errors");
+                    }
+                }
+
+                console.log(this);
                 console.log("ERRORS", errors);
             },
             options: options,
