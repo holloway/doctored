@@ -203,14 +203,20 @@
             if(!json_string || json_string.length === 0) return "";
             return doctored.util.build_xml_attributes_from_map(JSON.parse(json_string));
         },
-        get_instance_from_root_element: function(root_element) {
+        offer_download: function(xml){
+            var blob = new Blob([xml], {type: "text/xml;charset=utf-8"});
+
+            window.saveAs(blob, "download.xml");
+        },
+        get_instance_from_root_element: function(target) {
             var i,
-                instance;
+                instance,
+                from_menu = target.parentNode.nextSibling;
 
             if(doctored.instances === undefined) return false;
             for(i = 0; i < doctored.instances.length; i++){
                 instance = doctored.instances[i];
-                if(instance.root.isEqualNode(root_element)) {
+                if(instance.root.isEqualNode(target) || instance.root.isEqualNode(from_menu)) {
                     return instance;
                 }
             }

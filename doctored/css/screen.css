@@ -23,7 +23,7 @@
 
     .doctored .block {
         position:relative;
-        clear:both;
+        /*clear:both;*/
         display:block;
         margin:0px 200px 0px 0px;
         padding:0.5em 0px 1em 2.5em;
@@ -85,7 +85,6 @@
             text-shadow:1px 1px 2px #dddddd;
             cursor: pointer;
         }
-        
 
         .doctored .block.hide_errors:before,
         .doctored .block.has_errors:before {
@@ -171,3 +170,35 @@
             border-bottom: solid 2px red;
         }
 
+.doctored-menu {
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+    text-transform:uppercase;
+    font-family: sans-serif;
+    font-size:small;
+    margin-bottom:6px;
+}
+
+    .doctored-menu a {
+        display: inline-block;
+        border: solid 1px white;
+        box-shadow: 0px 0px 2px #cccccc;
+        color: #666666;
+        padding:3px 6px;
+        margin-right:1px;
+        background: #eeeeee;
+        text-decoration:none;
+    }
+
+    .doctored-menu a:hover {
+        background: #fff;
+    }
+
+.doctored-view-source {
+    position: fixed;
+    top: 3%;
+    left: 3%;
+    width: 94%;
+    height:94%;
+}

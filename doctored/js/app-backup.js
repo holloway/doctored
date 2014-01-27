@@ -362,7 +362,7 @@
                  i,
                  highlightApplier;
 
-        for(i = 0; i < selections.length; i++){ 
+        for(i = 0; i < selections.length; i++){
             selection = selections[i];
 	        $(selection).replaceWith(selection.childNodes); //TODO replace with plain JavaScript
         }

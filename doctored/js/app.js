@@ -12,7 +12,9 @@
             initial_placeholder_element:   "para",
             retry_init_after_milliseconds: 50,
             format:                        doctored.util.formats.docbook
-        };
+        },
+        head = document.getElementsByTagName('head')[0],
+        body = document.getElementsByTagName('body')[0];
 
     doctored.init = function(selector, options){
         var root_element = document.querySelector(selector),
@@ -32,9 +34,12 @@
             root_selector: selector,
             cache: {},
             lint: function(){
-                var xml = this.options.format.root_start_tag + doctored.util.descend_building_xml(this.root.childNodes) + this.options.format.root_close_tag;
+                var xml = this.get_xml_string();
 
                 doctored.linters.lint(xml, this.options.format.schema, instance.lint_response, instance);
+            },
+            get_xml_string: function(){
+                return this.options.format.root_start_tag + doctored.util.descend_building_xml(this.root.childNodes) + this.options.format.root_close_tag;
             },
             lint_response: function(errors){
                 var by_line = {},
@@ -92,10 +97,32 @@
                 doctored_html = doctored.util.convert_html_to_doctored_html(html);
                 doctored.util.insert_html_at_cursor_position(doctored_html, event);
             },
+            view_source: function(event){
+                var instance = doctored.util.get_instance_from_root_element(this),
+                    xml      = instance.get_xml_string(),
+                    textarea = document.createElement('textarea');
+
+                event.preventDefault();
+                textarea.readOnly = true;
+                textarea.classList.add("doctored-view-source");
+                textarea.innerHTML = xml;
+                body.appendChild(textarea);
+                textarea.focus();
+                textarea.addEventListener('blur', function(){ this.parentNode.removeChild(this); }, false);
+
+            },
+            download: function(event){
+                var instance = doctored.util.get_instance_from_root_element(this),
+                    xml      = instance.get_xml_string();
+
+                event.preventDefault();
+                doctored.util.offer_download(xml);
+            },
             options: options,
             init: function(){
                 var default_content,
-                    _this = this;
+                    _this = this,
+                    menu;
 
                 if(!doctored.ready) {
                     if(this.cache.init_timer) clearTimeout(this.cache.init_timer);
@@ -116,6 +143,15 @@
                 this.root.addEventListener('keydown', this.keydown_element, false);
                 this.root.addEventListener('keyup',   this.keyup_element, false);
                 this.root.addEventListener('mouseup', this.mouseup, false);
+                this.menu = document.createElement('div');
+                this.menu.classList.add("doctored-menu");
+                this.menu.innerHTML = "<a class=\"download\" href=\"\">Download</a><a class=\"save\" href=\"\">Save</a><a class=\"view-source\" href=\"\">View Source</a>";
+                this.menu.download = this.menu.getElementsByClassName("download")[0];
+                this.menu.download.addEventListener('click', this.download, false);
+                this.menu.save = this.menu.getElementsByClassName("save")[0];
+                this.menu.view_source = this.menu.getElementsByClassName("view-source")[0];
+                this.menu.view_source.addEventListener('click', this.view_source, false);
+                this.root.parentNode.insertBefore(this.menu, this.root);
                 if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
             }
         };

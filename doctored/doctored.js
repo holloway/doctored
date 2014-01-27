@@ -38,7 +38,7 @@
         scripts        = Array.prototype.slice.call(document.getElementsByTagName('script')),
         this_script    = scripts[scripts.length-1],
         manifest       = {
-                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app.js", "js/shims.js", "libs/rangy/rangy.js", "libs/handlebars/handlebars.js", "libs/picoModal/picoModal.js"],
+                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app.js", "js/shims.js", "libs/rangy/rangy.js", "libs/handlebars/handlebars.js", "libs/picoModal/picoModal.js", "libs/filesaver.js/FileSaver.js"],
                          "css": ["css/screen.css"]
                          },
         manifest_count = manifest.js.length + manifest.css.length,
