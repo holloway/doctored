@@ -1,4 +1,4 @@
-/*globals doctored, alert, console*/
+/*globals doctored, alert, console, confirm*/
 (function(){
     "use strict";
 
@@ -10,7 +10,8 @@
         defaults = {
             linting_debounce_milliseconds: 500,
             initial_placeholder_element:   "para",
-            retry_init_after_milliseconds: 50
+            retry_init_after_milliseconds: 50,
+            format:                        doctored.util.formats.docbook
         };
 
     doctored.init = function(selector, options){
@@ -18,25 +19,22 @@
             instance,
             property;
 
-        options = options || {};
+        if(!root_element) return alert("Doctored.js is unable to find the element selected by: " + selector);
 
+        options = options || {};
         for (property in defaults) {
             if (options.hasOwnProperty(property)) continue;
             options[property] = defaults[property];
         }
-
-        if(!root_element) return alert("Doctored.js is unable to find the element selected by: " + selector);
 
         instance = {
             root: root_element,
             root_selector: selector,
             cache: {},
             lint: function(){
-                var xml             = '<book xmlns="http://docbook.org/ns/docbook">' + doctored.util.descend_building_xml(this.root.childNodes) + '</book>', //TODO: make this generic, not just DocBook
-                    started_linting = doctored.linters.lint(xml, "../../schemas/docbook5/schema.rng", instance.lint_response, instance); //TODO: make this generic, not just DocBook
-                if(!started_linting) {
-                    //unable to lint ... I guess the workers are busy
-                }
+                var xml = this.options.format.root_start_tag + doctored.util.descend_building_xml(this.root.childNodes) + this.options.format.root_close_tag;
+
+                doctored.linters.lint(xml, this.options.format.schema, instance.lint_response, instance);
             },
             lint_response: function(errors){
                 var by_line = {},
@@ -61,14 +59,9 @@
                     }
                     by_line[error_line.line_number].push(error_line);
                 }
-
-                console.log("by_line", by_line);
-                console.log("childNodes", this.root.childNodes);
-
                 for(i = 0; i < this.root.childNodes.length; i++){
                     child_node = this.root.childNodes[i];
                     line_number = i + 1;
-                    console.log("trying line ", line_number);
                     if(by_line[line_number]) {
                         child_node.setAttribute("data-error", format_errors(by_line[line_number]));
                         child_node.classList.add("has_errors");
@@ -79,14 +72,25 @@
                         child_node.classList.add("hide_errors");
                     }
                 }
-
-                console.log(this);
-                console.log("ERRORS", errors);
             },
             paste: function(event){
-                var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData);
-                    
-                doctored.util.insert_html_at_cursor_position(html, event);
+                var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),
+                    instance = doctored.util.get_instance_from_root_element(this), //because `this` is the root element, not the instance, due to this function being a browser event callback.
+                    doctored_html;
+
+                if(instance && instance.options.format.convert_from_html && doctored.util.looks_like_html(html)) {
+                    event.returnValue = false;
+                    setTimeout(function(){ //for some reason in Chrome it runs confirm twice when it's not in a setTimeout. Odd, suspected browser bug.
+                        if(confirm("That looks like HTML - want to convert it to " + instance.options.format.name + "?")) {
+                            html = instance.options.format.convert_from_html(html);
+                        }
+                        doctored_html = doctored.util.convert_html_to_doctored_html(html);
+                        doctored.util.insert_html_at_cursor_position(doctored_html, event);
+                    }, 0);
+                    return;
+                }
+                doctored_html = doctored.util.convert_html_to_doctored_html(html);
+                doctored.util.insert_html_at_cursor_position(doctored_html, event);
             },
             options: options,
             init: function(){
@@ -115,12 +119,9 @@
                 if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
             }
         };
-
         instance.init();
-
+        doctored.instances = doctored.instances || [];
+        doctored.instances.push(instance);
         return instance;
     };
-
-    
-
 }());
