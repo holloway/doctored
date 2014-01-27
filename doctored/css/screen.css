@@ -89,13 +89,12 @@
         .doctored .block.hide_errors:before,
         .doctored .block.has_errors:before {
             content: attr(data-error);
-            -ms-transition:width 2s, height 2s, background-color 2s, -moz-transform 2s;
-            -moz-transition:width 2s, height 2s, background-color 2s, -moz-transform 2s;
-            -webkit-transition:width 2s, height 2s, background-color 2s, -webkit-transform 2s;
-            -o-transition:width 2s, height 2s, background-color 2s, -o-transform 2s;
-            transition:width 2s, height 2s, background-color 2s, transform 2s;
+            -ms-transition:2s;
+            -moz-transition:2s;
+            -webkit-transition:2s;
+            -o-transition:2s;
+            transition:2s;
             position:absolute;
-            z-index:1000px;
             right:-200px;
             top:0px;
             width:160px;
@@ -123,12 +122,10 @@
 
         .doctored .block.has_errors:before {
             opacity: 1;
-            z-index:2;
         }
 
         .doctored .block.hide_errors:before {
             opacity: 0.5;
-            z-index:1;
         }
 
     .doctored .inline-block {
@@ -178,7 +175,12 @@
     font-family: sans-serif;
     font-size:small;
     margin-bottom:6px;
+    opacity: 0.8;
 }
+
+    .doctored-menu:hover {
+        opacity: 1;
+    }
 
     .doctored-menu a {
         display: inline-block;
@@ -199,6 +201,11 @@
     position: fixed;
     top: 3%;
     left: 3%;
-    width: 94%;
-    height:94%;
+    width: 92%;
+    height:92%;
+    -webkit-appearance: none; /* http://stackoverflow.com/questions/11658840/css-box-shadow-isnt-working-with-textarea-in-webkit */
+    -moz-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
+    -webkit-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
+    box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
+    padding: 0.5%;
 }
