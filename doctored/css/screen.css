@@ -187,7 +187,7 @@
         display: inline-block;
         border: solid 1px white;
         padding:8px 13px;
-        margin-right:2px;
+        margin-right:4px;
         background: #dddddd;
         text-decoration:none;
         background-color:#ededed;
@@ -211,15 +211,6 @@
     .doctored-menu a:active {
         background-color:#666666;
     }
-
-    .doctored-menu .last-saved {
-        font-size:xx-small;
-        font-weight:bold;
-        color: #aaaaaa;
-        margin-left: 6px;
-    }
-
-
 
 .doctored-view-source {
     position: fixed;

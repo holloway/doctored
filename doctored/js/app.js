@@ -86,16 +86,10 @@
                     localStorage_key,
                     xml;
 
-                if(!window.localStorage) return alert("Can't save. Your browser doesn't support localStorage.");
                 instance = doctored.util.get_instance_from_root_element(this); //because `this` is the root element, not the instance, due to this function being a browser event callback.
-
+                console.log(this, instance);
                 localStorage_key = instance.options.localStorage_key;
-                xml = instance.get_xml_string();
-                if(window.localStorage.getItem(localStorage_key) !== xml) {
-                    window.localStorage.setItem(localStorage_key, xml);
-                    instance.menu.last_saved_at = new Date().getTime();
-                }
-                event.preventDefault();
+                window.localStorage.setItem(localStorage_key, instance.get_xml_string());
             },
             paste: function(event){
                 var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),
@@ -179,8 +173,7 @@
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
                 if(window.localStorage) {
-                    this.save_timer = setTimeout(this.save, this.options.autosave_every_milliseconds);
-                    this.last_saved_timer = setInterval(this.update_last_saved, this.options.last_saved_message_every_milliseconds); //normally I prefer recursive setTimeout but as we're only running this every 30+ seconds it seems safe and clearer
+                    this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
                 if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
             }
