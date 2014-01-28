@@ -8,10 +8,11 @@
 
     var non_breaking_space = "\u00A0",
         defaults = {
+            autosave_every_milliseconds:   30 * 1000,
             linting_debounce_milliseconds: 500,
-            initial_placeholder_element:   "para",
             retry_init_after_milliseconds: 50,
-            format:                        doctored.util.formats.docbook
+            initial_placeholder_element:   "para",
+            format:                        "docbook" //key from doctored.util.formats
         },
         head = document.getElementsByTagName('head')[0],
         body = document.getElementsByTagName('body')[0];
@@ -22,6 +23,7 @@
             property;
 
         if(!root_element) return alert("Doctored.js is unable to find the element selected by: " + selector);
+        if (typeof defaults.format === 'string' || defaults.format instanceof String) defaults.format = doctored.util.formats[defaults.format];
 
         options = options || {};
         for (property in defaults) {
@@ -30,6 +32,7 @@
         }
 
         instance = {
+            doctored: 0.5,
             root: root_element,
             root_selector: selector,
             cache: {},
@@ -78,6 +81,22 @@
                     }
                 }
             },
+            save: function(event){
+                var instance,
+                    localStorage_key,
+                    xml;
+
+                if(!window.localStorage) return alert("Can't save. Your browser doesn't support localStorage.");
+                instance = doctored.util.get_instance_from_root_element(this); //because `this` is the root element, not the instance, due to this function being a browser event callback.
+
+                localStorage_key = instance.options.localStorage_key;
+                xml = instance.get_xml_string();
+                if(window.localStorage.getItem(localStorage_key) !== xml) {
+                    window.localStorage.setItem(localStorage_key, xml);
+                    instance.menu.last_saved_at = new Date().getTime();
+                }
+                event.preventDefault();
+            },
             paste: function(event){
                 var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),
                     instance = doctored.util.get_instance_from_root_element(this), //because `this` is the root element, not the instance, due to this function being a browser event callback.
@@ -113,10 +132,17 @@
             },
             download: function(event){
                 var instance = doctored.util.get_instance_from_root_element(this),
-                    xml      = instance.get_xml_string();
+                    xml      = instance.get_xml_string(),
+                    filename = instance.root_selector.replace(/[#-]/g, "").replace(/\s/g, "") + xml.replace(/<[^>]*?>/g, "").replace(/\s/g, "");
 
                 event.preventDefault();
-                doctored.util.offer_download(xml);
+                if(filename.length > 10) {
+                    filename = filename.substr(0, 10);
+                } else if(filename.length < 4) {
+                    filename = "download";
+                }
+                filename += ".xml";
+                doctored.util.offer_download(xml, filename);
             },
             options: options,
             init: function(){
@@ -145,13 +171,17 @@
                 this.root.addEventListener('mouseup', this.mouseup, false);
                 this.menu = document.createElement('div');
                 this.menu.classList.add("doctored-menu");
-                this.menu.innerHTML = "<a class=\"download\" href=\"\">Download</a><a class=\"save\" href=\"\">Save</a><a class=\"view-source\" href=\"\">View Source</a>";
+                this.menu.innerHTML = "<a class=\"download\" href=\"\">Download</a><a class=\"view-source\" href=\"\">View Source</a>";
                 this.menu.download = this.menu.getElementsByClassName("download")[0];
                 this.menu.download.addEventListener('click', this.download, false);
-                this.menu.save = this.menu.getElementsByClassName("save")[0];
                 this.menu.view_source = this.menu.getElementsByClassName("view-source")[0];
                 this.menu.view_source.addEventListener('click', this.view_source, false);
+                this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
+                if(window.localStorage) {
+                    this.save_timer = setTimeout(this.save, this.options.autosave_every_milliseconds);
+                    this.last_saved_timer = setInterval(this.update_last_saved, this.options.last_saved_message_every_milliseconds); //normally I prefer recursive setTimeout but as we're only running this every 30+ seconds it seems safe and clearer
+                }
                 if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
             }
         };

@@ -203,16 +203,18 @@
             if(!json_string || json_string.length === 0) return "";
             return doctored.util.build_xml_attributes_from_map(JSON.parse(json_string));
         },
-        offer_download: function(xml){
+        offer_download: function(xml, filename){
             var blob = new Blob([xml], {type: "text/xml;charset=utf-8"});
-
-            window.saveAs(blob, "download.xml");
+            filename = filename || "download.xml";
+            window.saveAs(blob, filename);
         },
         get_instance_from_root_element: function(target) {
             var i,
                 instance,
-                from_menu = target.parentNode.nextSibling;
+                from_menu;
 
+            if(target.doctored) return target;
+            from_menu = target.parentNode.nextSibling;
             if(doctored.instances === undefined) return false;
             for(i = 0; i < doctored.instances.length; i++){
                 instance = doctored.instances[i];

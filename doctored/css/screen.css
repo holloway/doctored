@@ -168,14 +168,15 @@
         }
 
 .doctored-menu {
-    display: inline-block;
+    display: block;
     margin: 0px;
     padding: 0px;
     text-transform:uppercase;
     font-family: sans-serif;
     font-size:small;
-    margin-bottom:6px;
-    opacity: 0.8;
+    font-weight:bold;
+    margin-bottom:5px;
+    opacity: 0.9;
 }
 
     .doctored-menu:hover {
@@ -185,17 +186,40 @@
     .doctored-menu a {
         display: inline-block;
         border: solid 1px white;
-        box-shadow: 0px 0px 2px #cccccc;
-        color: #666666;
-        padding:3px 6px;
-        margin-right:1px;
-        background: #eeeeee;
+        padding:8px 13px;
+        margin-right:2px;
+        background: #dddddd;
         text-decoration:none;
+        background-color:#ededed;
+        color:#888888;
+        border-radius: 5px;
+        background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+        background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+        text-shadow:1px 1px 0px #ffffff;
+        box-shadow: 0px 5px 14px -5px #bbbbbb;
     }
 
     .doctored-menu a:hover {
-        background: #fff;
+        -moz-box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
+        -webkit-box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
+        box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
+        background-color:#dfdfdf;
+        color: #666666;
     }
+
+    .doctored-menu a:active {
+        background-color:#666666;
+    }
+
+    .doctored-menu .last-saved {
+        font-size:xx-small;
+        font-weight:bold;
+        color: #aaaaaa;
+        margin-left: 6px;
+    }
+
+
 
 .doctored-view-source {
     position: fixed;
@@ -203,9 +227,12 @@
     left: 3%;
     width: 92%;
     height:92%;
+    border: none;
     -webkit-appearance: none; /* http://stackoverflow.com/questions/11658840/css-box-shadow-isnt-working-with-textarea-in-webkit */
-    -moz-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
-    -webkit-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
-    box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc;
+    -moz-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
+    -webkit-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
+    box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
     padding: 0.5%;
+    outline: none;
+
 }

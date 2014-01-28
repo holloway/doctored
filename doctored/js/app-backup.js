@@ -1,3 +1,4 @@
+/*globals rangy, alert, console */
 (function($){
     "use strict";
 
