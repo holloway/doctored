@@ -2896,8 +2896,9 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
             // loads and initializes Rangy later. If anyone complains, code could be added to save and restore the
             // selection.
             var sel = window.getSelection();
-            if (sel) {
+            if (sel && sel.rangeCount) {
                 // Store the current selection
+                console.log("selcount", sel.rangeCount);
                 var originalSelectionRangeCount = sel.rangeCount;
                 var selectionHasMultipleRanges = (originalSelectionRangeCount > 1);
                 var originalSelectionRanges = [];
@@ -3355,6 +3356,7 @@ rangy.createCoreModule("WrappedSelection", ["DomRange", "WrappedRange"], functio
     }
 
     selProto.getRangeAt = function(index) {
+        console.log("getRangeAt", index, this.rangeCount, this._ranges, this._ranges[index]);
         if (index < 0 || index >= this.rangeCount) {
             throw new DOMException("INDEX_SIZE_ERR");
         } else {

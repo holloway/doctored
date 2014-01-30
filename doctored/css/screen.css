@@ -86,7 +86,7 @@
             cursor: pointer;
         }
 
-        .doctored .block.hide_errors:before,
+        /*.doctored .block.hide_errors:before,*/
         .doctored .block.has_errors:before {
             content: attr(data-error);
             -ms-transition:2s;
@@ -122,10 +122,6 @@
 
         .doctored .block.has_errors:before {
             opacity: 1;
-        }
-
-        .doctored .block.hide_errors:before {
-            opacity: 0.5;
         }
 
     .doctored .inline-block {
@@ -176,7 +172,9 @@
     font-size:small;
     font-weight:bold;
     margin-bottom:5px;
+    margin-right:200px;
     opacity: 0.9;
+    text-align:left;
 }
 
     .doctored-menu:hover {
@@ -195,9 +193,13 @@
         border-radius: 5px;
         background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
         background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
-        filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
         text-shadow:1px 1px 0px #ffffff;
         box-shadow: 0px 5px 14px -5px #bbbbbb;
+        -ms-transition:1s;
+        -moz-transition:1s;
+        -webkit-transition:1s;
+        -o-transition:1s;
+        transition:1s;
     }
 
     .doctored-menu a:hover {
@@ -206,13 +208,14 @@
         box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
         background-color:#dfdfdf;
         color: #666666;
+
     }
 
     .doctored-menu a:active {
         background-color:#666666;
     }
 
-.doctored-view-source {
+.doctored-view-source-textbox {
     position: fixed;
     top: 3%;
     left: 3%;
@@ -225,5 +228,13 @@
     box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
     padding: 0.5%;
     outline: none;
+}
 
+.doctored-dialog {
+    position: absolute;
+
+}
+
+.doctored-selection {
+    border: solid 1px red;
 }

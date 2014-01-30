@@ -30,6 +30,10 @@
                     setTimeout(bindings[name][i], 0); //go on async stack, don't execute immediately
                 }
             }
+        },
+        _to_be_initialized: [],
+        init: function(selector, options){
+            window.doctored._to_be_initialized.push({selector: selector, options: options});
         }
     };
 
@@ -38,15 +42,13 @@
         scripts        = Array.prototype.slice.call(document.getElementsByTagName('script')),
         this_script    = scripts[scripts.length-1],
         manifest       = {
-                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app.js", "js/shims.js", "libs/rangy/rangy.js", "libs/handlebars/handlebars.js", "libs/picoModal/picoModal.js", "libs/filesaver.js/FileSaver.js"],
+                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app.js", "js/shims.js", "libs/filesaver.js/FileSaver.js"],
                          "css": ["css/screen.css"]
                          },
         manifest_count = manifest.js.length + manifest.css.length,
         manifest_load  = function(){
                             manifest_count--;
-                            if(manifest_count === 0){
-                                window.doctored.event.trigger("app:ready");
-                            }
+                            if(manifest_count === 0) window.doctored.event.trigger("app:ready");
                           },
         i,
         new_element;
@@ -59,7 +61,8 @@
     window.doctored.base = this_script.src.substr(0, this_script.src.lastIndexOf("/") + 1);
 
     //TODO: allow people to override manifest locations when their URLs are mangled via a CDN or something.
-    //      this should probably be done by have a <script> preceding this one that sets the new URLs.
+    //      because this is unusual we shouldn't optimise for this ... I guess this should probably be
+    //      done by have a <script> preceding this one that sets the new URLs.
 
     for(i = 0; i < manifest.js.length; i++){
         new_element = document.createElement("script");

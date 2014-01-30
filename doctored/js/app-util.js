@@ -13,12 +13,16 @@
                     var element_mapping   = {"p": "para", "a": "ulink"},
                         attribute_mapping = {"href": "url"};
                     return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
+                },
+                get_elements: function(){
+                    return ["para", "title"];
                 }
             }
         },
         debounce: function(fn, delay_in_milliseconds, context) {
             var timer = null;
             context = context || this;
+            console.log("debounce for " + delay_in_milliseconds, fn);
             return function(){
                 var args = arguments;
                 clearTimeout(timer);
@@ -265,6 +269,23 @@
                        attributes_string +
                        ">";
             });
+        },
+        to_options_tags: function(list){
+            var html = "",
+                i,
+                escape_chars = {
+                    "&": "&nbsp;",
+                    "<": "&lt;",
+                    ">": "&gt;"
+                },
+                escape = function(char){
+                    return escape_chars[char];
+                };
+
+            for(i = 0; i < list.length; i++){
+                html += "<option>" + list[i].replace(/[&<>]/g, escape) + "</option>";
+            }
+            return html;
         }
     };
 }());

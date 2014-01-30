@@ -1,9 +1,16 @@
-/*globals doctored, alert, console, confirm*/
+/*globals doctored, alert, console, confirm, $*/
 (function(){
     "use strict";
 
     doctored.event.on("app:ready", function(){
+        var i,
+            instance;
+
         doctored.ready = true;
+        for(i = 0; i < doctored._to_be_initialized.length; i++){
+            instance = doctored._to_be_initialized[i];
+            doctored._init(instance.selector, instance.options);
+        }
     });
 
     var non_breaking_space = "\u00A0",
@@ -17,7 +24,7 @@
         head = document.getElementsByTagName('head')[0],
         body = document.getElementsByTagName('body')[0];
 
-    doctored.init = function(selector, options){
+    doctored._init = function(selector, options){
         var root_element = document.querySelector(selector),
             instance,
             property;
@@ -87,7 +94,6 @@
                     xml;
 
                 instance = doctored.util.get_instance_from_root_element(this); //because `this` is the root element, not the instance, due to this function being a browser event callback.
-                console.log(this, instance);
                 localStorage_key = instance.options.localStorage_key;
                 window.localStorage.setItem(localStorage_key, instance.get_xml_string());
             },
@@ -110,6 +116,38 @@
                 doctored_html = doctored.util.convert_html_to_doctored_html(html);
                 doctored.util.insert_html_at_cursor_position(doctored_html, event);
             },
+            mouseup: function(event){
+                var instance = doctored.util.get_instance_from_root_element(this),
+                    selection_elements = instance.root.getElementsByClassName("doctored-selection"),
+                    highlight_text = function(){
+                        
+                        var element = document.createElement('div');
+                        element.className = "doctored-selection";
+                        var selection = window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
+                        if (selection.rangeCount) {
+                                var range = selection.getRangeAt(0).cloneRange();
+                                if(range.toString().length === 0) return;
+                                range.surroundContents(element);
+                                selection.removeAllRanges();
+                                selection.addRange(range);
+                                selection.removeAllRanges();
+                        }
+                        
+                    };
+
+                setTimeout(highlight_text, 0);
+            },
+            selectionstart: function(event){
+                //wot?
+            },
+            element_picker: function(target){
+                var $target = $(target),
+                    offset  = $target.inlineOffset(); //todo replace with plain javascript
+
+                this.dialog.style.left = offset.left + "px";
+                this.dialog.style.top  = offset.top  + "px";
+                this.dialog.style.display = "block";
+            },
             view_source: function(event){
                 var instance = doctored.util.get_instance_from_root_element(this),
                     xml      = instance.get_xml_string(),
@@ -117,12 +155,11 @@
 
                 event.preventDefault();
                 textarea.readOnly = true;
-                textarea.classList.add("doctored-view-source");
+                textarea.classList.add("doctored-view-source-textbox");
                 textarea.innerHTML = xml;
                 body.appendChild(textarea);
                 textarea.focus();
                 textarea.addEventListener('blur', function(){ this.parentNode.removeChild(this); }, false);
-
             },
             download: function(event){
                 var instance = doctored.util.get_instance_from_root_element(this),
@@ -163,15 +200,21 @@
                 this.root.addEventListener('keydown', this.keydown_element, false);
                 this.root.addEventListener('keyup',   this.keyup_element, false);
                 this.root.addEventListener('mouseup', this.mouseup, false);
-                this.menu = document.createElement('div');
+                this.root.addEventListener('touchend', this.mouseup, false);
+                this.root.addEventListener('selectstart', this.selectionstart, false);
+                this.menu = document.createElement('menu');
                 this.menu.classList.add("doctored-menu");
-                this.menu.innerHTML = "<a class=\"download\" href=\"\">Download</a><a class=\"view-source\" href=\"\">View Source</a>";
-                this.menu.download = this.menu.getElementsByClassName("download")[0];
+                this.dialog = document.createElement('menu');
+                this.dialog.classList.add("doctored-dialog");
+                this.dialog.innerHTML = "<select>" + doctored.util.to_options_tags(this.options.format.get_elements()) + "</select>";
+                this.menu.innerHTML = "<a class=\"doctored-download\" href=\"\">Download</a><a class=\"doctored-view-source\" href=\"\">View Source</a>";
+                this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
                 this.menu.download.addEventListener('click', this.download, false);
-                this.menu.view_source = this.menu.getElementsByClassName("view-source")[0];
+                this.menu.view_source = this.menu.getElementsByClassName("doctored-view-source")[0];
                 this.menu.view_source.addEventListener('click', this.view_source, false);
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
+                this.root.parentNode.insertBefore(this.dialog, this.root);
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
