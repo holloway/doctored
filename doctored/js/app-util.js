@@ -15,14 +15,16 @@
                     return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
                 },
                 get_elements: function(){
-                    return ["para", "title"];
+                    return {
+                        para:  {display: "block"},
+                        title: {display: "inline"}
+                    };
                 }
             }
         },
         debounce: function(fn, delay_in_milliseconds, context) {
             var timer = null;
             context = context || this;
-            console.log("debounce for " + delay_in_milliseconds, fn);
             return function(){
                 var args = arguments;
                 clearTimeout(timer);
@@ -215,14 +217,16 @@
         get_instance_from_root_element: function(target) {
             var i,
                 instance,
-                from_menu;
+                from_menu,
+                from_select;
 
             if(target.doctored) return target;
             from_menu = target.parentNode.nextSibling;
+            if(target.nodeName.toLowerCase() === "select") from_select = target.parentNode.nextSibling.nextSibling;
             if(doctored.instances === undefined) return false;
             for(i = 0; i < doctored.instances.length; i++){
                 instance = doctored.instances[i];
-                if(instance.root.isEqualNode(target) || instance.root.isEqualNode(from_menu)) {
+                if(instance.root.isEqualNode(target) || instance.root.isEqualNode(from_menu) || instance.root.isEqualNode(from_select)) {
                     return instance;
                 }
             }
@@ -272,7 +276,7 @@
         },
         to_options_tags: function(list){
             var html = "",
-                i,
+                element_name,
                 escape_chars = {
                     "&": "&nbsp;",
                     "<": "&lt;",
@@ -282,8 +286,8 @@
                     return escape_chars[char];
                 };
 
-            for(i = 0; i < list.length; i++){
-                html += "<option>" + list[i].replace(/[&<>]/g, escape) + "</option>";
+            for(element_name in list){
+                html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
             }
             return html;
         }

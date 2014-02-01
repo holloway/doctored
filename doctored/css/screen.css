@@ -77,8 +77,6 @@
             -moz-transform: rotate(90deg) translate(1em, 0);
             -ms-transform-origin: 1 1;
             -ms-transform: rotate(90deg) translate(1em, 0);
-            -o-transform-origin: 1 1;
-            -o-transform: rotate(90deg) translate(1em, 0);
             transform-origin: 1 1;
             transform: rotate(90deg) translate(1em, 0);
             font-size:small;
@@ -92,7 +90,6 @@
             -ms-transition:2s;
             -moz-transition:2s;
             -webkit-transition:2s;
-            -o-transition:2s;
             transition:2s;
             position:absolute;
             right:-200px;
@@ -111,10 +108,6 @@
             background-image:-moz-linear-gradient( rgba(125, 125, 125, 0.5) 50%, 
                 rgba(95, 95, 95, 0.5) 50%, 
                 rgba(55, 55, 55, 0.5));
-            background-image:-o-linear-gradient( rgba(125, 125, 125, 0.5) 50%, 
-                rgba(95, 95, 95, 0.5) 50%, 
-                rgba(55, 55, 55, 0.5));
-
             -moz-box-shadow: 3px 3px 5px #888;
             -webkit-box-shadow: 3px 3px 5px #888;
             box-shadow: 3px 3px 5px #888;
@@ -124,7 +117,7 @@
             opacity: 1;
         }
 
-    .doctored .inline-block {
+    .doctored .inline {
         position:relative;
         display:inline-block;
         background: #555555;
@@ -135,7 +128,7 @@
         vertical-align: text-top;
     }
 
-        .doctored .inline-block:after {
+        .doctored .inline:after {
             position:absolute;
             display:inline-block;
             bottom:0.3em;
@@ -150,17 +143,11 @@
             -moz-transform: translate(0, 0.5em);
             -ms-transform-origin: 0px 100px ;
             -ms-transform: translate(0, 0.5em);
-            -o-transform-origin: 0px 100px ;
-            -o-transform: translate(0, 0.5em);
             transform-origin: 0px 100px;
             transform: translate(0, 0.8em);
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
             cursor: pointer;
-        }
-
-        .doctored .inline-block-changing {
-            border-bottom: solid 2px red;
         }
 
 .doctored-menu {
@@ -198,7 +185,6 @@
         -ms-transition:1s;
         -moz-transition:1s;
         -webkit-transition:1s;
-        -o-transition:1s;
         transition:1s;
     }
 
@@ -208,7 +194,6 @@
         box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
         background-color:#dfdfdf;
         color: #666666;
-
     }
 
     .doctored-menu a:active {
@@ -217,24 +202,59 @@
 
 .doctored-view-source-textbox {
     position: fixed;
+    z-index: 2;
     top: 3%;
     left: 3%;
     width: 92%;
     height:92%;
     border: none;
     -webkit-appearance: none; /* http://stackoverflow.com/questions/11658840/css-box-shadow-isnt-working-with-textarea-in-webkit */
-    -moz-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
+    -moz-box-shadow:    0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
     -webkit-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
-    box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
+    box-shadow:         0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
     padding: 0.5%;
     outline: none;
 }
 
 .doctored-dialog {
     position: absolute;
-
+    z-index:1;
+    background: #000000;
+    border-radius: 5px;
+    padding: 2px;
+    display:none;
 }
+
+    .doctored-dialog select::before {
+        display: inline;
+        content: "Choose element";
+    }
+
+    .doctored-dialog select {
+        background: #000000;
+        border: none;
+        color: white;
+        -webkit-appearance: none;
+    }
+
+        .doctored-dialog select optgroup,
+        .doctored-dialog select option {
+            background: black;
+            color: white;
+        }
 
 .doctored-selection {
-    border: solid 1px red;
+    display: inline;
+    background: #66aaff;
+    border: solid 1px #ffffff;
+    border: solid 1px rgba(255,255,255,0);
+    border-left: 0px;
+    border-right: 0px;
+    color: white;
 }
+
+    .doctored-selection:hover {
+        border: solid 1px #4477cc;
+        border-left: 0px;
+        border-right: 0px;
+    }

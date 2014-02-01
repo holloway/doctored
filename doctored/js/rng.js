@@ -9,8 +9,7 @@
 		xml_file = "document.xml",
 		rng_file = "schema.rng",
 		schemas = {},
-		console = {
-					log: function(debug_string){
+		console = {log: function(debug_string){
 							if(!current_event) {
 								current_event = {index:-1};
 							}
@@ -55,7 +54,7 @@
 					line = line.substr("element ".length).trim();
 					response.target = line.substr(0, line.indexOf(":"));
 				} else {
-					console.log(line);
+					//console.log(line);
 				}
 				line = line.substr(line.indexOf(":") + 1).trim();
 				if(line.substr(0, "Relax-NG validity error :".length) === "Relax-NG validity error :"){

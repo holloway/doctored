@@ -118,27 +118,73 @@
             },
             mouseup: function(event){
                 var instance = doctored.util.get_instance_from_root_element(this),
-                    selection_elements = instance.root.getElementsByClassName("doctored-selection"),
-                    highlight_text = function(){
-                        
-                        var element = document.createElement('div');
-                        element.className = "doctored-selection";
-                        var selection = window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
-                        if (selection.rangeCount) {
-                                var range = selection.getRangeAt(0).cloneRange();
-                                if(range.toString().length === 0) return;
-                                range.surroundContents(element);
-                                selection.removeAllRanges();
-                                selection.addRange(range);
-                                selection.removeAllRanges();
-                        }
-                        
-                    };
+                    element,
+                    range,
+                    selection,
+                    offsets,
+                    mouse;
 
-                setTimeout(highlight_text, 0);
+                if(instance.cache.selection && instance.cache.selection.classList.contains("doctored-selection")) { //the element must still contain the "doctored-selection" class or else it's probably been turned into an 'element' (in the Doctored sense -- part of the document we generate rather than an element used to express text selection)
+                    $(instance.cache.selection).replaceWith(instance.cache.selection.childNodes); //todo replace with plain javascript
+                    delete instance.cache.selection;
+                    instance.dialog.style.display = "none";
+                }
+                selection = window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
+                if (selection.rangeCount) {
+                        element = document.createElement('div');
+                        element.className = "doctored-selection";
+                        instance.cache.selection = element;
+                        range = selection.getRangeAt(0).cloneRange();
+                        if(range.toString().length === 0) return;
+                        try{
+                            range.surroundContents(element); //FIXME causes "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements. e.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>"
+                        } catch(e) {
+                        }
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        selection.removeAllRanges();
+
+                        if(element.parentNode) {
+                            offsets = $(element).inlineOffset();
+                            mouse   = {x:event.clientX, y:event.clientY};
+                            offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
+                            instance.dialog.style.display = "block"; //must be visible to obtain width/height
+                            offsets.dialog = {width: instance.dialog.offsetWidth, height: instance.dialog.offsetHeight};
+                            if(offsets.mouse_differences.before_x > offsets.mouse_differences.after_x) {  //move dialog to one end of selection, depending on which end is closest (horizontally) to mouse pointer / finger touch
+                                offsets.proposed = {x: offsets.after.left, y: offsets.after.top - offsets.dialog.height};
+                            } else {
+                                offsets.proposed = {x: offsets.before.left - offsets.dialog.width, y: offsets.before.top - instance.dialog.offsetHeight};
+                            }
+                            if(offsets.proposed.x < 1) {
+                                offsets.proposed.x = 1;
+                            } else if(offsets.proposed.x > window.innerWidth - offsets.dialog.width) {
+                                offsets.proposed.x = window.innerWidth - offsets.dialog.width;
+                            }
+                            if(offsets.proposed.y < 1) {
+                                offsets.proposed.y = 1;
+                            } else if(offsets.proposed.y > window.innerHeight - offsets.dialog.height - 1) {
+                                offsets.proposed.y = window.innerHeight - offsets.dialog.height -1;
+                            }
+                            instance.dialog.style.left = offsets.proposed.x + "px";
+                            instance.dialog.style.top  = offsets.proposed.y + "px";
+                        }
+                }
             },
-            selectionstart: function(event){
-                //wot?
+            wrap_element: function(event){
+                var instance = doctored.util.get_instance_from_root_element(this),
+                    option,
+                    option_value;
+
+                if(!instance.cache.selection || !instance.cache.selection.classList.contains("doctored-selection")) return;
+
+                instance.cache.selection.classList.remove("doctored-selection");
+                option = instance.dialog.select.options[instance.dialog.select.selectedIndex];
+                option_value = option.getAttribute("value");
+                if(option_value.length === 0) return;
+                instance.cache.selection.classList.add(option_value);
+                instance.cache.selection.setAttribute("data-element", option.innerText);
+                instance.dialog.style.display = "none";
+                instance.dialog.select.selectedIndex = 0;
             },
             element_picker: function(target){
                 var $target = $(target),
@@ -201,12 +247,13 @@
                 this.root.addEventListener('keyup',   this.keyup_element, false);
                 this.root.addEventListener('mouseup', this.mouseup, false);
                 this.root.addEventListener('touchend', this.mouseup, false);
-                this.root.addEventListener('selectstart', this.selectionstart, false);
                 this.menu = document.createElement('menu');
                 this.menu.classList.add("doctored-menu");
                 this.dialog = document.createElement('menu');
                 this.dialog.classList.add("doctored-dialog");
-                this.dialog.innerHTML = "<select>" + doctored.util.to_options_tags(this.options.format.get_elements()) + "</select>";
+                this.dialog.innerHTML = '<select><option value="">Choose Element</option>' + doctored.util.to_options_tags(this.options.format.get_elements()) + "</select>";
+                this.dialog.select = this.dialog.getElementsByTagName('select')[0];
+                this.dialog.select.addEventListener('change', this.wrap_element, false);
                 this.menu.innerHTML = "<a class=\"doctored-download\" href=\"\">Download</a><a class=\"doctored-view-source\" href=\"\">View Source</a>";
                 this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
                 this.menu.download.addEventListener('click', this.download, false);
@@ -214,7 +261,7 @@
                 this.menu.view_source.addEventListener('click', this.view_source, false);
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
-                this.root.parentNode.insertBefore(this.dialog, this.root);
+                this.root.parentNode.insertBefore(this.dialog, this.root.previousSibling);
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
