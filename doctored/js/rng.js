@@ -9,6 +9,7 @@
 		xml_file = "document.xml",
 		rng_file = "schema.rng",
 		schemas = {},
+		last_line_number = 0,
 		console = {log: function(debug_string){
 							if(!current_event) {
 								current_event = {index:-1};
@@ -64,6 +65,11 @@
 			} else if(line.substr(0, xml_file.length + 1) === xml_file + " " && line.indexOf("fails to validate") !== -1){
 				response.type = "error_summary";
 				response.message = line.substr(xml_file.length + 1);
+			} else {
+				console.log("Unable to parse xmlline_line: " + line);
+			}
+			if(response.line_number) {
+				last_line_number = response.line_number;
 			}
 			return response;
 		},
@@ -82,7 +88,8 @@
 			line,
 			i,
 			error_lines = [],
-			error_summary = "";
+			error_summary = "",
+			last_line_number;
 		
 		current_event = event.data;
 		module = {
@@ -101,8 +108,6 @@
 				error_lines.push(line);
 			} else if(line["type"] === "error_summary"){
 				error_summary = line;
-			} else {
-				console.log("Unrecognised xmllint line: " + xmllint_line);
 			}
 		}
 

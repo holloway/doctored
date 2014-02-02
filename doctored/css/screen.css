@@ -5,14 +5,33 @@
     outline:none;
 }
 
-    .doctored:before {
+    .doctored.valid:before {
+        float:right;
+        text-align:right;
+        margin-right:10px;
+        padding: 3px 5px;
+        border-radius: 3px;
+        width: 160px;
+        text-align:center;
+        position:relative;
+        top:1em;
+        color: white;
+        text-shadow: 1px 1px 1px #999999;
+        font-size: 13px;
+        font-weight: bold;
+        background: green;
+        font-family: 'Reenie Beanie', Arial, sans-serif;
+        content: "Valid document!";
+    }
+
+    .doctored.invalid:before {
         float:right;
         text-align:right;
         margin-right:30px;
         width: 180px;
         position:relative;
-        top:1.3em;
-        color: rgb(102, 102, 102);
+        top:-1.5em;
+        color: #777;
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
         font-weight: bold;
@@ -245,7 +264,7 @@
 
 .doctored-selection {
     display: inline;
-    background: #66aaff;
+    background: #006ddb;
     border: solid 1px #ffffff;
     border: solid 1px rgba(255,255,255,0);
     border-left: 0px;

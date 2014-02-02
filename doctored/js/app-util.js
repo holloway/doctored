@@ -1,24 +1,27 @@
-/*globals doctored, Node, alert, console, rangy*/
+/*globals doctored, Node, alert, console, rangy, $*/
 (function(){
 	"use strict";
 
     doctored.util = {
         formats:  {
             "docbook": {
-                'name':              'DocBook 5',
-                'root_start_tag':    '<book xmlns="http://docbook.org/ns/docbook">',
-                'root_close_tag':    '</book>',
-                'schema':            '../../schemas/docbook5/schema.rng',
-                'convert_from_html': function(html_string){ //TODO: improve this A LOT
-                    var element_mapping   = {"p": "para", "a": "ulink"},
+                'name':       'DocBook 5',
+                'root_start': '<?xml version="1.0" ?><article xmlns="http://docbook.org/ns/docbook" version="5.0">', //FIXME: allow different root nodes
+                'root_end':   '</article>',
+                'schema':     '../../schemas/docbook5/schema.rng',
+                'convert_from_html': function(html_string){ //FIXME: improve this A LOT
+                    var element_mapping   = {"p":    "para", "a": "ulink"},
                         attribute_mapping = {"href": "url"};
                     return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
                 },
-                get_elements: function(){
-                    return {
-                        para:  {display: "block"},
-                        title: {display: "inline"}
-                    };
+                elements: {
+                    para:  {display: "block"},
+                    title: {display: "block"},
+                    ulink: {display: "inline"}
+                },
+                get_new_document: function(){
+                    return '<title>Book Title</title>' +
+                           '<para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para>';
                 }
             }
         },
@@ -34,6 +37,7 @@
                         );
             };
         },
+        non_breaking_space: "\u00A0",
         increment_but_wrap_at: function(current_value, wrap_at, increment_by){
             var amount = increment_by || 1;
 
@@ -104,10 +108,11 @@
             });
             return attributes;
         },
-        convert_html_to_doctored_html: function(html){
-            return html.replace(/<(.*?)>/g, function(match, contents, offset, s){
+        convert_xml_to_doctored_html: function(xml, elements){
+            return xml.replace(/<(.*?)>/g, function(match, contents, offset, s){
                 var element_name,
-                    attributes = "";
+                    attributes = "",
+                    display = "block";
 
                 if(match.substr(0, 2) === "</"){
                     return '</div>';
@@ -121,7 +126,9 @@
                                  '"';
                 }
 
-                return '<div class="block" data-element="' + element_name + '"' + attributes + '>';
+                if(elements[element_name]) display = elements[element_name].display;
+
+                return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>';
             });
         },
         sniff_display_type: function(node){
@@ -169,9 +176,9 @@
                         data_element = node.getAttribute("data-element");
                         if(!data_element) continue;
                         display_type =doctored.util.sniff_display_type(node);
-                        if(display_type === doctored.util.display_types.block){
-                            xml_string += "\n";
-                        }
+                        //if(depth === 0 && display_type === doctored.util.display_types.block){
+                        //    xml_string += "\n";
+                        //}
                         xml_string += "<" + data_element;
                         xml_string += doctored.util.build_xml_attributes_from_json_string(node.getAttribute("data-attributes"));
                         xml_string += ">";
@@ -221,7 +228,7 @@
                 from_select;
 
             if(target.doctored) return target;
-            from_menu = target.parentNode.nextSibling;
+            from_menu = target.parentNode.nextSibling; //TODO: this dom walking code is a bit shit. fix it.
             if(target.nodeName.toLowerCase() === "select") from_select = target.parentNode.nextSibling.nextSibling;
             if(doctored.instances === undefined) return false;
             for(i = 0; i < doctored.instances.length; i++){
@@ -231,6 +238,58 @@
                 }
             }
             return false;
+        },
+        remove_old_selection: function(selection, instance){
+            if(selection && selection.classList.contains("doctored-selection")) {
+                //the element must still contain the "doctored-selection" class or else it's probably
+                //been turned into an 'element' (in the Doctored sense -- part of the document
+                // we generate rather than an element used to express text selection)
+                $(selection).replaceWith(selection.childNodes); //todo replace with plain javascript
+                delete instance.cache.selection;
+                instance.dialog.style.display = "none";
+            }
+        },
+        surround_selection_with_element: function(nodeName, classNames, instance, selection){
+            var range = selection.getRangeAt(0).cloneRange(),
+                element;
+            
+            if(range.toString().length === 0) return;
+            element = document.createElement(nodeName);
+            element.className = classNames;
+            instance.cache.selection = element;
+            try{
+                range.surroundContents(element); //FIXME causes "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements. e.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>"
+                selection.removeAllRanges();
+                selection.addRange(range);
+                selection.removeAllRanges();
+            } catch(e) {
+                return;
+            }
+            return element;
+        },
+        display_dialog_around_inline: function(inline, dialog){
+            var offsets = $(inline).inlineOffset(),
+                mouse   = {x:event.clientX, y:event.clientY};
+            offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
+            dialog.style.display = "block"; //must be visible to obtain width/height
+            offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
+            if(offsets.mouse_differences.before_x > offsets.mouse_differences.after_x) {  //move dialog to one end of selection, depending on which end is closest (horizontally) to mouse pointer / finger touch
+                offsets.proposed = {x: offsets.after.left, y: offsets.after.top - offsets.dialog.height};
+            } else {
+                offsets.proposed = {x: offsets.before.left - offsets.dialog.width, y: offsets.before.top - dialog.offsetHeight};
+            }
+            if(offsets.proposed.x < 1) {
+                offsets.proposed.x = 1;
+            } else if(offsets.proposed.x > window.innerWidth - offsets.dialog.width) {
+                offsets.proposed.x = window.innerWidth - offsets.dialog.width;
+            }
+            if(offsets.proposed.y < 1) {
+                offsets.proposed.y = 1;
+            } else if(offsets.proposed.y > window.innerHeight - offsets.dialog.height - 1) {
+                offsets.proposed.y = window.innerHeight - offsets.dialog.height -1;
+            }
+            dialog.style.left = offsets.proposed.x + "px";
+            dialog.style.top  = offsets.proposed.y + "px";
         },
         rename_keys: function(attributes, attribute_mapping){
             var new_attributes = {},
@@ -273,6 +332,32 @@
                        attributes_string +
                        ">";
             });
+        },
+        lint_response: function(errors, max_lines){
+            var by_line = {},
+                error_line,
+                child_node,
+                line_number,
+                i,
+                error;
+
+            for(i = 0; i < errors.error_lines.length; i++){
+                error_line = errors.error_lines[i];
+                if(error_line.line_number === 0) error_line.line_number = 1; //line 0 and 1 are aggregated for the purposes of display
+                if(by_line[error_line.line_number] === undefined) {
+                    by_line[error_line.line_number] = [];
+                }
+                by_line[error_line.line_number].push(error_line);
+            }
+            return by_line;
+        },
+        format_lint_errors: function(line_errors){
+            var i,
+                error_string = "";
+            for(i = 0; i < line_errors.length; i++){
+                error_string += line_errors[i].message + ". ";
+            }
+            return error_string;
         },
         to_options_tags: function(list){
             var html = "",

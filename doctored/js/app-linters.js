@@ -14,7 +14,18 @@
         pool: [],
         pool_cursor: 0,
         config: {
-            number_of_workers: 4, //TODO either make this configurable or calculate this in a clever way... perhaps benchmark speed of completing CPU-intensive task and decide accordingly
+            number_of_workers: 3, // the optimum MAY be:   number_of_workers = CPU_CORES - 1.
+                                  // because we want one core on the UI/browser thread, and other cores available for linting.
+                                  // BUT it's basically impossible to determine number of CPU cores via JavaScript,
+                                  //   (e.g. see all the variation here http://www.reddit.com/r/programming/comments/1ezdnv/ )
+                                  // AND whatever number we choose will be flawed because other system load will affect
+                                  // the optimum number of workers.
+                                  //   (e.g. see http://lists.whatwg.org/htdig.cgi/whatwg-whatwg.org/2009-November/024018.html
+                                  //             http://lists.whatwg.org/pipermail/whatwg-whatwg.org/2009-November/024058.html )
+                                  // So it's a bit arbitrary but 3 is chosen because of the popularity of Intel i5/i7 CPUs which
+                                  // have 4 cores, and even Intel i3s have 2 cores with hyperthreading (2 cores pretending to be 4).
+                                  // TODO: we could make this configurable
+
             when_all_workers_are_busy_retry_after_milliseconds: 100
         },
         lint: function(xml_string, path_to_schema, callback, context){
@@ -27,7 +38,7 @@
                 linters.pool_cursor = doctored.util.increment_but_wrap_at(linters.pool_cursor, linters.pool.length);
                 worker = linters.pool[linters.pool_cursor];
                 if(linters.pool_cursor === initial_cursor) { //then we've looped around, so we'll discard the current request
-                    console.log("Killing off old worker #" + worker.index + " and restarting it.");
+                    //console.log("Killing off old worker #" + worker.index + " and restarting it.");
                     worker.Worker.terminate(); //this is relative expensive for memory/CPU so we don't really want to have to do this. Perhaps it would be better to wait?
                     worker = get_worker(worker.index);
                 }
@@ -35,9 +46,7 @@
             
             linters.pool_cursor = doctored.util.increment_but_wrap_at(linters.pool_cursor, linters.pool.length);
 
-            console.log("xml_string", xml_string);
-
-            if(console && console.log) console.log("Gave job to worker #" + worker.index);
+            //if(console && console.log) console.log("Gave job to worker #" + worker.index);
             worker.callback = callback;
             worker.context  = context;
             worker.ready    = false;
