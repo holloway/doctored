@@ -5,6 +5,23 @@
     outline:none;
 }
 
+    .doctored:before {
+        float:right;
+        text-align:right;
+        margin-right:10px;
+        padding: 3px 5px;
+        border-radius: 3px;
+        width: 160px;
+        text-align:center;
+        position:relative;
+        top:1em;
+        color: #777;
+        text-shadow: 1px 1px 1px #999999;
+        font-size: 13px;
+        font-family: 'Reenie Beanie', Arial, sans-serif;
+        content: "Validating...";
+    }
+
     .doctored.valid:before {
         float:right;
         text-align:right;
@@ -28,16 +45,22 @@
         float:right;
         text-align:right;
         margin-right:30px;
-        width: 180px;
+        width: 160px;
         position:relative;
         top:-1.5em;
         color: #777;
+        background-color: none;
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
         font-weight: bold;
         transform: rotate(1deg);
         font-family: 'Reenie Beanie', Arial, sans-serif;
         content: "Validation messages\21B4";
+    }
+
+    .doctored.invalid:after {
+        content: " ";
+        clear:both;
     }
 
     .doctored .block {
@@ -181,6 +204,12 @@
     margin-right:200px;
     opacity: 0.9;
     text-align:left;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
     .doctored-menu:hover {
@@ -194,29 +223,30 @@
         margin-right:4px;
         background: #dddddd;
         text-decoration:none;
-        background-color:#ededed;
-        color:#888888;
+        background-color:#eeeeee;
+        color:#777777;
         border-radius: 5px;
-        background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
-        background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
         text-shadow:1px 1px 0px #ffffff;
         box-shadow: 0px 5px 14px -5px #bbbbbb;
-        -ms-transition:1s;
-        -moz-transition:1s;
-        -webkit-transition:1s;
-        transition:1s;
+        -ms-transition:0.3s;
+        -moz-transition:0.3s;
+        -webkit-transition:0.3s;
+        transition:0.3s;
     }
 
     .doctored-menu a:hover {
-        -moz-box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
-        -webkit-box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
-        box-shadow:inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff,inset 0px 0px 5px #ffffff;
-        background-color:#dfdfdf;
+        -moz-box-shadow:inset 0px 0px 5px #cccccc;
+        -webkit-box-shadow:inset 0px 0px 5px #cccccc;
+        box-shadow:inset 0px 0px 5px #cccccc;
+        background-color:#eeeeee;
         color: #666666;
     }
 
     .doctored-menu a:active {
-        background-color:#666666;
+        -moz-box-shadow:inset 0px 0px 5px #999999;
+        -webkit-box-shadow:inset 0px 0px 5px #999999;
+        box-shadow:inset 0px 0px 5px #999999;
+        background-color:#ffffff;
     }
 
 .doctored-view-source-textbox {

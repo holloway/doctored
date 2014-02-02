@@ -6,7 +6,7 @@
             autosave_every_milliseconds:   30 * 1000,
             linting_debounce_milliseconds: 500,
             retry_init_after_milliseconds: 50,
-            format:                        "docbook" //key from doctored.util.formats
+            format:                        "docbook" //key from doctored.formats in app-formats.js
         },
         head = document.getElementsByTagName('head')[0],
         body = document.getElementsByTagName('body')[0];
@@ -27,8 +27,8 @@
             instance,
             property;
 
-        if(!root_element) return alert("Doctored.js is unable to find the element selected by: " + selector);
-        if (typeof defaults.format === 'string' || defaults.format instanceof String) defaults.format = doctored.util.formats[defaults.format];
+        if(!root_element) return console.log("Doctored.js: Unable to find the element selected by: " + selector);
+        if (typeof defaults.format === 'string' || defaults.format instanceof String) defaults.format = doctored.formats[defaults.format];
 
         options = options || {};
         for (property in defaults) {
@@ -145,7 +145,9 @@
                 textarea.focus();
                 textarea.addEventListener('blur', function(){
                     if(this && this.parentNode) {
-                        this.parentNode.removeChild(this);
+                        try {
+                            this.parentNode.removeChild(this); //FIXME: this try/catch is to work around DOM errors where the node doesn't exist despite the if() check. Investigate later.
+                        }catch(exception){}
                     }}, false);
 
                 event.preventDefault();
@@ -165,12 +167,13 @@
             init: function(){
                 var _this = this,
                     menu,
-                    i;
+                    i,
+                    lint = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
 
                 this.root.innerHTML = doctored.util.convert_xml_to_doctored_html(_this.options.format.get_new_document(), this.options.format.elements);
                 this.root.contentEditable = true;
                 this.root.classList.add("doctored");
-                this.root.addEventListener("input",   doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this), false);
+                this.root.addEventListener("input",   lint, false);
                 this.root.addEventListener('paste',   this.paste, false);
                 this.root.addEventListener('click',   this.click_element, false);
                 this.root.addEventListener('keydown', this.keydown_element, false);
@@ -196,6 +199,7 @@
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
                 if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
+                lint();
             }
         };
         instance.init();
