@@ -51,19 +51,21 @@
                 var by_line = doctored.util.lint_response(errors, this.root.childNodes.length),
                     i,
                     child_node,
-                    line_number;
+                    line_number = 0;
 
                 for(i = 0; i < this.root.childNodes.length; i++){
                     child_node = this.root.childNodes[i];
-                    line_number = i + 1;
-                    if(by_line[line_number]) {
-                        child_node.setAttribute("data-error", doctored.util.format_lint_errors(by_line[line_number]));
-                        child_node.classList.add("has_errors");
-                        child_node.classList.remove("hide_errors");
-                    } else {
-                        child_node.setAttribute("data-error", "");
-                        child_node.classList.remove("has_errors");
-                        child_node.classList.add("hide_errors");
+                    if(child_node.nodeType === Node.ELEMENT_NODE){ //ignore text nodes etc
+                        line_number += 1;
+                        if(by_line[line_number]) {
+                            child_node.setAttribute("data-error", doctored.util.format_lint_errors(by_line[line_number]));
+                            child_node.classList.add("has_errors");
+                            child_node.classList.remove("hide_errors");
+                        } else {
+                            child_node.setAttribute("data-error", "");
+                            child_node.classList.remove("has_errors");
+                            child_node.classList.add("hide_errors");
+                        }
                     }
                 }
                 if(errors && errors.error_lines && errors.error_lines.length === 0) {
@@ -138,18 +140,20 @@
                     xml      = instance.get_xml_string(),
                     textarea = document.createElement('textarea');
 
-                textarea.readOnly = true;
                 textarea.classList.add("doctored-view-source-textbox");
                 textarea.innerHTML = xml;
                 body.appendChild(textarea);
                 textarea.focus();
                 textarea.addEventListener('blur', function(){
+                    var xml = this.value;
+                    xml = xml.substr(xml.indexOf("\n") + 1);
+                    xml = xml.substr(0, xml.lastIndexOf("\n"));
+                    instance.root.innerHTML = doctored.util.convert_xml_to_doctored_html(xml, instance.options.format.elements);
                     if(this && this.parentNode) {
                         try {
                             this.parentNode.removeChild(this); //FIXME: this try/catch is to work around DOM errors where the node doesn't exist despite the if() check. Investigate later.
                         }catch(exception){}
                     }}, false);
-
                 event.preventDefault();
             },
             download: function(event){

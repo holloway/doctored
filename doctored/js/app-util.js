@@ -3,28 +3,6 @@
 	"use strict";
 
     doctored.util = {
-        formats:  {
-            "docbook": {
-                'name':       'DocBook 5',
-                'root_start': '<?xml version="1.0" ?><article xmlns="http://docbook.org/ns/docbook" version="5.0">', //FIXME: allow different root nodes
-                'root_end':   '</article>',
-                'schema':     '../../schemas/docbook5/schema.rng',
-                'convert_from_html': function(html_string){ //FIXME: improve this A LOT
-                    var element_mapping   = {"p":    "para", "a": "ulink"},
-                        attribute_mapping = {"href": "url"};
-                    return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
-                },
-                elements: {
-                    para:  {display: "block"},
-                    title: {display: "block"},
-                    ulink: {display: "inline"}
-                },
-                get_new_document: function(){
-                    return '<title>Book Title</title>' +
-                           '<para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para>';
-                }
-            }
-        },
         debounce: function(fn, delay_in_milliseconds, context) {
             var timer = null;
             context = context || this;

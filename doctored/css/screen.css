@@ -235,10 +235,10 @@
     }
 
     .doctored-menu a:hover {
-        -moz-box-shadow:inset 0px 0px 5px #cccccc;
-        -webkit-box-shadow:inset 0px 0px 5px #cccccc;
-        box-shadow:inset 0px 0px 5px #cccccc;
-        background-color:#eeeeee;
+        -moz-box-shadow:inset 0px 0px 5px #bbbbbb;
+        -webkit-box-shadow:inset 0px 0px 5px #bbbbbb;
+        box-shadow:inset 0px 0px 5px #bbbbbb;
+        background-color:#e6e6e6;
         color: #666666;
     }
 
