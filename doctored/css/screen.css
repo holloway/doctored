@@ -103,7 +103,7 @@
             transform: rotate(90deg) translate(1em, 0);
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
-            cursor: pointer; /* won't have an effect in most browsers */
+            cursor: pointer; /* doesn't have an effect in Chrome (v25) but does in Firefox (v23) */
         }
 
         .doctored .block.has_errors:before {
@@ -211,14 +211,14 @@ menu.doctored-menu {
         color: #666666;
     }
 
-    .doctored-menu a:active {
+    menu.doctored-menu a:active {
         -moz-box-shadow:inset 0px 0px 5px #999999;
         -webkit-box-shadow:inset 0px 0px 5px #999999;
         box-shadow:inset 0px 0px 5px #999999;
         background-color:#ffffff;
     }
 
-.doctored-view-source-textbox {
+textarea.doctored-view-source-textbox {
     position: fixed;
     z-index: 2;
     top: 3%;
@@ -261,7 +261,7 @@ menu.doctored-dialog {
             color: white;
         }
 
-.doctored-selection {
+div.doctored-selection {
     display: inline;
     background: #006ddb;
     border: solid 1px #ffffff;
@@ -271,7 +271,7 @@ menu.doctored-dialog {
     color: white;
 }
 
-    .doctored-selection:hover {
+    div.doctored-selection:hover {
         border: solid 1px #4477cc;
         border-left: 0px;
         border-right: 0px;

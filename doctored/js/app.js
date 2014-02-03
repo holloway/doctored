@@ -3,10 +3,10 @@
     "use strict";
 
     var defaults = {
-            autosave_every_milliseconds:   30 * 1000,
-            linting_debounce_milliseconds: 500,
-            retry_init_after_milliseconds: 50,
-            format:                        "docbook" //key from doctored.formats in app-formats.js
+            autosave_every_milliseconds:      30 * 1000,
+            linting_debounce_milliseconds:    1000,
+            retry_init_after_milliseconds:    50,
+            format:                           "docbook" //key from doctored.formats in app-formats.js
         },
         head = document.getElementsByTagName('head')[0],
         body = document.getElementsByTagName('body')[0];
@@ -136,7 +136,6 @@
                 instance.dialog.select.selectedIndex = 0;
             },
             properties: function(event){
-
                 event.preventDefault();
             },
             view_source: function(event){
@@ -171,6 +170,22 @@
                 event.preventDefault();
                 doctored.util.offer_download(xml, filename);
             },
+            mousemove: function(event){
+                var x = event.x,
+                    y = event.y,
+                    instance = doctored.util.get_instance_from_root_element(this),
+                    target   = event.toElement || event.target || document.elementFromPoint(x, y),
+                    target_offset = target.getBoundingClientRect(),
+                    cursor = "auto";
+
+                if(!target) return;
+                if(target.classList.contains("inline") && y > target_offset.top + target.offsetHeight - doctored.CONSTANTS.inline_label_height_in_pixels) {
+                    cursor = "pointer";
+                } else if(target.classList.contains("block") && x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
+                    cursor = "pointer";
+                }
+                instance.root.style.cursor = cursor;
+            },
             options: options,
             init: function(){
                 var _this = this,
@@ -180,23 +195,23 @@
 
                 this.root.innerHTML = doctored.util.convert_xml_to_doctored_html(_this.options.format.get_new_document(), this.options.format.elements);
                 this.root.contentEditable = true;
-                this.root.classList.add("doctored");
-                this.root.addEventListener("input",   lint, false);
-                this.root.addEventListener('paste',   this.paste, false);
-                this.root.addEventListener('click',   this.click_element, false);
-                this.root.addEventListener('keydown', this.keydown_element, false);
-                this.root.addEventListener('keyup',   this.keyup_element, false);
-                this.root.addEventListener('mouseup', this.mouseup, false);
-                this.root.addEventListener('touchend', this.mouseup, false);
+                this.root.className = "doctored";
+                this.root.addEventListener("input",     lint, false);
+                this.root.addEventListener('paste',     this.paste, false);
+                this.root.addEventListener('click',     this.click_element, false);
+                this.root.addEventListener('keydown',   this.keydown_element, false);
+                this.root.addEventListener('keyup',     this.keyup_element, false);
+                this.root.addEventListener('mouseup',   this.mouseup, false);
+                this.root.addEventListener('touchend',  this.mouseup, false);
+                this.root.addEventListener('mousemove', this.mousemove, false);
                 this.menu = document.createElement('menu');
-                this.menu.classList.add("doctored-menu");
+                this.menu.className = "doctored-menu";
                 this.dialog = document.createElement('menu');
-                this.dialog.classList.add("doctored-dialog");
+                this.dialog.className = "doctored-dialog";
                 this.dialog.innerHTML = '<select><option value="">Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements) + "</select>";
                 this.dialog.select = this.dialog.getElementsByTagName('select')[0];
                 this.dialog.select.addEventListener('change', this.promote_selection_to_element, false);
                 this.menu.innerHTML = '<a class="doctored-properties" href="">Properties</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
-
                 this.menu.properties_button = this.menu.getElementsByClassName("doctored-properties")[0];
                 this.menu.properties_button.addEventListener('click', this.properties, false);
                 this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
@@ -204,11 +219,9 @@
                 this.menu.view_source = this.menu.getElementsByClassName("doctored-view-source")[0];
                 this.menu.view_source.addEventListener('click', this.view_source, false);
                 this.properties = document.createElement('menu');
-                this.properties.classList.add("doctored-properties");
+                this.properties.className = "doctored-properties";
                 this.properties.innerHTML = '<label><span>Root:</span><select><option>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements) + '</select></label>';
-
                 this.properties.select = this.properties.getElementsByTagName('select')[0];
-
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
                 this.root.parentNode.insertBefore(this.dialog, this.root.previousSibling);
@@ -224,5 +237,10 @@
         doctored.instances = doctored.instances || [];
         doctored.instances.push(instance);
         return instance;
+    };
+
+    doctored.CONSTANTS = {
+        inline_label_height_in_pixels: 10,
+        block_label_width_in_pixels:   25
     };
 }());
