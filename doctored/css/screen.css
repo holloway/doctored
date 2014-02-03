@@ -28,7 +28,6 @@
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
         font-weight: bold;
-        transform: rotate(1deg);
         font-family: 'Reenie Beanie', Arial, sans-serif;
         content: "Validation messages\21B4";
     }
@@ -86,16 +85,16 @@
             clear:both;
             position:absolute;
             display:inline-block;
-            left: 2em;
+            left: -0.2em;
             top: 0.5em;
             content: attr(data-element);
             color:#666666;
-            margin-right: 0em;
-            height:1.2em;
+            margin-right: -3em;
+            width:3em;
             white-space:nowrap;
             font-weight:bold;
-            -webkit-transform-origin: 0 0;
-            -webkit-transform: rotate(90deg);
+            -webkit-transform-origin: 1 1;
+            -webkit-transform: rotate(90deg) translate(1em, 0);
             -moz-transform-origin: 1 1;
             -moz-transform: rotate(90deg) translate(1em, 0);
             -ms-transform-origin: 1 1;
@@ -104,7 +103,7 @@
             transform: rotate(90deg) translate(1em, 0);
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
-            cursor: pointer;
+            cursor: pointer; /* won't have an effect in most browsers */
         }
 
         .doctored .block.has_errors:before {
@@ -116,7 +115,7 @@
             top:4px;
             width:172px;
             font-size:x-small;
-            padding:4px 7px;
+            padding:4px 5px 4px 7px;
             background: red;
             border-radius:5px;
             border: solid 2px white;
