@@ -196,8 +196,9 @@
                 this.dialog.select = this.dialog.getElementsByTagName('select')[0];
                 this.dialog.select.addEventListener('change', this.promote_selection_to_element, false);
                 this.menu.innerHTML = '<a class="doctored-properties" href="">Properties</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
-                this.menu.properties = this.menu.getElementsByClassName("doctored-properties")[0];
-                this.menu.properties.addEventListener('click', this.properties, false);
+
+                this.menu.properties_button = this.menu.getElementsByClassName("doctored-properties")[0];
+                this.menu.properties_button.addEventListener('click', this.properties, false);
                 this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
                 this.menu.download.addEventListener('click', this.download, false);
                 this.menu.view_source = this.menu.getElementsByClassName("doctored-view-source")[0];
