@@ -179,7 +179,7 @@
                     cursor = "auto";
 
                 if(!target) return;
-                if(target.classList.contains("inline") && y > target_offset.top + target.offsetHeight - doctored.CONSTANTS.inline_label_height_in_pixels) {
+                if(target.classList.contains("inline")       && y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
                     cursor = "pointer";
                 } else if(target.classList.contains("block") && x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
                     cursor = "pointer";
