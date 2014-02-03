@@ -135,6 +135,10 @@
                 instance.dialog.style.display = "none";
                 instance.dialog.select.selectedIndex = 0;
             },
+            properties: function(event){
+
+                event.preventDefault();
+            },
             view_source: function(event){
                 var instance = doctored.util.get_instance_from_root_element(this),
                     xml      = instance.get_xml_string(),
@@ -191,14 +195,23 @@
                 this.dialog.innerHTML = '<select><option value="">Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements) + "</select>";
                 this.dialog.select = this.dialog.getElementsByTagName('select')[0];
                 this.dialog.select.addEventListener('change', this.promote_selection_to_element, false);
-                this.menu.innerHTML = "<a class=\"doctored-download\" href=\"\">Download</a><a class=\"doctored-view-source\" href=\"\">View Source</a>";
+                this.menu.innerHTML = '<a class="doctored-properties" href="">Properties</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
+                this.menu.properties = this.menu.getElementsByClassName("doctored-properties")[0];
+                this.menu.properties.addEventListener('click', this.properties, false);
                 this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
                 this.menu.download.addEventListener('click', this.download, false);
                 this.menu.view_source = this.menu.getElementsByClassName("doctored-view-source")[0];
                 this.menu.view_source.addEventListener('click', this.view_source, false);
+                this.properties = document.createElement('menu');
+                this.properties.classList.add("doctored-properties");
+                this.properties.innerHTML = '<label><span>Root:</span><select><option>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements) + '</select></label>';
+
+                this.properties.select = this.properties.getElementsByTagName('select')[0];
+
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
                 this.root.parentNode.insertBefore(this.dialog, this.root.previousSibling);
+                this.root.parentNode.insertBefore(this.properties, this.root.previousSibling.previousSibling);
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }

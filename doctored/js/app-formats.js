@@ -1,4 +1,4 @@
-/*globals doctored, Node, alert, console, rangy, $*/
+/*globals doctored*/
 (function(){
     "use strict";
 

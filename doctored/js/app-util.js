@@ -263,8 +263,6 @@
             }
             if(offsets.proposed.y < 1) {
                 offsets.proposed.y = 1;
-            } else if(offsets.proposed.y > window.innerHeight - offsets.dialog.height - 1) {
-                offsets.proposed.y = window.innerHeight - offsets.dialog.height -1;
             }
             dialog.style.left = offsets.proposed.x + "px";
             dialog.style.top  = offsets.proposed.y + "px";
