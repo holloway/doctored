@@ -15,6 +15,13 @@
                         );
             };
         },
+        this_function: function(fn, context){
+            context = context || this;
+            return function(){
+                var args = arguments;
+                fn.apply(context, args);
+            };
+        },
         non_breaking_space: "\u00A0",
         increment_but_wrap_at: function(current_value, wrap_at, increment_by){
             var amount = increment_by || 1;
@@ -199,7 +206,7 @@
             filename = filename || "download.xml";
             window.saveAs(blob, filename);
         },
-        get_instance_from_root_element: function(target) {
+        get_instance_from_this: function(target) {
             var i,
                 instance,
                 from_menu,
@@ -223,7 +230,7 @@
                 //been turned into an 'element' (in the Doctored sense -- part of the document
                 // we generate rather than an element used to express text selection)
                 $(selection).replaceWith(selection.childNodes); //todo replace with plain javascript
-                delete instance.cache.selection;
+                delete instance.dialog.target;
                 instance.dialog.style.display = "none";
             }
         },
@@ -234,7 +241,7 @@
             if(range.toString().length === 0) return;
             element = document.createElement(nodeName);
             element.className = classNames;
-            instance.cache.selection = element;
+            instance.dialog.target = element;
             try{
                 range.surroundContents(element); //FIXME causes "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements. e.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>"
                 selection.removeAllRanges();
@@ -245,10 +252,45 @@
             }
             return element;
         },
-        display_dialog_around_inline: function(inline, dialog){
-            var offsets = $(inline).inlineOffset(),
-                mouse   = {x:event.clientX, y:event.clientY};
+        display_element_dialog: function(target, dialog, mouse){
+            dialog.format_chooser.style.display        = "none";
+            dialog.format_chooser_label.style.display  = "none";
+            dialog.linter_chooser.style.display        = "none";
+            dialog.linter_chooser_label.style.display  = "none";
+            dialog.element_chooser_label.style.display = "";
+            dialog.attributes_div.style.display        = "";
+            dialog.style.left = mouse.x + "px";
+            dialog.style.top  = mouse.y + "px";
+            dialog.style.display = "block"; //must be visible to obtain width/height
+            dialog.mode = "editElement";
+            dialog.target = target;
+            doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
+        },
+        set_element_chooser_to_element: function(element, element_chooser){
+            var data_element = element.getAttribute("data-element"),
+                i;
+
+            if(!data_element) {
+                element_chooser.selectedIndex = 0;
+                return;
+            }
+            for(i = 0; i < element_chooser.options.length; i++){
+                if(element_chooser.options[i].text === data_element) {
+                    element_chooser.selectedIndex = i;
+                    return;
+                }
+            }
+        },
+        display_dialog_around_inline: function(inline, dialog, mouse){
+            var offsets = $(inline).inlineOffset();
+
             offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
+            dialog.format_chooser.style.display = "none";
+            dialog.format_chooser_label.style.display = "none";
+            dialog.element_chooser_label.style.display = "none";
+            dialog.linter_chooser.style.display = "none";
+            dialog.linter_chooser_label.style.display = "none";
+            dialog.attributes_div.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
             if(offsets.mouse_differences.before_x > offsets.mouse_differences.after_x) {  //move dialog to one end of selection, depending on which end is closest (horizontally) to mouse pointer / finger touch
@@ -266,6 +308,19 @@
             }
             dialog.style.left = offsets.proposed.x + "px";
             dialog.style.top  = offsets.proposed.y + "px";
+            dialog.mode = "createElement";
+            doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
+        },
+        within_pseudoelement: function(target, position){
+            var target_offset = target.getBoundingClientRect(),
+                within        = false;
+
+            if(target.classList.contains("inline")       && position.y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
+                within = true;
+            } else if(target.classList.contains("block") && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
+                within = true;
+            }
+            return within;
         },
         rename_keys: function(attributes, attribute_mapping){
             var new_attributes = {},
@@ -279,6 +334,15 @@
                 }
             }
             return new_attributes;
+        },
+        range: function(i) {
+            /* jshint ignore:start */
+            for(var list=[];list[--i]=i;){} //good ole hoisting
+            /* jshint ignore:end */
+            return list;
+        },
+        get_formats: function(){
+
         },
         simple_transform: function(markup, element_mapping, attribute_mapping) {
             return markup.replace(/<(.*?)>/g, function(match, contents, offset, s){
@@ -335,9 +399,10 @@
             }
             return error_string;
         },
-        to_options_tags: function(list){
+        to_options_tags: function(list, complex){
             var html = "",
                 element_name,
+                key,
                 escape_chars = {
                     "&": "&nbsp;",
                     "<": "&lt;",
@@ -347,8 +412,16 @@
                     return escape_chars[char];
                 };
 
-            for(element_name in list){
-                html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
+            if(complex === undefined) complex = true;
+            if(complex) {
+                for(element_name in list){
+                    html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
+                }
+            } else {
+                for(key in list){
+                    element_name = list[key];
+                    html += '<option value="' + element_name.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
+                }
             }
             return html;
         }

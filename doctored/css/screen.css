@@ -1,5 +1,10 @@
-.doctored {
+.doctored,
+menu.doctored-dialog,
+menu.doctored-menu {
     font-family:Ubuntu,sans-serif;
+}
+
+.doctored {
     padding:0px;
     margin:0px;
     outline:none;
@@ -14,7 +19,6 @@
         color: #777;
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
-        font-family: 'Reenie Beanie', Arial, sans-serif;
         font-style: italic;
         content: "Validating...";
     }
@@ -28,7 +32,6 @@
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
         font-weight: bold;
-        font-family: 'Reenie Beanie', Arial, sans-serif;
         content: "Validation messages\21B4";
     }
 
@@ -43,7 +46,6 @@
         font-size: 13px;
         font-weight: bold;
         background: #6b6;
-        font-family: 'Reenie Beanie', Arial, sans-serif;
         content: "Valid document!";
     }
 
@@ -166,7 +168,6 @@ menu.doctored-menu {
     margin: 0px;
     padding: 0px;
     text-transform:uppercase;
-    font-family: sans-serif;
     font-size:small;
     font-weight:bold;
     margin-bottom:5px;
@@ -238,20 +239,41 @@ menu.doctored-dialog {
     position: absolute;
     z-index:1;
     background: #000000;
+    color: white;
     border-radius: 5px;
     padding: 2px;
     display:none;
 }
 
-    menu.doctored-dialog select::before {
-        display: inline;
-        content: "Choose element";
+    menu.doctored-dialog label,
+    menu.doctored-dialog div {
+        clear:left;
+    }
+
+    menu.doctored-dialog a {
+        float:right;
+        position:relative;
+        top:-5px;
+        right:-4px;
+        border-radius:100%;
+        padding:0px 5px;
+        text-decoration:none;
+        color:#ccc;
+    }
+
+    menu.doctored-dialog label {
+        display: inline-block;
+        width:4em;
+        color: #cccccc;
+        text-align:right;
+        font-size:small;
     }
 
     menu.doctored-dialog select {
         background: #000000;
         border: none;
         color: white;
+        font-size:small;
         -webkit-appearance: none;
     }
 
@@ -260,6 +282,17 @@ menu.doctored-dialog {
             background: black;
             color: white;
         }
+
+    menu.doctored-dialog div {
+        padding: 0px 5px;
+    }
+
+    menu.doctored-dialog h6 {
+        border-top: solid 1px #666666;
+        padding-top:4px;
+        color: #cccccc;
+        margin:0px;
+    }
 
 div.doctored-selection {
     display: inline;
@@ -276,8 +309,3 @@ div.doctored-selection {
         border-left: 0px;
         border-right: 0px;
     }
-
-
-menu.doctored-properties {
-    display:none;
-}

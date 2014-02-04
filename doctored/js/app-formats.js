@@ -17,7 +17,17 @@
                 return '<title>Book Title</title>' +
                        '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
             },
-            elements: {
+            namespaces: {
+                _default: "http://docbook.org/ns/docbook",
+                xlink: "http://wwww.w3.org/1999/xlink/"
+            },
+            attributes: {//FIXME these are placeholder attribute values. The idea of assuming all elements have the same attributes is obviously flawed and to do this properly we'll need to get them from the RelaxNG file
+                "abc":         {type: "text"},
+                "def":         {type: "integer"},
+                "jam":         {type: "float"},
+                "xlink:xhref": {type: "url"}
+            },
+            elements: { // even if we parsed the RelaxNG we'd probably still need this for info on inline/block info, but perhaps we could do away with attributes
                 abbrev:             {display:"inline"},
                 abstract:           {display:"block"},
                 accel:              {display:"block"},
