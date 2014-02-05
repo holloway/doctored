@@ -17,6 +17,10 @@
         },
         this_function: function(fn, context){
             context = context || this;
+            if(fn === undefined) {
+                console.trace();
+                alert("Error: this_function called with non-existant function. See console.log");
+            }
             return function(){
                 var args = arguments;
                 fn.apply(context, args);
@@ -30,7 +34,7 @@
             if(current_value >= wrap_at) current_value = 0;
             return current_value;
         },
-        display_types: {
+        display_types: { //TODO: remove this - is it even used?
             block:  "block",
             inline: "inline-block",
             table:  "table",
@@ -63,17 +67,6 @@
                 }
             }
             return html_string;
-        },
-        insert_html_at_cursor_position: function(html, paste_event){
-            var range,
-                nodes,
-                selection;
-        
-            paste_event.returnValue = false;
-            selection = rangy.getSelection();
-            range = selection.getRangeAt(0);
-            nodes = range.createContextualFragment(html);
-            range.insertNode(nodes);
         },
         parse_attributes_string: function(attributes_string){
             // although it would be easier to use the browsers DOM
@@ -117,6 +110,7 @@
             });
         },
         sniff_display_type: function(node){
+            //FIXME: remove this shit code
             if(!node) return;
             var className;
             switch(node.nodeType){
@@ -145,6 +139,7 @@
             alert("Unknown element type. nodeName was " + node.nodeName);
         },
         descend_building_xml: function(nodes, depth){
+            //FIXME: this is old code. It works but it's a bit shit. Fix it to note depend on display_type and instead just use classList.contains() directly
             var i,
                 node,
                 xml_string = "",
@@ -206,24 +201,6 @@
             filename = filename || "download.xml";
             window.saveAs(blob, filename);
         },
-        get_instance_from_this: function(target) {
-            var i,
-                instance,
-                from_menu,
-                from_select;
-
-            if(target.doctored) return target;
-            from_menu = target.parentNode.nextSibling; //TODO: this dom walking code is a bit shit. fix it.
-            if(target.nodeName.toLowerCase() === "select") from_select = target.parentNode.nextSibling.nextSibling;
-            if(doctored.instances === undefined) return false;
-            for(i = 0; i < doctored.instances.length; i++){
-                instance = doctored.instances[i];
-                if(instance.root.isEqualNode(target) || instance.root.isEqualNode(from_menu) || instance.root.isEqualNode(from_select)) {
-                    return instance;
-                }
-            }
-            return false;
-        },
         remove_old_selection: function(selection, instance){
             if(selection && selection.classList.contains("doctored-selection")) {
                 //the element must still contain the "doctored-selection" class or else it's probably
@@ -248,8 +225,11 @@
                 selection.addRange(range);
                 selection.removeAllRanges();
             } catch(e) {
+                selection.removeAllRanges();
+                //TODO: display error message because of bad boundaries
                 return;
             }
+            
             return element;
         },
         display_element_dialog: function(target, dialog, mouse){
