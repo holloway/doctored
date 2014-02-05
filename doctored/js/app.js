@@ -169,13 +169,14 @@
                 event.preventDefault();
                 doctored.util.offer_download(xml, filename);
             },
-            mouseup: function(event){
+            click: function(event){
                 var browser_selection = window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null),
                     target   = event.toElement || event.target,
                     mouse_position = {x:event.x,y:event.y},
                     within_pseudoelement = doctored.util.within_pseudoelement(target, mouse_position),
                     new_doctored_selection;
 
+                this.dialog.style.display = "none";
                 doctored.util.remove_old_selection(this.dialog.target, this);
                 if (browser_selection.rangeCount) {
                     new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection);
@@ -210,8 +211,8 @@
                 this.root.className = "doctored";
                 this.root.addEventListener("input",     lint, false);
                 this.root.addEventListener('paste',     this_function(this.paste, this), false);
-                this.root.addEventListener('mouseup',   this_function(this.mouseup, this), false);
-                this.root.addEventListener('touchend',  this_function(this.mouseup, this), false);
+                this.root.addEventListener('mouseup',   this_function(this.click, this), false);
+                this.root.addEventListener('touchend',  this_function(this.click, this), false);
                 this.root.addEventListener('mousemove', this_function(this.mousemove, this), false);
                 this.menu = document.createElement('menu');
                 this.menu.className = "doctored-menu";
