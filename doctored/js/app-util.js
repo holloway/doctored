@@ -211,7 +211,7 @@
                 instance.dialog.style.display = "none";
             }
         },
-        surround_selection_with_element: function(nodeName, classNames, instance, selection){
+        surround_selection_with_element: function(nodeName, classNames, instance, selection, mouse){
             var range = selection.getRangeAt(0).cloneRange(),
                 element;
             
@@ -226,7 +226,7 @@
                 selection.removeAllRanges();
             } catch(e) {
                 selection.removeAllRanges();
-                //TODO: display error message because of bad boundaries
+                doctored.util.this_function(instance.show_tooltip, instance)("Invalid selection", mouse.x, mouse.y);
                 return;
             }
             
@@ -235,8 +235,6 @@
         display_element_dialog: function(target, dialog, mouse){
             dialog.format_chooser.style.display        = "none";
             dialog.format_chooser_label.style.display  = "none";
-            dialog.linter_chooser.style.display        = "none";
-            dialog.linter_chooser_label.style.display  = "none";
             dialog.element_chooser_label.style.display = "";
             dialog.attributes_div.style.display        = "";
             dialog.style.left = mouse.x + "px";
@@ -268,8 +266,6 @@
             dialog.format_chooser.style.display = "none";
             dialog.format_chooser_label.style.display = "none";
             dialog.element_chooser_label.style.display = "none";
-            dialog.linter_chooser.style.display = "none";
-            dialog.linter_chooser_label.style.display = "none";
             dialog.attributes_div.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
@@ -316,8 +312,9 @@
             return new_attributes;
         },
         range: function(i) {
+            // Returns [1,2,3...i]
             /* jshint ignore:start */
-            for(var list=[];list[--i]=i;){} //good ole hoisting
+            for(var list=[];list[--i]=i;){} //this code works and is intentional; it's not a mistake thanks to good ole variable hoisting
             /* jshint ignore:end */
             return list;
         },

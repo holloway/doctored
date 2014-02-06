@@ -9,7 +9,30 @@
             format:                           "docbook" //key from doctored.formats in app-formats.js
         },
         head = document.getElementsByTagName('head')[0],
-        body = document.getElementsByTagName('body')[0];
+        body = document.getElementsByTagName('body')[0],
+        $ = function(selector, scope){
+            scope = scope || document;
+            if(selector.indexOf(" ") >= 0) return scope.querySelectorAll(selector);
+            if(selector.substring(0,1) === "#") return scope.getElementById(selector.substring(1));
+            if(selector.substring(0,1) === ".") return scope.getElementsByClassName(selector.substring(1));
+            return scope.getElementsByTagName(selector);
+        },
+        transition_end_event = function(){
+            var key;
+            var element = document.createElement('fakeelement');
+            var transitions = {
+              'transition':'transitionend',
+              'OTransition':'otransitionEnd',
+              'MozTransition':'transitionend',
+              'WebkitTransition':'webkitTransitionEnd'
+            };
+
+            for(key in transitions){
+                if(element.style[key] !== undefined){
+                    return transitions[key];
+                }
+            }
+        }();
 
     doctored.event.on("app:ready", function(){
         var i,
@@ -179,7 +202,7 @@
                 this.dialog.style.display = "none";
                 doctored.util.remove_old_selection(this.dialog.target, this);
                 if (browser_selection.rangeCount) {
-                    new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection);
+                    new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection, mouse_position);
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
                         doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position);
                     } else if(within_pseudoelement) {
@@ -196,6 +219,22 @@
                 if(!target) return;
                 if(doctored.util.within_pseudoelement(target, {x:event.x,y:event.y})) cursor = "pointer";
                 this.root.style.cursor = cursor;
+            },
+            show_tooltip: function(text, x, y){
+                var _this = this;
+
+                this.tooltip.innerHTML = text;
+                this.tooltip.style.left = x + "px";
+                this.tooltip.style.top = y + "px";
+                this.tooltip.style.display = "block";
+                this.tooltip.classList.remove("doctored-hidden");
+                if(this.tooltip.timer) clearTimeout(this.tooltip.timer);
+                this.tooltip.timer = setTimeout(function(){
+                    _this.tooltip.classList.add("doctored-hidden");
+                }, 1000);
+            },
+            hide_tooltip: function(event){
+                this.tooltip.style.display = "none";
             },
             options: options,
             init: function(){
@@ -218,30 +257,32 @@
                 this.menu.className = "doctored-menu";
                 this.dialog = document.createElement('menu');
                 this.dialog.className = "doctored-dialog";
-                this.dialog.innerHTML = '<a href>&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
+                this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
                                         '<label for="' + this.id + '_elements">root: </label><select   id="' + this.id + '_elements"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
-                                        '<label for="' + this.id + '_linters">linters: </label><select id="' + this.id + '_linters"><option>' + doctored.util.range(16).join("</option><option>") + '</option></select>' +
                                         '<div><h6>attributes</h6></div>';
-                this.dialog.close = this.dialog.getElementsByTagName('a')[0];
+                this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
-                this.dialog.format_chooser = this.dialog.getElementsByTagName('select')[0];
-                this.dialog.format_chooser_label = this.dialog.getElementsByTagName('label')[0];
-                this.dialog.element_chooser = this.dialog.getElementsByTagName('select')[1];
+                this.dialog.format_chooser = $('select', this.dialog)[0];
+                this.dialog.format_chooser_label = $('label', this.dialog)[0];
+                this.dialog.element_chooser = $('select', this.dialog)[1];
                 this.dialog.element_chooser.addEventListener('change', this_function(this.element_chooser_change, this), false);
-                this.dialog.element_chooser_label = this.dialog.getElementsByTagName('label')[1];
-                this.dialog.linter_chooser = this.dialog.getElementsByTagName('select')[2];
-                this.dialog.linter_chooser_label = this.dialog.getElementsByTagName('label')[2];
-                this.dialog.attributes_div = this.dialog.getElementsByTagName('div')[0];
+                this.dialog.element_chooser_label = $('label', this.dialog)[1];
+                this.dialog.attributes_div = $('div', this.dialog)[0];
                 this.menu.innerHTML = '<a class="doctored-properties" href="">Properties</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
-                this.menu.properties_button = this.menu.getElementsByClassName("doctored-properties")[0];
+                this.menu.properties_button = $(".doctored-properties", this.menu)[0];
                 this.menu.properties_button.addEventListener('click', this_function(this.properties, this), false);
-                this.menu.download = this.menu.getElementsByClassName("doctored-download")[0];
+                this.menu.download = $(".doctored-download", this.menu)[0];
                 this.menu.download.addEventListener('click', this_function(this.download, this), false);
-                this.menu.view_source = this.menu.getElementsByClassName("doctored-view-source")[0];
+                this.menu.view_source = $(".doctored-view-source", this.menu)[0];
                 this.menu.view_source.addEventListener('click', this_function(this.view_source, this), false);
+                this.tooltip = document.createElement('samp');
+                this.tooltip.className = "doctored-tooltip";
+                console.log(transition_end_event);
+                this.tooltip.addEventListener(transition_end_event, this_function(this.hide_tooltip, this), false);
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 this.root.parentNode.insertBefore(this.menu, this.root);
-                this.root.parentNode.insertBefore(this.dialog, this.root.previousSibling);
+                this.root.parentNode.insertBefore(this.dialog, this.menu);
+                this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }

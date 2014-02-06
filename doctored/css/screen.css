@@ -1,6 +1,7 @@
 .doctored,
 menu.doctored-dialog,
-menu.doctored-menu {
+menu.doctored-menu,
+samp.doctored-tooltip {
     font-family:Ubuntu,sans-serif;
 }
 
@@ -25,13 +26,12 @@ menu.doctored-menu {
 
     .doctored.invalid:before {
         text-align:right;
-        margin-right:30px;
-        width: 160px;
+        margin-right:40px;
+        width: 150px;
         color: #777;
         background-color: none;
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
-        font-weight: bold;
         content: "Validation messages\21B4";
     }
 
@@ -44,7 +44,6 @@ menu.doctored-menu {
         color: white;
         text-shadow: 1px 1px 1px #999999;
         font-size: 13px;
-        font-weight: bold;
         background: #6b6;
         content: "Valid document!";
     }
@@ -118,7 +117,6 @@ menu.doctored-menu {
             width:172px;
             font-size:x-small;
             padding:4px 5px 4px 7px;
-            background: red;
             border-radius:5px;
             border: solid 2px white;
             color: white;
@@ -245,6 +243,10 @@ menu.doctored-dialog {
     display:none;
 }
 
+    menu.doctored-dialog * {
+        font-size:small;
+    }
+
     menu.doctored-dialog label,
     menu.doctored-dialog div {
         clear:left;
@@ -255,7 +257,6 @@ menu.doctored-dialog {
         position:relative;
         top:-5px;
         right:-4px;
-        border-radius:100%;
         padding:0px 5px;
         text-decoration:none;
         color:#ccc;
@@ -266,16 +267,20 @@ menu.doctored-dialog {
         width:4em;
         color: #cccccc;
         text-align:right;
-        font-size:small;
     }
 
     menu.doctored-dialog select {
         background: #000000;
         border: none;
+        outline: none;
         color: white;
-        font-size:small;
         -webkit-appearance: none;
     }
+
+        menu.doctored-dialog select:focus {
+            border: none;
+            outline: none;
+        }
 
         menu.doctored-dialog select optgroup,
         .doctored-dialog select option {
@@ -287,12 +292,13 @@ menu.doctored-dialog {
         padding: 0px 5px;
     }
 
-    menu.doctored-dialog h6 {
-        border-top: solid 1px #666666;
-        padding-top:4px;
-        color: #cccccc;
-        margin:0px;
-    }
+        menu.doctored-dialog div h6 {
+            border-top: solid 1px #666666;
+            padding-top:4px;
+            color: #cccccc;
+            margin:0px;
+            font-weight:normal;
+        }
 
 div.doctored-selection {
     display: inline;
@@ -308,4 +314,34 @@ div.doctored-selection {
         border: solid 1px #4477cc;
         border-left: 0px;
         border-right: 0px;
+    }
+
+
+samp.doctored-tooltip {
+    position:absolute;
+    display:none;
+    z-index:4;
+    font-size: x-small;
+    border-radius: 2px;
+    font-weight:bold;
+    text-transform:uppercase;
+    padding:2px 7px 3px 5px;
+    background: #c44;
+    color: #fff;
+    text-shadow: 1px 1px 1px #b33;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -ms-transition: opacity 1s;
+    -moz-transition: opacity 1s;
+    -webkit-transition: opacity 1s;
+    transition: opacity 1s;
+    pointer-events: none;
+}
+
+    samp.doctored-tooltip.doctored-hidden {
+        opacity: 0;
     }
