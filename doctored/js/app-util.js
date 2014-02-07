@@ -1,4 +1,4 @@
-/*globals doctored, Node, alert, console, rangy, $*/
+/*globals doctored, Node, alert, console, $*/
 (function(){
 	"use strict";
 
@@ -63,7 +63,7 @@
             for(i = 0; i < mimetypes_ordered_by_preference_last_most_prefered.length; i++){
                 mimetype = mimetypes_ordered_by_preference_last_most_prefered[i];
                 if(clipboard.types && clipboard.types.indexOf(mimetype) >= 0) {
-                    html_string = clipboard.getData(mimetype);
+                    html_string = clipboard.getData(mimetype).toString();
                 }
             }
             return html_string;
@@ -100,14 +100,30 @@
                     element_name = match.substr(1, match.indexOf(" ") - 1);
                     match = match.substr(match.indexOf(" "));
                     attributes = ' data-attributes="' +
-                                 JSON.stringify( doctored.util.parse_attributes_string(match.substr(0, match.length - 1))).replace(/"/g, "&quot;") +
+                                 doctored.util.encode_data_attributes(doctored.util.parse_attributes_string(match.substr(0, match.length - 1))) +
                                  '"';
                 }
-
-                if(elements[element_name]) display = elements[element_name].display;
-
+                if(elements && elements[element_name]) display = elements[element_name].display;
                 return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>';
             });
+        },
+        encode_data_attributes: function(attributes){
+            return JSON.stringify(attributes).replace(/"/g, "&quot;");
+        },
+        gather_attributes: function(attribute_pairs){
+            var attributes = {},
+                attribute_pair,
+                key,
+                i;
+
+            for(i = 0; i < attribute_pairs.length; i++){
+                attribute_pair = attribute_pairs[i];
+                key = attribute_pair.childNodes[0].value.replace(/\s/g, '');
+                if(key.length){
+                    attributes[key] = attribute_pair.childNodes[2].value;
+                }
+            }
+            return attributes;
         },
         sniff_display_type: function(node){
             //FIXME: remove this shit code
@@ -143,9 +159,11 @@
             var i,
                 node,
                 xml_string = "",
+                attributes_string,
                 data_element,
                 text_node,
-                display_type;
+                display_type,
+                escape_text = doctored.util.escape_text;
             
             if(depth === undefined) depth = 0;
 
@@ -160,7 +178,10 @@
                         //    xml_string += "\n";
                         //}
                         xml_string += "<" + data_element;
-                        xml_string += doctored.util.build_xml_attributes_from_json_string(node.getAttribute("data-attributes"));
+                        attributes_string = node.getAttribute("data-attributes");
+                        if(attributes_string) {
+                            xml_string += doctored.util.build_xml_attributes_from_json_string(attributes_string.replace(/&quot;/g, '"'));
+                        }
                         xml_string += ">";
                         if (node.hasChildNodes()) {
                             xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
@@ -173,7 +194,7 @@
                     case Node.TEXT_NODE:
                         text_node = node.innerHTML || node.textContent || node.innerText;
                         if(text_node === undefined) break;
-                        xml_string += text_node.replace(/[\n]/g, " ");
+                        xml_string += escape_text(text_node.replace(/[\n]/g, " "));
                         break;
                 }
             }
@@ -182,7 +203,7 @@
         build_xml_attributes_from_map: function(attributes){
             var attributes_string = "",
                 key;
-            
+
             for(key in attributes) {
                 attributes_string += " " +
                                      key.toString() +
@@ -208,31 +229,48 @@
                 // we generate rather than an element used to express text selection)
                 $(selection).replaceWith(selection.childNodes); //todo replace with plain javascript
                 delete instance.dialog.target;
-                instance.dialog.style.display = "none";
             }
+        },
+        insert_html_at_cursor_position: function(html, paste_event){
+            var range,
+                nodes,
+                selection;
+        
+            paste_event.returnValue = false;
+            selection = doctored.util.get_current_selection();
+            range = selection.getRangeAt(0);
+            nodes = range.createContextualFragment(html);
+            range.insertNode(nodes);
         },
         surround_selection_with_element: function(nodeName, classNames, instance, selection, mouse){
             var range = selection.getRangeAt(0).cloneRange(),
-                element;
+                element,
+                boundaries;
             
             if(range.toString().length === 0) return;
             element = document.createElement(nodeName);
             element.className = classNames;
             instance.dialog.target = element;
             try{
-                range.surroundContents(element); //FIXME causes "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements. e.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>"
+                range.surroundContents(element);
                 selection.removeAllRanges();
                 selection.addRange(range);
                 selection.removeAllRanges();
             } catch(e) {
+                // typically "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements.
+                // E.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>".
+                // So in this case we just display a confusing and bewildering message in a tooltip (if you can think of better wording, let me know!)
                 selection.removeAllRanges();
-                doctored.util.this_function(instance.show_tooltip, instance)("Invalid selection", mouse.x, mouse.y);
+                boundaries = element.getBoundingClientRect();
+                if(!mouse) mouse = {x:boundaries.left, y:boundaries.top};
+                doctored.util.this_function(instance.show_tooltip, instance)("Invalid selection", mouse.x + document.body.scrollLeft, mouse.y + document.body.scrollTop);
                 return;
             }
-            
             return element;
         },
         display_element_dialog: function(target, dialog, mouse){
+            var i;
+
             dialog.format_chooser.style.display        = "none";
             dialog.format_chooser_label.style.display  = "none";
             dialog.element_chooser_label.style.display = "";
@@ -242,7 +280,15 @@
             dialog.style.display = "block"; //must be visible to obtain width/height
             dialog.mode = "editElement";
             dialog.target = target;
+
+            for(i = dialog.attributes_div.childNodes.length - 2; i >= 0; i--){ // we leave the last one present, because it's never used
+                dialog.attributes_div.removeChild(dialog.attributes_div.childNodes[i]);
+            }
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
+            dialog.element_chooser.focus();
+        },
+        get_current_selection: function(){
+            return window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
         },
         set_element_chooser_to_element: function(element, element_chooser){
             var data_element = element.getAttribute("data-element"),
@@ -262,14 +308,17 @@
         display_dialog_around_inline: function(inline, dialog, mouse){
             var offsets = $(inline).inlineOffset();
 
-            offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
+            if(mouse){
+                offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
+            }
             dialog.format_chooser.style.display = "none";
             dialog.format_chooser_label.style.display = "none";
             dialog.element_chooser_label.style.display = "none";
             dialog.attributes_div.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
-            if(offsets.mouse_differences.before_x > offsets.mouse_differences.after_x) {  //move dialog to one end of selection, depending on which end is closest (horizontally) to mouse pointer / finger touch
+
+            if(mouse && offsets.mouse_differences.before_x > offsets.mouse_differences.after_x) {  //move dialog to one end of selection, depending on which end is closest (horizontally) to mouse pointer / finger touch
                 offsets.proposed = {x: offsets.after.left, y: offsets.after.top - offsets.dialog.height};
             } else {
                 offsets.proposed = {x: offsets.before.left - offsets.dialog.width, y: offsets.before.top - dialog.offsetHeight};
@@ -282,15 +331,18 @@
             if(offsets.proposed.y < 1) {
                 offsets.proposed.y = 1;
             }
-            dialog.style.left = offsets.proposed.x + "px";
-            dialog.style.top  = offsets.proposed.y + "px";
+            dialog.style.left = document.body.scrollLeft + offsets.proposed.x + "px";
+            dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
+            dialog.element_chooser.focus();
         },
         within_pseudoelement: function(target, position){
-            var target_offset = target.getBoundingClientRect(),
-                within        = false;
-
+            var within = false,
+                target_offset;
+                
+            if(position === undefined) return false;
+            target_offset = target.getBoundingClientRect();
             if(target.classList.contains("inline")       && position.y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
                 within = true;
             } else if(target.classList.contains("block") && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
@@ -376,28 +428,35 @@
             }
             return error_string;
         },
-        to_options_tags: function(list, complex){
-            var html = "",
-                element_name,
-                key,
-                escape_chars = {
+        escape_text: function(){
+            var _escape_chars = {
                     "&": "&nbsp;",
                     "<": "&lt;",
                     ">": "&gt;"
                 },
-                escape = function(char){
-                    return escape_chars[char];
+                _escape = function(char){
+                    return _escape_chars[char];
                 };
 
+            return function(str){
+                return str.replace(/[&<>"']/g, _escape);
+            };
+        }(),
+        to_options_tags: function(list, complex){
+            var html = "",
+                element_name,
+                key,
+                escape_text = doctored.util.escape_text;
+               
             if(complex === undefined) complex = true;
             if(complex) {
                 for(element_name in list){
-                    html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
+                    html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + escape_text(element_name) + "</option>";
                 }
             } else {
                 for(key in list){
                     element_name = list[key];
-                    html += '<option value="' + element_name.replace(/"/g, "&quot;") + '">' + element_name.replace(/[&<>]/g, escape) + "</option>";
+                    html += '<option value="' + element_name.replace(/"/g, "&quot;") + '">' + escape_text(element_name) + "</option>";
                 }
             }
             return html;

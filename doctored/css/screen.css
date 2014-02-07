@@ -240,6 +240,7 @@ menu.doctored-dialog {
     color: white;
     border-radius: 5px;
     padding: 2px;
+    margin-bottom:50px;
     display:none;
 }
 
@@ -264,9 +265,9 @@ menu.doctored-dialog {
 
     menu.doctored-dialog label {
         display: inline-block;
-        width:4em;
         color: #cccccc;
-        text-align:right;
+        text-align:left;
+        padding-left:5px;
     }
 
     menu.doctored-dialog select {
@@ -274,6 +275,7 @@ menu.doctored-dialog {
         border: none;
         outline: none;
         color: white;
+        width:180px;
         -webkit-appearance: none;
     }
 
@@ -288,16 +290,40 @@ menu.doctored-dialog {
             color: white;
         }
 
-    menu.doctored-dialog div {
-        padding: 0px 5px;
+    menu.doctored-dialog h6 {
+        border-top: solid 1px #666666;
+        padding:0px 0px 0px 5px;
+        color: #cccccc;
+        margin:0px;
+        font-weight:normal;
     }
 
-        menu.doctored-dialog div h6 {
-            border-top: solid 1px #666666;
-            padding-top:4px;
-            color: #cccccc;
-            margin:0px;
-            font-weight:normal;
+    menu.doctored-dialog div {
+        padding: 0px;
+    }
+
+        menu.doctored-dialog .doctored-attribute-name,
+        menu.doctored-dialog .doctored-attribute-value {
+            background: #333;
+            color: white;
+            border: none;
+            width:105px;
+            outline: none;
+        }
+
+        menu.doctored-dialog .doctored-attribute-name:focus,
+        menu.doctored-dialog .doctored-attribute-value:focus {
+            background: #444;
+        }
+
+        menu.doctored-dialog .doctored-attribute-name {
+            clear:left;
+            text-align:right;
+            margin-left:5px;
+        }
+
+        menu.doctored-dialog .doctored-attribute-value {
+            text-align:left;
         }
 
 div.doctored-selection {

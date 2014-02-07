@@ -34,6 +34,8 @@
 				initial_cursor = linters.pool_cursor,
 				worker         = linters.pool[linters.pool_cursor];
 
+            if(linters.config.number_of_workers === 0) return;
+            
             while(worker.ready !== true){
                 linters.pool_cursor = doctored.util.increment_but_wrap_at(linters.pool_cursor, linters.pool.length);
                 worker = linters.pool[linters.pool_cursor];
@@ -85,7 +87,10 @@
             var i    = 0,
                 linters = doctored.linters;
 
-            if(typeof window.Worker !== "function") return alert("Doctored.js requires a browser that supports Web Workers.");
+            if(typeof window.Worker !== "function") {
+                alert("Doctored.js requires a browser that supports Web Workers.");
+                linters.config.number_of_workers = 0;
+            }
 
             for(i = 0; i < linters.config.number_of_workers; i++){
                linters.pool.push(get_worker(i));
