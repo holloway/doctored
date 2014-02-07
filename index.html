@@ -11,7 +11,9 @@
     <script src="dependencies/jquery-1.9.1.min.js"></script>
     <script src="doctored/doctored.js"></script>
     <script>
-        var editor1 = doctored.init("#editor1");
+        var onload = function(){console.log("Doctored.js: initialized " + this.root_selector + "!")};
+
+        doctored.init("#editor1", {onload:onload});
     </script>
 </body>
 </html>

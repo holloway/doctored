@@ -23,7 +23,7 @@
             }
             return function(){
                 var args = arguments;
-                fn.apply(context, args);
+                return fn.apply(context, args);
             };
         },
         non_breaking_space: "\u00A0",
@@ -108,7 +108,20 @@
             });
         },
         encode_data_attributes: function(attributes){
-            return JSON.stringify(attributes).replace(/"/g, "&quot;");
+            var sanitised_attributes = {},
+                first_letter,
+                key,
+                index = 0;
+
+            for(key in attributes){
+                index += 1;
+                key = key.replace(/["'<>&]/g, '').trim();
+                if(!key.match(/^[a-zA-Z_:][\-a-zA-Z0-9_:.]/)){
+                    key = "INVALID" + index + key;
+                }
+                sanitised_attributes[key] = attributes[key];
+            }
+            return JSON.stringify(sanitised_attributes).replace(/"/g, "&quot;");
         },
         gather_attributes: function(attribute_pairs){
             var attributes = {},
@@ -222,13 +235,13 @@
             filename = filename || "download.xml";
             window.saveAs(blob, filename);
         },
-        remove_old_selection: function(selection, instance){
+        remove_old_selection: function(selection, dialog){
             if(selection && selection.classList.contains("doctored-selection")) {
                 //the element must still contain the "doctored-selection" class or else it's probably
-                //been turned into an 'element' (in the Doctored sense -- part of the document
+                //been turned into an 'element' (in the Doctored sense) -- part of the document
                 // we generate rather than an element used to express text selection)
                 $(selection).replaceWith(selection.childNodes); //todo replace with plain javascript
-                delete instance.dialog.target;
+                delete dialog.target;
             }
         },
         insert_html_at_cursor_position: function(html, paste_event){
@@ -251,7 +264,7 @@
             element = document.createElement(nodeName);
             element.className = classNames;
             instance.dialog.target = element;
-            try{
+            try {
                 range.surroundContents(element);
                 selection.removeAllRanges();
                 selection.addRange(range);
@@ -269,23 +282,44 @@
             return element;
         },
         display_element_dialog: function(target, dialog, mouse){
-            var i;
+            var attributes_string,
+                attributes_item,
+                attributes,
+                target_offset,
+                key,
+                i;
 
             dialog.format_chooser.style.display        = "none";
             dialog.format_chooser_label.style.display  = "none";
-            dialog.element_chooser_label.style.display = "";
+            dialog.element_chooser_label.style.display = "none";
             dialog.attributes_div.style.display        = "";
+            dialog.attributes_h6.style.display         = "";
+            if(mouse === undefined){
+                target_offset = target.getBoundingClientRect();
+                mouse = {x:target_offset.left, y:target_offset.top};
+            }
             dialog.style.left = mouse.x + "px";
             dialog.style.top  = mouse.y + "px";
-            dialog.style.display = "block"; //must be visible to obtain width/height
             dialog.mode = "editElement";
             dialog.target = target;
 
             for(i = dialog.attributes_div.childNodes.length - 2; i >= 0; i--){ // we leave the last one present, because it's never used
                 dialog.attributes_div.removeChild(dialog.attributes_div.childNodes[i]);
             }
+
+            attributes_string = dialog.target.getAttribute("data-attributes");
+            if(attributes_string) {
+                attributes = JSON.parse(attributes_string.replace(/&quot;/g, '"'));
+                for(key in attributes){
+                    attributes_item = dialog.attributes_template.cloneNode(true);
+                    attributes_item.childNodes[0].value = key;
+                    attributes_item.childNodes[2].value = attributes[key];
+                    dialog.attributes_div.insertBefore(attributes_item, dialog.attributes_add);
+                }
+            }
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
+            dialog.style.display = "block";
         },
         get_current_selection: function(){
             return window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
@@ -315,6 +349,7 @@
             dialog.format_chooser_label.style.display = "none";
             dialog.element_chooser_label.style.display = "none";
             dialog.attributes_div.style.display = "none";
+            dialog.attributes_h6.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
 

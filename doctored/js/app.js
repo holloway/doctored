@@ -155,7 +155,7 @@
                 element_chooser = dialog.element_chooser;
                 option = element_chooser.options[this.dialog.element_chooser.selectedIndex];
                 option_value = option.getAttribute("value");
-                if(option_value.length === 0) return;
+                if(option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 dialog.target.className = option_value; //must clobber other values
                 dialog.target.setAttribute("data-element", option.innerText);
@@ -199,29 +199,38 @@
                 event.preventDefault();
                 doctored.util.offer_download(xml, filename);
             },
-            keyup_dialog: function(event){
-                var esc_key   = 27,
-                    enter_key = 13,
+            keyup_dialog_esc: function(event){
+                var esc_key = 27;
+
+                if(event.keyCode != esc_key) return;
+                doctored.util.remove_old_selection(this.dialog.target, this);
+                this.dialog.style.display = "none";
+                this.cache.just_hit_esc = true;
+            },
+            keyup_dialog_enter: function(event){
+                var enter_key = 13,
                     attributes,
                     selection;
 
-                switch(event.keyCode){
-                    case esc_key:
-                        doctored.util.remove_old_selection(this.dialog.target, this);
-                        instance.dialog.style.display = "none";
-                        this.cache.just_hit_esc = true;
-                        break;
-                    case enter_key:
-                        attributes = doctored.util.gather_attributes(this.dialog.attributes_div.childNodes);
-                        this.dialog.target.setAttribute('data-attributes', doctored.util.encode_data_attributes(attributes));
-                        this.dialog.style.display = "none";
-                        delete this.dialog.target;
-                        break;
-                }
+                if(event.keyCode != enter_key) return;
+                attributes = doctored.util.gather_attributes(this.dialog.attributes_div.childNodes);
+                this.dialog.target.setAttribute('data-attributes', doctored.util.encode_data_attributes(attributes));
+                this.dialog.style.display = "none";
+                delete this.dialog.target;
             },
             keyup_contentEditable: function(event){
-                if(event.shiftKey !== false) return;
-                doctored.util.this_function(this.click, this)(event);
+                var esc_key = 27,
+                    browser_selection,
+                    parentNode;
+
+                if(event.keyCode === esc_key){
+                    browser_selection = doctored.util.get_current_selection();
+                    parentNode = browser_selection.getRangeAt(0).endContainer.parentNode;
+                    doctored.util.display_element_dialog(parentNode, this.dialog);
+                    this.dialog.element_chooser.focus();
+                } else if(event.shiftKey === false){
+                    doctored.util.this_function(this.click, this)(event);
+                }
             },
             click: function(event){
                 var browser_selection = doctored.util.get_current_selection(),
@@ -231,7 +240,7 @@
                     new_doctored_selection;
 
                 this.dialog.style.display = "none";
-                doctored.util.remove_old_selection(this.dialog.target, this);
+                doctored.util.remove_old_selection(this.dialog.target, this.dialog);
                 if (browser_selection.rangeCount) {
                     new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection, mouse_position);
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
@@ -243,12 +252,17 @@
                     doctored.util.display_element_dialog(target, this.dialog, mouse_position);
                 }
             },
-            add_attribute_item: function(event){
-                var attributes_item = this.dialog.attributes_template.cloneNode(true),
-                    this_function   = doctored.util.this_function;
+            add_attribute_item: function(){
+                var attributes_item = this.dialog.attributes_template.cloneNode(true);
 
                 this.dialog.attributes_add.parentNode.insertBefore(attributes_item, this.dialog.attributes_add);
-                attributes_item.childNodes[0].focus();
+                return attributes_item;
+            },
+            add_attribute_item_key: function(event){
+                doctored.util.this_function(this.add_attribute_item, this)().childNodes[0].focus();
+            },
+            add_attribute_item_value: function(event){
+                doctored.util.this_function(this.add_attribute_item, this)().childNodes[2].focus();
             },
             mousemove: function(event){
                 var target   = event.toElement || event.target,
@@ -296,23 +310,26 @@
                 this.menu.className = "doctored-menu";
                 this.dialog = document.createElement('menu');
                 this.dialog.className = "doctored-dialog";
-                this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog, this), false);
+                this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
                 this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
-                                        '<label for="' + this.id + '_elements">root: </label><select id="' + this.id + '_elements"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
+                                        '<label for="' + this.id + '_elements">root element</label><select id="' + this.id + '_elements" title="Change element"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
                                         '<h6>attributes</h6><div></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.format_chooser = $('select', this.dialog)[0];
                 this.dialog.format_chooser_label = $('label', this.dialog)[0];
+                this.dialog.attributes_h6 = $('h6', this.dialog)[0];
                 this.dialog.element_chooser = $('select', this.dialog)[1];
                 this.dialog.element_chooser.addEventListener('blur', this_function(this.element_chooser_change, this), false);
+                this.dialog.element_chooser.addEventListener('mouseup', this_function(this.element_chooser_change, this), false);
                 this.dialog.element_chooser_label = $('label', this.dialog)[1];
                 this.dialog.attributes_div = $('div', this.dialog)[0];
+                this.dialog.attributes_div.addEventListener('keyup',   this_function(this.keyup_dialog_enter, this), false);
                 this.dialog.attributes_template = document.createElement("div");
-                this.dialog.attributes_template.innerHTML = '<input class="doctored-attribute-name">="<input class="doctored-attribute-value">"';
+                this.dialog.attributes_template.innerHTML = '<input class="doctored-attribute-name">=<input class="doctored-attribute-value">';
                 this.dialog.attributes_add = this.dialog.attributes_template.cloneNode(true);
-                this.dialog.attributes_add.childNodes[0].addEventListener("focus", this_function(this.add_attribute_item, this), false);
-                this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item, this), false);
+                this.dialog.attributes_add.childNodes[0].addEventListener("focus", this_function(this.add_attribute_item_key, this), false);
+                this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item_value, this), false);
                 this.dialog.attributes_div.appendChild(this.dialog.attributes_add);
                 this.menu.innerHTML = '<a class="doctored-properties" href="">Properties</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
                 this.menu.properties_button = $(".doctored-properties", this.menu)[0];
@@ -332,8 +349,10 @@
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
-                if(console && console.log) console.log("Doctored.js: Initialized editor " + this.root_selector + "!");
                 lint();
+                if(this.options.onload) {
+                    this_function(this.options.onload, this)();
+                }
             }
         };
         instance.init();

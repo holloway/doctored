@@ -9,6 +9,7 @@ samp.doctored-tooltip {
     padding:0px;
     margin:0px;
     outline:none;
+    display:block;
 }
 
     .doctored:before {
@@ -48,7 +49,7 @@ samp.doctored-tooltip {
         content: "Valid document!";
     }
 
-    .doctored .block {
+    .doctored div.block {
         position:relative;
         display:block;
         margin:0px;
@@ -59,7 +60,7 @@ samp.doctored-tooltip {
         overflow:hidden;
     }
 
-    .doctored .block .block {
+    .doctored div.block div.block {
         clear:left;
         padding:0.5em 0px 1em 2.5em;
         margin-top: 0.2em;
@@ -71,18 +72,18 @@ samp.doctored-tooltip {
         border-top-left-radius: 10
     }
 
-    .doctored .block:first-child {
+    .doctored div.block:first-child {
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
     }
 
-    .doctored > .block:last-child {
+    .doctored > div.block:last-child {
         border-bottom-left-radius: 5px;
         border-bottom-right-radius: 5px;
         box-shadow: 0px 4px 5px #999999;
     }
 
-        .doctored .block:after {
+        .doctored div.block:after {
             clear:both;
             position:absolute;
             display:inline-block;
@@ -107,7 +108,7 @@ samp.doctored-tooltip {
             cursor: pointer; /* doesn't have an effect in Chrome (v25) but does in Firefox (v23) */
         }
 
-        .doctored .block.has_errors:before {
+        .doctored div.block.has_errors:before {
             content: attr(data-error);
             overflow:visible;
             position:absolute;
@@ -128,7 +129,7 @@ samp.doctored-tooltip {
             box-shadow: inset 1px 1px 3px #a22;
         }
 
-    .doctored .inline {
+    .doctored div.inline {
         position:relative;
         display:inline-block;
         background: #555555;
@@ -139,7 +140,7 @@ samp.doctored-tooltip {
         vertical-align: text-top;
     }
 
-        .doctored .inline:after {
+        .doctored div.inline:after {
             position:absolute;
             display:inline-block;
             bottom:0.3em;
@@ -256,28 +257,41 @@ menu.doctored-dialog {
     menu.doctored-dialog a {
         float:right;
         position:relative;
-        top:-5px;
-        right:-4px;
+        top:0px;
+        right:0px;
         padding:0px 5px;
         text-decoration:none;
         color:#ccc;
     }
 
+        menu.doctored-dialog a:hover {
+            color: #fff;
+        }
+
     menu.doctored-dialog label {
-        display: inline-block;
+        display: block;
         color: #cccccc;
         text-align:left;
         padding-left:5px;
+        font-weight:bold;
+        font-size:x-small;
     }
 
     menu.doctored-dialog select {
-        background: #000000;
+        background: #000;
         border: none;
         outline: none;
         color: white;
-        width:180px;
+        margin-left:2px;
+        width:160px;
+        border-radius:2px;
         -webkit-appearance: none;
+        cursor: pointer;
     }
+
+        menu.doctored-dialog select:hover {
+            background: #444444;
+        }
 
         menu.doctored-dialog select:focus {
             border: none;
@@ -285,21 +299,23 @@ menu.doctored-dialog {
         }
 
         menu.doctored-dialog select optgroup,
-        .doctored-dialog select option {
+        menu.doctored-dialog select option {
             background: black;
             color: white;
         }
 
     menu.doctored-dialog h6 {
-        border-top: solid 1px #666666;
+        border-top: solid 1px #333333;
         padding:0px 0px 0px 5px;
         color: #cccccc;
         margin:0px;
-        font-weight:normal;
+        font-weight:bold;
+        font-size:x-small;
     }
 
     menu.doctored-dialog div {
-        padding: 0px;
+        padding: 0px 0px 3px 0px;
+        color: #aaaaaa;
     }
 
         menu.doctored-dialog .doctored-attribute-name,
@@ -307,10 +323,13 @@ menu.doctored-dialog {
             background: #333;
             color: white;
             border: none;
-            width:105px;
+            width:81px;
             outline: none;
+            border-radius:2px;
         }
 
+        menu.doctored-dialog .doctored-attribute-name:hover,
+        menu.doctored-dialog .doctored-attribute-value:hover,
         menu.doctored-dialog .doctored-attribute-name:focus,
         menu.doctored-dialog .doctored-attribute-value:focus {
             background: #444;
