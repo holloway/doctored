@@ -317,17 +317,17 @@
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
                 this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
-                                        '<label for="' + this.id + '_elements">root element</label><select id="' + this.id + '_elements" title="Change element"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
+                                        '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
                                         '<h6>attributes</h6><div></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.format_chooser = $('select', this.dialog)[0];
                 this.dialog.format_chooser_label = $('label', this.dialog)[0];
-                this.dialog.attributes_h6 = $('h6', this.dialog)[0];
+                this.dialog.attributes_h6 = $('h6', this.dialog)[1];
                 this.dialog.element_chooser = $('select', this.dialog)[1];
                 this.dialog.element_chooser.addEventListener('blur', this_function(this.element_chooser_change, this), false);
                 this.dialog.element_chooser.addEventListener('mouseup', this_function(this.element_chooser_change, this), false);
-                this.dialog.element_chooser_label = $('label', this.dialog)[1];
+                this.dialog.root_element_title = $('h6', this.dialog)[0];
                 this.dialog.attributes_div = $('div', this.dialog)[0];
                 this.dialog.attributes_div.addEventListener('keyup',   this_function(this.keyup_dialog_enter, this), false);
                 this.dialog.attributes_template = document.createElement("div");
