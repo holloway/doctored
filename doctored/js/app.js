@@ -100,7 +100,7 @@
                 }
             },
             get_xml_string: function(){
-                return this.options.format.root_start + "\n" + doctored.util.descend_building_xml(this.root.childNodes) + this.options.format.root_end;
+                return doctored.CONSTANTS.xml_declaration + doctored.util.descend_building_xml([this.root]);
             },
             save: function(event){
                 var localStorage_key,
@@ -157,10 +157,13 @@
                 option_value = option.getAttribute("value");
                 if(option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
-                dialog.target.className = option_value; //must clobber other values
+                if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
+                    dialog.target.className = option_value; //must clobber other values
+                }
                 dialog.target.setAttribute("data-element", option.innerText);
             },
             properties: function(event){
+                doctored.util.display_element_dialog(this.root, this.dialog);
                 event.preventDefault();
             },
             close_dialog: function(event){
@@ -297,6 +300,8 @@
                     this_function = doctored.util.this_function;
 
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
+                this.root.setAttribute("data-element", this.options.format.root_element);
+                this.root.setAttribute("data-attributes", doctored.util.encode_data_attributes(this.options.format.root_attributes));
                 this.root.innerHTML = doctored.util.convert_xml_to_doctored_html(_this.options.format.get_new_document(), this.options.format.elements);
                 this.root.contentEditable = true;
                 this.root.className = "doctored";
@@ -363,6 +368,7 @@
 
     doctored.CONSTANTS = {
         inline_label_height_in_pixels: 10,
-        block_label_width_in_pixels:   25
+        block_label_width_in_pixels:   25,
+        xml_declaration: '<?xml version="1.0" ?>'
     };
 }());

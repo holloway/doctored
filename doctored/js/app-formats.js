@@ -4,11 +4,18 @@
 
     doctored.formats = {
         docbook: {
-            'name':              "DocBook 5",
-            'root_start':        "<?xml version=\"1.0\" ?><book xmlns=\"http://docbook.org/ns/docbook\" version=\"5.0\">", //FIXME: allow different root nodes
-            'root_end':          "</book>",
+            name:              "DocBook 5",
+            root_element:      "book",
+            root_attributes:   {
+                version: "5.0",
+                xmlns: "http://docbook.org/ns/docbook",
+                "xmlns:xlink": "http://wwww.w3.org/1999/xlink/"
+            },
             'schema':            "../../schemas/docbook5/schema.rng",
-            'convert_from_html': function(html_string){ //FIXME: improve this A LOT!
+            'convert_from_html': function(html_string){
+            // Typically called when people paste HTML and this is supposed to convert that to DocBook
+            // this is just a prototype at the moment, not very useful
+            // FIXME: improve this A LOT!
                 var element_mapping   = {"p":    "para", "a": "ulink"},
                     attribute_mapping = {"href": "url"};
                 return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
@@ -16,16 +23,6 @@
             get_new_document: function(){
                 return '<title>Book Title</title>' +
                        '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
-            },
-            namespaces: {
-                _default: "http://docbook.org/ns/docbook",
-                xlink: "http://wwww.w3.org/1999/xlink/"
-            },
-            attributes: {//FIXME these are placeholder attribute values. The idea of assuming all elements have the same attributes is obviously flawed and to do this properly we'll need to get them from the RelaxNG file
-                "abc":         {type: "text"},
-                "def":         {type: "integer"},
-                "jam":         {type: "float"},
-                "xlink:xhref": {type: "url"}
             },
             elements: { // even if we parsed the RelaxNG we'd probably still need this for info on inline/block info, but perhaps we could do away with attributes
                 abbrev:             {display:"inline"},

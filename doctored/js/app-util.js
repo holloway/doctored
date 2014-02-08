@@ -187,20 +187,20 @@
                         data_element = node.getAttribute("data-element");
                         if(!data_element) continue;
                         display_type =doctored.util.sniff_display_type(node);
-                        //if(depth === 0 && display_type === doctored.util.display_types.block){
-                        //    xml_string += "\n";
-                        //}
                         xml_string += "<" + data_element;
                         attributes_string = node.getAttribute("data-attributes");
                         if(attributes_string) {
                             xml_string += doctored.util.build_xml_attributes_from_json_string(attributes_string.replace(/&quot;/g, '"'));
                         }
                         xml_string += ">";
+                        if(depth === 0){
+                            xml_string += "\n";
+                        }
                         if (node.hasChildNodes()) {
                             xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
                         }
                         xml_string += "</" + data_element + ">";
-                        if(depth === 0 && display_type === doctored.util.display_types.block){
+                        if(depth === 1 && display_type === doctored.util.display_types.block){
                             xml_string += "\n";
                         }
                         break;
