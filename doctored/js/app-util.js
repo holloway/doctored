@@ -1,4 +1,4 @@
-/*globals doctored, Node, alert, console, $*/
+/*globals doctored, Node, alert, console*/
 (function(){
 	"use strict";
 
@@ -248,7 +248,7 @@
             
             parentNode = selection.parentNode;
             for(i = 0; i < selection_childNodes_length; i++){
-                parentNode.insertBefore(selection.childNodes[0], selection); //NOTE is 0 because the first childNode keeps changing when we pull out the ones before
+                parentNode.insertBefore(selection.childNodes[0], selection); //NOTE is [0] because the childNode[0] keeps pointing to the new first child as we move them
             }
             parentNode.removeChild(selection);
             delete dialog.target;
@@ -349,8 +349,8 @@
             }
         },
         display_dialog_around_inline: function(inline, dialog, mouse){
-            var offsets = $(inline).inlineOffset();
-
+            var offsets = doctored.util.inlineOffset(inline);
+            
             if(mouse){
                 offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
             }
@@ -381,6 +381,28 @@
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
             dialog.element_chooser.focus();
         },
+        inlineOffset: function() {
+            //NOTE: closure - actual function returned below
+            var i_before = document.createElement("i"),
+                i_after  = document.createElement("i");
+
+            return function(sender){
+                var parentNode = sender.parentNode,
+                    element_before_offset,
+                    element_after_offset;
+
+                parentNode.insertBefore(i_before, sender);
+                parentNode.insertBefore(i_after,  sender.nextSibling);
+                element_before_offset = i_before.getBoundingClientRect();
+                element_after_offset  = i_after .getBoundingClientRect();
+                parentNode.removeChild(i_before);
+                parentNode.removeChild(i_after);
+                return {
+                        before: element_before_offset,
+                        after:  element_after_offset
+                    };
+            };
+        }(),
         within_pseudoelement: function(target, position){
             var within = false,
                 target_offset;
