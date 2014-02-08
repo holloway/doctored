@@ -6,7 +6,7 @@
         return {
           ready:  true,
           index: i,
-          Worker: new Worker(window.doctored.base + "js/rng.js")
+          Worker: new Worker(window.doctored.base + "js/app-linter-worker.js")
         };
     };
 
