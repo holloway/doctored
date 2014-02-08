@@ -1,4 +1,4 @@
-/*globals doctored, alert, console, confirm, $*/
+/*globals doctored, alert, console, confirm*/
 (function(){
     "use strict";
 

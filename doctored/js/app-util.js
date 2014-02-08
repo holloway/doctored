@@ -356,7 +356,7 @@
             }
             dialog.format_chooser.style.display = "none";
             dialog.format_chooser_label.style.display = "none";
-            dialog.element_chooser_label.style.display = "none";
+            dialog.root_element_title.style.display = "none";
             dialog.attributes_div.style.display = "none";
             dialog.attributes_h6.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
