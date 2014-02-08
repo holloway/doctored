@@ -247,6 +247,7 @@
                 i;
             
             parentNode = selection.parentNode;
+            if(!parentNode) return;
             for(i = 0; i < selection_childNodes_length; i++){
                 parentNode.insertBefore(selection.childNodes[0], selection); //NOTE is [0] because the childNode[0] keeps pointing to the new first child as we move them
             }
