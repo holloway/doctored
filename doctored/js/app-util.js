@@ -236,13 +236,22 @@
             window.saveAs(blob, filename);
         },
         remove_old_selection: function(selection, dialog){
-            if(selection && selection.classList.contains("doctored-selection")) {
-                //the element must still contain the "doctored-selection" class or else it's probably
-                //been turned into an 'element' (in the Doctored sense) -- part of the document
-                // we generate rather than an element used to express text selection)
-                $(selection).replaceWith(selection.childNodes); //todo replace with plain javascript
-                delete dialog.target;
+            // remove old doctored selection (which is a `div.doctored-selection`).
+            // replace it with its childnodes
+            // the element must still contain the "doctored-selection" class or else it's probably
+            // been turned into an 'element' (in the Doctored sense) -- part of the document
+            // we generate rather than an element used to express text selection)
+            if(!selection || !selection.classList.contains("doctored-selection")) return;
+            var parentNode,
+                selection_childNodes_length = selection.childNodes.length, // NOTE: not a terrible optimisation but rather it's necessary to make a note of this because it will keep changing
+                i;
+            
+            parentNode = selection.parentNode;
+            for(i = 0; i < selection_childNodes_length; i++){
+                parentNode.insertBefore(selection.childNodes[0], selection); //NOTE is 0 because the first childNode keeps changing when we pull out the ones before
             }
+            parentNode.removeChild(selection);
+            delete dialog.target;
         },
         insert_html_at_cursor_position: function(html, paste_event){
             var range,
@@ -399,7 +408,9 @@
             return new_attributes;
         },
         range: function(i) {
-            // Returns [1,2,3...i]
+            // returns [1,2,3...i]
+            // ARGUMENTS
+            // i is the upper limit
             /* jshint ignore:start */
             for(var list=[];list[--i]=i;){} //this code works and is intentional; it's not a mistake thanks to good ole variable hoisting
             /* jshint ignore:end */
@@ -409,6 +420,12 @@
 
         },
         simple_transform: function(markup, element_mapping, attribute_mapping) {
+            // transform one markup format
+            // replaces elements and attribute keys with a simple 1:1 mapping, and returns the resulting string. attribute values are left the same.
+            // ARGUMENTS
+            // markup = html string
+            // element_mapping = {oldNodeName1: newNodeName1, oldNodeName2: newNodeName2}
+            // attribute_mapping = {oldkey1: newkey1, oldkey2: newkey2}
             return markup.replace(/<(.*?)>/g, function(match, contents, offset, s){
                 var is_a_closing_tag = (match.substr(1, 1) === '/'),
                     element_name,
@@ -417,11 +434,11 @@
                     new_element_name,
                     indexOf_whitespace = match.indexOf(" "); // indexOf doesn't support regex, so we'll just match spaces. TODO: make this support other whitespace a la http://stackoverflow.com/questions/273789/is-there-a-version-of-javascripts-string-indexof-that-allows-for-regular-expr
 
-                if(is_a_closing_tag) {
+                if(is_a_closing_tag) { //...is...a...closing...tag
                     element_name = match.substr(2, match.length - 3);
                 } else if(indexOf_whitespace === -1){ //is an opening tag without attributes
                     element_name = match.substr(1, match.length - 2);
-                } else { //is an opening tag with attributes
+                } else { //is an opening tag WITH attributes
                     element_name = match.substr(1, indexOf_whitespace - 1);
                     attributes   = doctored.util.parse_attributes_string(
                                         match.substr(indexOf_whitespace)
@@ -464,6 +481,7 @@
             return error_string;
         },
         escape_text: function(){
+            // Note is a closure
             var _escape_chars = {
                     "&": "&nbsp;",
                     "<": "&lt;",
