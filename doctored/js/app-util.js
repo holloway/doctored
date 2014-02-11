@@ -36,11 +36,7 @@
         },
         display_types: { //TODO: remove this - is it even used?
             block:  "block",
-            inline: "inline-block",
-            table:  "table",
-            row:    "row",
-            cell:   "cell",
-            root:   "root"
+            inline: "inline"
         },
         looks_like_html: function(html_string_fragment){
             // Note that we cannot really succeed at identifying HTML
@@ -48,7 +44,8 @@
             // time and it's useful for users
 
             return (
-                html_string_fragment.indexOf("<!DOCTYPE html>") >= 0 ||
+                html_string_fragment.indexOf("<!DOCTYPE html") >= 0  ||
+                html_string_fragment.indexOf("<html>") >= 0          ||
                 html_string_fragment.indexOf("</html>") >= 0         ||
                 html_string_fragment.indexOf("</p>") >= 0            ||
                 html_string_fragment.indexOf("</a>") >= 0
@@ -67,6 +64,20 @@
                 }
             }
             return html_string;
+        },
+        set_theme: function(theme_name, instance){
+            var filter_themes = function(element){
+                    element.className = (element.className + " ").replace(/doctored-theme-[^ ]*?/g, '');
+                    element.classList.add(theme_name);
+                };
+
+            theme_name = doctored.CONSTANTS.theme_prefix + theme_name.toLowerCase().replace(/[^a-z]/g, '');
+
+            filter_themes(instance.root);
+            filter_themes(instance.dialog);
+            filter_themes(instance.menu);
+            filter_themes(instance.hamburger_menu);
+            filter_themes(instance.tooltip);
         },
         parse_attributes_string: function(attributes_string){
             // although it would be easier to use the browsers DOM
@@ -90,7 +101,7 @@
             return xml.replace(/<(.*?)>/g, function(match, contents, offset, s){
                 var element_name,
                     attributes = "",
-                    display = "block";
+                    display = doctored.CONSTANTS.block_class;
 
                 if(match.substr(0, 2) === "</"){
                     return '</div>';
@@ -103,7 +114,7 @@
                                  doctored.util.encode_data_attributes(doctored.util.parse_attributes_string(match.substr(0, match.length - 1))) +
                                  '"';
                 }
-                if(elements && elements[element_name]) display = elements[element_name].display;
+                if(elements && elements[element_name]) display = doctored.CONSTANTS.block_or_inline_class_prefix + elements[element_name].display;
                 return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>';
             });
         },
@@ -139,31 +150,16 @@
             return attributes;
         },
         sniff_display_type: function(node){
-            //FIXME: remove this shit code
-            if(!node) return;
-            var className;
             switch(node.nodeType){
                 case node.TEXT_NODE:
                     return Node.TEXT_NODE;
                 case node.ELEMENT_NODE:
-                    className = " " + node.className + " ";
-                    if(       / block / .test(className)){
+                    if(node.classList.contains(doctored.CONSTANTS.block_class)) {
                         return doctored.util.display_types.block;
-                    } else if(/ inline /.test(className) || / inline-block /.test(className)){
+                    } else if(doctored.CONSTANTS.inline_class){
                         return doctored.util.display_types.inline;
-                    } else if(/ table / .test(className)){
-                        return doctored.util.display_types.table;
-                    } else if(/ row /   .test(className)){
-                        return doctored.util.display_types.row;
-                    } else if(/ cell /  .test(className)){
-                        return doctored.util.display_types.cell;
-                    } else if(/ selection /  .test(className)){
-                        return doctored.util.display_types.text_selection;
-                    } else if(/ doctored /  .test(className)){
-                        return doctored.util.display_types.root;
                     }
-
-                    return alert("Unknown element type. className was " + className);
+                    return alert("Unknown element type. className was " + node.className);
             }
             alert("Unknown element type. nodeName was " + node.nodeName);
         },
@@ -186,7 +182,7 @@
                     case Node.ELEMENT_NODE:
                         data_element = node.getAttribute("data-element");
                         if(!data_element) continue;
-                        display_type =doctored.util.sniff_display_type(node);
+                        display_type = doctored.util.sniff_display_type(node);
                         xml_string += "<" + data_element;
                         attributes_string = node.getAttribute("data-attributes");
                         if(attributes_string) {
@@ -196,7 +192,7 @@
                         if(depth === 0){
                             xml_string += "\n";
                         }
-                        if (node.hasChildNodes()) {
+                        if(node.hasChildNodes()) {
                             xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
                         }
                         xml_string += "</" + data_element + ">";
@@ -383,7 +379,7 @@
             dialog.element_chooser.focus();
         },
         inlineOffset: function() {
-            //NOTE: closure - actual function returned below
+            //NOTE: this is a closure - actual function returned below
             var i_before = document.createElement("i"),
                 i_after  = document.createElement("i");
 
@@ -401,7 +397,7 @@
                 return {
                         before: element_before_offset,
                         after:  element_after_offset
-                    };
+                };
             };
         }(),
         within_pseudoelement: function(target, position){
@@ -410,9 +406,9 @@
                 
             if(position === undefined) return false;
             target_offset = target.getBoundingClientRect();
-            if(target.classList.contains("inline")       && position.y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
+            if(target.classList.contains(doctored.CONSTANTS.inline_class)       && position.y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
                 within = true;
-            } else if(target.classList.contains("block") && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
+            } else if(target.classList.contains(doctored.CONSTANTS.block_class) && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
                 within = true;
             }
             return within;

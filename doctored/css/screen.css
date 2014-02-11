@@ -1,13 +1,5 @@
-.doctored,
-menu.doctored-dialog,
-menu.doctored-menu,
-samp.doctored-tooltip {
-    font-family:Ubuntu,sans-serif;
-}
-
 .doctored {
     padding:0px;
-    margin:0px;
     outline:none;
     display:block;
 }
@@ -17,84 +9,42 @@ samp.doctored-tooltip {
         right: 0px;
         position:absolute;
         width: 200px;
-        text-align:center;
-        color: #777;
-        text-shadow: 1px 1px 1px #999999;
-        font-size: 13px;
-        font-style: italic;
         content: "Validating...";
     }
 
     .doctored.invalid:before {
-        text-align:right;
-        margin-right:40px;
         width: 150px;
-        color: #777;
-        background-color: none;
-        text-shadow: 1px 1px 1px #999999;
-        font-size: 13px;
         content: "Validation messages\21B4";
     }
 
     .doctored.valid:before {
-        padding: 2px;
-        border-radius: 3px;
         width: 160px;
         margin-right:23px;
-        text-align:center;
-        color: white;
-        text-shadow: 1px 1px 1px #999999;
-        font-size: 13px;
-        background: #6b6;
         content: "Valid document!";
     }
 
-    .doctored div.block {
+    .doctored div.doctored-block {
+        padding-right:200px;
         position:relative;
         display:block;
-        margin:0px;
-        padding:0.5em 200px 1em 2.5em;
-        border-radius:0px;
-        box-shadow: inset 0px -8px 8px -8px #c8c8c8, 0px 5px 5px #666666;
-        background: #fff;
         overflow:hidden;
     }
 
-    .doctored div.block div.block {
+    .doctored div.doctored-block div.doctored-block {
         clear:left;
-        padding:0.5em 0px 1em 2.5em;
-        margin-top: 0.2em;
-        margin-right: 0px;
-        background: #111111;
-        background: rgba(30,30,30,0.1);
-        box-shadow: inset 0px 0px 5px #fff;
-        border-bottom-right-radius: 0px;
-        border-top-left-radius: 10
+        padding-right:200px;
     }
 
-    .doctored div.block:first-child {
-        border-top-left-radius: 5px;
-        border-top-right-radius: 5px;
-    }
-
-    .doctored > div.block:last-child {
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
-        box-shadow: 0px 4px 5px #999999;
-    }
-
-        .doctored div.block:after {
+        .doctored div.doctored-block:after {
             clear:both;
             position:absolute;
             display:inline-block;
             left: -0.2em;
             top: 0.5em;
             content: attr(data-element);
-            color:#666666;
             margin-right: -3em;
             width:3em;
             white-space:nowrap;
-            font-weight:bold;
             -webkit-transform-origin: 1 1;
             -webkit-transform: rotate(90deg) translate(1em, 0);
             -moz-transform-origin: 1 1;
@@ -103,12 +53,9 @@ samp.doctored-tooltip {
             -ms-transform: rotate(90deg) translate(1em, 0);
             transform-origin: 1 1;
             transform: rotate(90deg) translate(1em, 0);
-            font-size:small;
-            text-shadow:1px 1px 2px #dddddd;
-            cursor: pointer; /* doesn't have an effect in Chrome (v25) but does in Firefox (v23) */
         }
 
-        .doctored div.block.has_errors:before {
+        .doctored div.doctored-block.has_errors:before {
             content: attr(data-error);
             overflow:visible;
             position:absolute;
@@ -116,39 +63,22 @@ samp.doctored-tooltip {
             right:5px;
             top:4px;
             width:172px;
-            font-size:x-small;
-            padding:4px 5px 4px 7px;
-            border-radius:5px;
-            border: solid 2px white;
-            color: white;
             clear:both;
-            opacity: 1;
-            background: #c44;
-            -moz-box-shadow: inset 1px 1px 3px #a22;
-            -webkit-box-shadow: inset 1px 1px 3px #a22;
-            box-shadow: inset 1px 1px 3px #a22;
         }
 
-    .doctored div.inline {
+    .doctored div.doctored-inline {
         position:relative;
         display:inline-block;
-        background: #555555;
-        background: rgba(30,30,30,0.1);
-        padding-bottom:0.6em;
-        border-radius: 0.5em;
         margin-bottom:0.5em;
-        vertical-align: text-top;
     }
 
-        .doctored div.inline:after {
+        .doctored div.doctored-inline:after {
             position:absolute;
             display:inline-block;
             bottom:0.3em;
             left:50%;
-            margin-left:-1em;
+            margin-left:-1em; /* assume that average element name width is 2em */
             content: attr(data-element);
-            color:#666666;
-            font-weight:bold;
             -webkit-transform-origin: 0px 100px;
             -webkit-transform: translate(0, 0.5em);
             -moz-transform-origin: 0px 100px;
@@ -157,22 +87,11 @@ samp.doctored-tooltip {
             -ms-transform: translate(0, 0.5em);
             transform-origin: 0px 100px;
             transform: translate(0, 0.8em);
-            font-size:small;
-            text-shadow:1px 1px 2px #dddddd;
-            cursor: pointer;
         }
 
 menu.doctored-menu {
     display: block;
-    margin: 0px;
-    padding: 0px;
-    text-transform:uppercase;
-    font-size:small;
-    font-weight:bold;
-    margin-bottom:5px;
-    margin-right:200px;
-    opacity: 0.9;
-    text-align:left;
+    margin-right:200px; /* normally we don't try to set margins but in this case it's necessary so that the menu doesn't overlap the schema validation title/label */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -181,43 +100,6 @@ menu.doctored-menu {
     user-select: none;
 }
 
-    menu.doctored-menu:hover {
-        opacity: 1;
-    }
-
-    menu.doctored-menu a {
-        display: inline-block;
-        border: solid 1px white;
-        padding:8px 13px;
-        margin-right:4px;
-        background: #dddddd;
-        text-decoration:none;
-        background-color:#eeeeee;
-        color:#777777;
-        border-radius: 5px;
-        text-shadow:1px 1px 0px #ffffff;
-        box-shadow: 0px 5px 14px -5px #bbbbbb;
-        -ms-transition:0.3s;
-        -moz-transition:0.3s;
-        -webkit-transition:0.3s;
-        transition:0.3s;
-    }
-
-    menu.doctored-menu a:hover {
-        -moz-box-shadow:inset 0px 0px 5px #bbbbbb;
-        -webkit-box-shadow:inset 0px 0px 5px #bbbbbb;
-        box-shadow:inset 0px 0px 5px #bbbbbb;
-        background-color:#e6e6e6;
-        color: #666666;
-    }
-
-    menu.doctored-menu a:active {
-        -moz-box-shadow:inset 0px 0px 5px #999999;
-        -webkit-box-shadow:inset 0px 0px 5px #999999;
-        box-shadow:inset 0px 0px 5px #999999;
-        background-color:#ffffff;
-    }
-
 textarea.doctored-view-source-textbox {
     position: fixed;
     z-index: 2;
@@ -225,29 +107,13 @@ textarea.doctored-view-source-textbox {
     left: 3%;
     width: 92%;
     height:92%;
-    border: none;
-    -webkit-appearance: none; /* http://stackoverflow.com/questions/11658840/css-box-shadow-isnt-working-with-textarea-in-webkit */
-    -moz-box-shadow:    0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
-    -webkit-box-shadow: 0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
-    box-shadow:         0px 0px 10px #888, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc, 0px 0px 50px #ccc;
-    padding: 0.5%;
-    outline: none;
 }
 
 menu.doctored-dialog {
     position: absolute;
     z-index:1;
-    background: #000000;
-    color: white;
-    border-radius: 5px;
-    padding: 2px;
-    margin-bottom:50px;
     display:none;
 }
-
-    menu.doctored-dialog * {
-        font-size:small;
-    }
 
     menu.doctored-dialog label,
     menu.doctored-dialog div {
@@ -259,121 +125,22 @@ menu.doctored-dialog {
         position:relative;
         top:0px;
         right:0px;
-        padding:0px 5px;
         text-decoration:none;
-        color:#ccc;
     }
-
-        menu.doctored-dialog a:hover {
-            color: #fff;
-        }
 
     menu.doctored-dialog label {
         display: block;
-        color: #cccccc;
-        text-align:left;
-        padding-left:5px;
-        font-weight:bold;
-        font-size:x-small;
     }
-
-    menu.doctored-dialog select {
-        background: #000;
-        border: none;
-        outline: none;
-        color: white;
-        margin-left:2px;
-        width:160px;
-        border-radius:2px;
-        -webkit-appearance: none;
-        cursor: pointer;
-    }
-
-        menu.doctored-dialog select:hover {
-            background: #444444;
-        }
-
-        menu.doctored-dialog select:focus {
-            border: none;
-            outline: none;
-        }
-
-        menu.doctored-dialog select optgroup,
-        menu.doctored-dialog select option {
-            background: black;
-            color: white;
-        }
-
-    menu.doctored-dialog h6 {
-        border-top: solid 1px #333333;
-        padding:0px 0px 0px 5px;
-        color: #cccccc;
-        margin:0px;
-        font-weight:bold;
-        font-size:x-small;
-    }
-
-    menu.doctored-dialog div {
-        padding: 0px 0px 3px 0px;
-        color: #aaaaaa;
-    }
-
-        menu.doctored-dialog .doctored-attribute-name,
-        menu.doctored-dialog .doctored-attribute-value {
-            background: #333;
-            color: white;
-            border: none;
-            width:81px;
-            outline: none;
-            border-radius:2px;
-        }
-
-        menu.doctored-dialog .doctored-attribute-name:hover,
-        menu.doctored-dialog .doctored-attribute-value:hover,
-        menu.doctored-dialog .doctored-attribute-name:focus,
-        menu.doctored-dialog .doctored-attribute-value:focus {
-            background: #444;
-        }
-
-        menu.doctored-dialog .doctored-attribute-name {
-            clear:left;
-            text-align:right;
-            margin-left:5px;
-        }
-
-        menu.doctored-dialog .doctored-attribute-value {
-            text-align:left;
-        }
 
 div.doctored-selection {
     display: inline;
-    background: #006ddb;
-    border: solid 1px #ffffff;
-    border: solid 1px rgba(255,255,255,0);
-    border-left: 0px;
-    border-right: 0px;
-    color: white;
 }
-
-    div.doctored-selection:hover {
-        border: solid 1px #4477cc;
-        border-left: 0px;
-        border-right: 0px;
-    }
-
 
 samp.doctored-tooltip {
     position:absolute;
     display:none;
     z-index:4;
-    font-size: x-small;
-    border-radius: 2px;
-    font-weight:bold;
-    text-transform:uppercase;
-    padding:2px 7px 3px 5px;
-    background: #c44;
-    color: #fff;
-    text-shadow: 1px 1px 1px #b33;
+    pointer-events: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -384,9 +151,19 @@ samp.doctored-tooltip {
     -moz-transition: opacity 1s;
     -webkit-transition: opacity 1s;
     transition: opacity 1s;
-    pointer-events: none;
 }
 
     samp.doctored-tooltip.doctored-hidden {
         opacity: 0;
+    }
+
+menu.doctored-hamburger {
+    position:absolute;
+    display: none;
+    z-index:3;
+}
+
+    menu.doctored-hamburger a {
+        float:right;
+        display: inline-block;
     }

@@ -2,14 +2,21 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:100,300,600' rel='stylesheet' type='text/css'>
     <title>Doctored.js DEMO - a new kind of editor</title>
-    <style> body { background: #eeeeee; font-family:sans-serif; } h1 { font-family: sans-serif; margin:1em 0px 10px 0px; padding: 0px; font-weight:100;} </style>
+    <link rel="stylesheet" href="screen.css">
+    <style> 
+    </style>
 </head>
 <body>
-    <h1>Doctored.js XML editor demo</h1>
+    <header>
+        <h1>Doctored.js XML editor demo</h1>
+        <p class="moreinfo">More info? See the <a href="http://holloway.co.nz/doctored/">Doctored.js website</a></p>
+        <i></i><b></b><u></u><s></s>
+    </header>
+
     <div id="editor1"></div>
-    
-    <p style="text-align:right">More info? See the <a href="http://holloway.co.nz/doctored/">Doctored.js website</a></p>
+        
     <script src="doctored/doctored.js"></script>
     <script>
         var callback = function(){console.log("Doctored.js: initialized " + this.root_selector + "!")};
