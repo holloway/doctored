@@ -249,7 +249,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
             text-align:left;
         }
 
-    div.doctored-selection.doctored-theme-shadow {
+    .doctored.doctored-theme-shadow div.doctored-selection {
         background: #006ddb;
         border: solid 1px #ffffff;
         border: solid 1px rgba(255,255,255,0);
@@ -258,7 +258,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
         color: white;
     }
 
-    div.doctored-selection.doctored-theme-shadow:hover {
+    .doctored.doctored-theme-shadow div.doctored-selection:hover {
         border: solid 1px #4477cc;
         border-left: 0px;
         border-right: 0px;
@@ -346,7 +346,7 @@ samp.doctored-tooltip.doctored-theme-flat {
             margin-top: 0.2em;
             margin-right: 0px;
             background: #eeeeee;
-
+            background: rgba(30,30,30,0.1);
             border-bottom-right-radius: 0px;
             border-top-left-radius: 0px;
         }
@@ -535,7 +535,7 @@ samp.doctored-tooltip.doctored-theme-flat {
             text-align:left;
         }
 
-    div.doctored-selection.doctored-theme-flat {
+    .doctored.doctored-theme-flat div.doctored-selection {
         background: #006ddb;
         border: solid 1px #ffffff;
         border: solid 1px rgba(255,255,255,0);
@@ -544,7 +544,7 @@ samp.doctored-tooltip.doctored-theme-flat {
         color: white;
     }
 
-    div.doctored-selection.doctored-theme-flat:hover {
+    .doctored.doctored-theme-flat div.doctored-selection:hover {
         border: solid 1px #4477cc;
         border-left: 0px;
         border-right: 0px;
@@ -815,7 +815,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
             text-align:left;
         }
 
-    div.doctored-selection.doctored-theme-highcontrast {
+    .doctored.doctored-theme-highcontrast div.doctored-selection {
         background: #006ddb;
         border: solid 1px #ffffff;
         border: solid 1px rgba(255,255,255,0);
@@ -824,7 +824,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         color: white;
     }
 
-    div.doctored-selection.doctored-theme-highcontrast:hover {
+    .doctored.doctored-theme-highcontrast div.doctored-selection:hover {
         border: solid 1px #000;
         border-left: 0px;
         border-right: 0px;

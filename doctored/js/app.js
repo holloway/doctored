@@ -237,7 +237,7 @@
                 if(option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
-                    dialog.target.className = option_value; //must clobber other values
+                    dialog.target.className = doctored.CONSTANTS.block_or_inline_class_prefix + option_value; //must clobber other values
                 }
                 dialog.target.setAttribute("data-element", option.innerText);
             },
