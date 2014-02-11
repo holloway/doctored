@@ -496,8 +496,8 @@ samp.doctored-tooltip.doctored-theme-flat {
 
     menu.doctored-dialog.doctored-theme-flat h6 {
         border-top: solid 1px #eeeeee;
-        padding:0px 0px 0px 5px;
-        color: #cccccc;
+        padding:5px 0px 0px 5px;
+        color: #666666;
         margin:0px;
         font-weight:bold;
         font-size:x-small;
@@ -510,8 +510,8 @@ samp.doctored-tooltip.doctored-theme-flat {
 
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-name,
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-value {
-            background: #333;
-            color: white;
+            background: #eee;
+            color: black;
             border: none;
             width:81px;
             outline: none;
@@ -522,7 +522,7 @@ samp.doctored-tooltip.doctored-theme-flat {
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-value:hover,
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-name:focus,
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-value:focus {
-            background: #444;
+            background: #ddd;
         }
 
         menu.doctored-dialog.doctored-theme-flat .doctored-attribute-name {
