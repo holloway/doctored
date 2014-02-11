@@ -720,7 +720,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
 
     menu.doctored-dialog.doctored-theme-highcontrast {
         background: #ffffff;
-        border: solid 3px #cccccc;
+        border: solid 3px #000000;
         color: black;
         border-radius: 2px;
         padding: 2px;
@@ -790,8 +790,6 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
 
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-name,
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-value {
-            background: #333;
-            color: white;
             border: none;
             width:81px;
             outline: none;
