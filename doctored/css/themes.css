@@ -663,8 +663,8 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
     .doctored.doctored-theme-highcontrast div.doctored-inline {
         background: #555555;
         background: rgba(30,30,30,0.1);
-        padding-bottom:1em;
-        border-bottom: 3px solid black;
+        padding:0px 3px 1em 3px;
+        border: 1px solid black;
         border-radius: 2px;
         vertical-align: text-top;
     }
@@ -732,7 +732,9 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
 
     menu.doctored-dialog.doctored-theme-highcontrast a {
         padding:0px 5px;
-        color:#333;
+        color:#000;
+        font-size:large;
+        margin-top:-5px;
     }
 
         menu.doctored-dialog.doctored-theme-highcontrast a:hover {
@@ -740,7 +742,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         }
 
     menu.doctored-dialog.doctored-theme-highcontrast label {
-        color: #cccccc;
+        color: #000000;
         text-align:left;
         padding-left:5px;
         font-weight:bold;
@@ -775,9 +777,9 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         }
 
     menu.doctored-dialog.doctored-theme-highcontrast h6 {
-        border-top: solid 1px #eeeeee;
-        padding:0px 0px 0px 5px;
-        color: #cccccc;
+        border-top: solid 3px #000000;
+        padding:5px 0px 0px 5px;
+        color: #000000;
         margin:0px;
         font-weight:bold;
         font-size:x-small;
@@ -800,7 +802,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-value:hover,
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-name:focus,
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-value:focus {
-            background: #444;
+            background: #ccc;
         }
 
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-name {
@@ -845,10 +847,11 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
     }
 
         menu.doctored-hamburger.doctored-theme-highcontrast a {
-            padding:0px 5px 0px 0px;
+            padding:-5px 5px 0px 0px;
             margin-left:5px;
             text-decoration: none;
             color: black;
+            font-size: x-large;
         }
 
         menu.doctored-hamburger.doctored-theme-highcontrast select {
