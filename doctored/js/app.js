@@ -75,6 +75,7 @@
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme");
                 
+                this.options.format.init();
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
                 this.root.setAttribute("data-element", this.options.format.root_element);
                 this.root.setAttribute("data-attributes", doctored.util.encode_data_attributes(this.options.format.root_attributes));
@@ -148,7 +149,7 @@
             },
             lint: function(){
                 // send linting job to one of the workers
-                doctored.linters.lint(this.get_xml_string(), this.options.format.schema, this.lint_response, instance);
+                doctored.linters.lint(this.get_xml_string(), this.options.format.schema_url, this.lint_response, instance);
             },
             lint_response: function(errors){
                 // handle a linting response, and write it to the page
