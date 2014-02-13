@@ -162,7 +162,7 @@
                                     xmlns: "http://docbook.org/ns/docbook",
                                     "xmlns:xlink": "http://wwww.w3.org/1999/xlink/"
                                 },
-            'schema_url':           "../../schemas/docbook5/schema.rng", // must end in .RNG
+            'schema_url':           "../schemas/docbook5/schema.rng", // must end in .RNG
             'convert_from_html': function(html_string){
             // Typically called when people paste HTML and this is supposed to convert that to DocBook
             // this is just a prototype at the moment, not very useful
