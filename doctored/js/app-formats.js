@@ -76,6 +76,7 @@
             xhr.send(null);
             xhr.onreadystatechange = this_function(function(){
                 if(xhr.readyState !== 4) return;
+                console.log(xhr);
                 this.schema = xhr.responseXML;
                 this_function(this.cache_useful_stuff_from_schema, this)();
                 this_function(this.new_document, this)();
