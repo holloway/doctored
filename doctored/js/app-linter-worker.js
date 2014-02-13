@@ -65,6 +65,9 @@
 			} else if(line.substr(0, xml_file.length + 1) === xml_file + " " && line.indexOf("fails to validate") !== -1){
 				response.type = "error_summary";
 				response.message = line.substr(xml_file.length + 1);
+			} else if(line.indexOf("document.xml validates")) {
+				response.type = "valid_document";
+				response.message = "Document is valid";
 			} else {
 				console.log("Unable to parse xmlline_line: " + line);
 			}
