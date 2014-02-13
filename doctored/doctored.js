@@ -1,4 +1,4 @@
-/*globals alert*/
+/*globals alert, console*/
 
 (function(){
     "use strict";
@@ -46,9 +46,10 @@
         }
     };
 
-    var head           = document.getElementsByTagName('head'),
-        body           = document.getElementsByTagName('body'),
-        scripts        = Array.prototype.slice.call(document.getElementsByTagName('script')),
+    var $              = window.doctored.$,
+        head           = $('head'),
+        body           = $('body'),
+        scripts        = Array.prototype.slice.call($('script')),
         this_script    = scripts[scripts.length-1],
         manifest       = {
                          "js" : ["js/app-linters.js", "js/app-util.js", "js/app-formats.js", "js/app.js", "js/shims.js", "libs/filesaver.js/FileSaver.js"],
@@ -58,7 +59,7 @@
         manifest_load  = function(){
                             manifest_count--;
                             if(manifest_count === 0) window.doctored.event.trigger("app:ready");
-                          },
+                         },
         i,
         new_element;
 
@@ -87,5 +88,4 @@
         new_element.addEventListener("load", manifest_load, false);
         head.appendChild(new_element);
     }
-
 }());
