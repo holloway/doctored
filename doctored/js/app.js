@@ -363,10 +363,10 @@
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
                         doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.options.format);
                     } else if(within_pseudoelement) {
-                        doctored.util.display_element_dialog(target, this.dialog, mouse_position);
+                        doctored.util.display_element_dialog(target, this.dialog, mouse_position, this.options.format);
                     }
                 } else if(within_pseudoelement) {
-                    doctored.util.display_element_dialog(target, this.dialog, mouse_position);
+                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, this.options.format);
                 }
             },
             add_attribute_item: function(){

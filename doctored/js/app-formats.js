@@ -2,11 +2,11 @@
 (function(){
     "use strict";
 
-    var $ = doctored.$,
+    var $       = doctored.$ ,
         relaxng = {
-            extract_elements: function(){
+            cache_useful_stuff_from_schema: function(){
                 var this_function   = doctored.util.this_function,
-                    schema_elements = this.schema.documentElement.getElementsByTagName("element"),
+                    schema_elements = $("element", this.schema.documentElement),
                     schema_element,
                     nodeName,
                     i;
@@ -23,11 +23,22 @@
                         }
                     }
                 }
+
+                this.schema_defines = {}; //cache some lookups
+                schema_elements = $("define", this.schema.documentElement);
+                for(i = 0; i < schema_elements.length; i++){
+                    schema_element = schema_elements[i];
+                    nodeName = schema_element.getAttribute("name");
+                    if(nodeName){
+                        this.schema_defines[nodeName] = schema_element;
+                    }
+                }
+
                 return this_function(this.update_element_chooser, this)();
             }
         },
         w3c_schema = {
-            extract_elements: function(){
+            cache_useful_stuff_from_schema: function(){
                 alert("W3C Schema isn't currently supported.");
             }
         },
@@ -40,10 +51,10 @@
             this.instance = instance;
             switch(file_extension.toLowerCase()){
                 case "rng":
-                    this.extract_elements = relaxng.extract_elements;
+                    this.cache_useful_stuff_from_schema = relaxng.cache_useful_stuff_from_schema;
                     break;
                 case "xsd":
-                    this.extract_elements = w3c_schema.extract_elements;
+                    this.cache_useful_stuff_from_schema = w3c_schema.cache_useful_stuff_from_schema;
                     break;
                 default:
                     return alert("Unable to use a schema '" + file_extension + "'. RelaxNG files must have extension .rng and W3C Schema files must have extension .xsd");
@@ -54,14 +65,14 @@
             xhr.onreadystatechange = this_function(function(){
                 if(xhr.readyState !== 4) return;
                 this.schema = xhr.responseXML;
-                this_function(this.extract_elements, this)();
+                this_function(this.cache_useful_stuff_from_schema, this)();
                 this_function(this.new_document, this)();
             }, this);
         },
         update_element_chooser = function(){
             var element_chooser = this.instance.dialog.element_chooser,
                 html = '<option value="" disabled selected>Choose Element</option>' +
-                       '<optgroup label="Valid elements in this context">' +
+                       '<optgroup label="Suggested elements in this context">' + // if you update this be sure to also update the one below in set_element_chooser_context()
                        '<option value="" disabled class="doctored-loading">Loading...</option>' +
                        '</optgroup>' +
                        '<optgroup label="All Elements">' +
@@ -70,7 +81,6 @@
                        '<optgroup label="Custom Element">' +
                        '<option value="(custom)">Choose a custom element</option>' +
                        '</optgroup>';
-
 
             element_chooser.innerHTML = html;
             element_chooser.context_chooser = $("optgroup", element_chooser)[0];
@@ -84,7 +94,7 @@
                 element_chooser = this.instance.dialog.element_chooser,
                 child_nodes_type_element,
                 options = {},
-                max_depth = 1,
+                max_depth = 2,
                 selector,
                 gather_elements_below = function(nodes, depth){
                     var node,
@@ -96,7 +106,11 @@
                     if(depth === undefined) depth = 0;
                     for(i = 0; i < nodes.length; i++){
                         node = nodes[i];
-                        if(node.nodeName === "ref") node = $("define[name=" + node.getAttribute("name").replace(/\./g, "\\.") + "]", _this.schema)[0];
+                        if(node.nodeName === "ref") node = _this.schema_defines[node.getAttribute("name")];
+                        if(!node) {
+                            console.log("Schema consistency error. Suspected 'ref[name=" + node.getAttribute("name") + "]' couldn't be resolved.");
+                            continue;
+                        }
                         child_elements = $("element", node);
                         for(y = 0; y < child_elements.length; y++){
                             child_element_name = child_elements[y].getAttribute("name");
@@ -105,7 +119,7 @@
                         if(depth <= max_depth) gather_elements_below($("ref", node), depth + 1);
                     }
                 };
-
+            context_chooser.setAttribute("label", "Suggested elements in this context (" + element_name + ")");
             selector = "element[name=" + element_name + "]";
             gather_elements_below($(selector, this.schema));
             if(Object.keys(options).length === 0) {
