@@ -34,6 +34,18 @@
                     }
                 }
 
+                this.schema_elements = {}; //cache some lookups
+                schema_elements = $("element", this.schema.documentElement);
+                for(i = 0; i < schema_elements.length; i++){
+                    schema_element = schema_elements[i];
+                    nodeName = schema_element.getAttribute("name");
+                    if(nodeName){
+                        this.schema_elements[nodeName] = schema_element;
+                    }
+                }
+
+                this.cached_context = {};
+
                 return this_function(this.update_element_chooser, this)();
             }
         },
@@ -75,7 +87,7 @@
                        '<optgroup label="Suggested elements in this context">' + // if you update this be sure to also update the one below in set_element_chooser_context()
                        '<option value="" disabled class="doctored-loading">Loading...</option>' +
                        '</optgroup>' +
-                       '<optgroup label="All Elements">' +
+                       '<optgroup label="All (' + Object.keys(this.elements).length + ' elements)">' +
                        doctored.util.to_options_tags(this.elements, true) +
                        '</optgroup>' +
                        '<optgroup label="Custom Element">' +
@@ -94,7 +106,8 @@
                 element_chooser = this.instance.dialog.element_chooser,
                 child_nodes_type_element,
                 options = {},
-                max_depth = 2,
+                options_length,
+                max_depth = 3,
                 selector,
                 gather_elements_below = function(nodes, depth){
                     var node,
@@ -102,7 +115,6 @@
                         y,
                         child_elements,
                         child_element_name;
-
                     if(depth === undefined) depth = 0;
                     for(i = 0; i < nodes.length; i++){
                         node = nodes[i];
@@ -119,14 +131,22 @@
                         if(depth <= max_depth) gather_elements_below($("ref", node), depth + 1);
                     }
                 };
-            context_chooser.setAttribute("label", "Suggested elements in this context (" + element_name + ")");
-            selector = "element[name=" + element_name + "]";
-            gather_elements_below($(selector, this.schema));
-            if(Object.keys(options).length === 0) {
+
+            if(element_name === this.previously_shown_context) return;
+            if(!this.cached_context[element_name]) {
+                gather_elements_below([this.schema_elements[element_name]]);
+                this.cached_context[element_name] = options;
+            } else {
+                options = this.cached_context[element_name];
+            }
+            options_length = Object.keys(options).length;
+            context_chooser.setAttribute("label", "Suggested under '" + element_name + "' (" + options_length + " elements)");
+            if(options_length === 0) {
                 element_chooser.context_chooser.innerHTML = '<option value="" disabled>(None)</option>';
             } else {
                 element_chooser.context_chooser.innerHTML = doctored.util.to_options_tags(options, true);
             }
+            this.previously_shown_context = element_name;
         };
         
         
