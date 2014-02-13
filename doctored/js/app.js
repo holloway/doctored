@@ -64,17 +64,17 @@
                 var _this = this,
                     menu,
                     i,
-                    lint = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this),
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme");
                 
+                this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
                 this.options.format.init(this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
                 this.root.setAttribute("data-element", this.options.format.root_element);
                 this.root.setAttribute("data-attributes", doctored.util.encode_data_attributes(this.options.format.root_attributes));
                 this.root.contentEditable = true;
                 this.root.className = "doctored";
-                this.root.addEventListener("input",     lint, false);
+                this.root.addEventListener("input",     this_function(this.lint_soon, this), false);
                 this.root.addEventListener('paste',     this_function(this.paste, this), false);
                 this.root.addEventListener('mouseup',   this_function(this.click, this), false);
                 this.root.addEventListener('touchend',  this_function(this.click, this), false);
@@ -134,7 +134,6 @@
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
-                lint();
                 if(this.options.onload) {
                     this_function(this.options.onload, this)();
                 }

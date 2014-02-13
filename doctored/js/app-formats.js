@@ -83,6 +83,7 @@
                 }
                 this_function(this.cache_useful_stuff_from_schema, this)();
                 this_function(this.new_document, this)();
+                this_function(this.instance.lint_soon, this.instance)();
             }, this);
         },
         update_element_chooser = function(){
