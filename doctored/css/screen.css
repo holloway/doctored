@@ -167,3 +167,8 @@ menu.doctored-hamburger {
         float:right;
         display: inline-block;
     }
+
+
+option.doctored-loading {
+    font-style: italic;
+}

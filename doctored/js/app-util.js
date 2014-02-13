@@ -2,6 +2,8 @@
 (function(){
 	"use strict";
 
+    var $ = doctored.$;
+
     doctored.util = {
         debounce: function(fn, delay_in_milliseconds, context) {
             var timer = null;
@@ -114,7 +116,9 @@
                                  doctored.util.encode_data_attributes(doctored.util.parse_attributes_string(match.substr(0, match.length - 1))) +
                                  '"';
                 }
-                if(elements && elements[element_name]) display = doctored.CONSTANTS.block_or_inline_class_prefix + elements[element_name].display;
+                if(elements && elements[element_name]) {
+                    display = doctored.CONSTANTS.block_or_inline_class_prefix + elements[element_name].display;
+                }
                 return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>';
             });
         },
@@ -345,7 +349,7 @@
                 }
             }
         },
-        display_dialog_around_inline: function(inline, dialog, mouse){
+        display_dialog_around_inline: function(inline, dialog, mouse, format){
             var offsets = doctored.util.inlineOffset(inline);
             
             if(mouse){
@@ -375,6 +379,7 @@
             dialog.style.left = document.body.scrollLeft + offsets.proposed.x + "px";
             dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
+            format.set_element_chooser_context(inline.parentNode.getAttribute("data-element"));
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
             dialog.element_chooser.focus();
         },
@@ -499,10 +504,13 @@
             }
             return error_string;
         },
+        file_extension: function(uri){
+            return uri.substr(uri.lastIndexOf(".") + 1);
+        },
         escape_text: function(){
             // Note is a closure
             var _escape_chars = {
-                    "&": "&nbsp;",
+                    "&": "&amp;",
                     "<": "&lt;",
                     ">": "&gt;"
                 },
@@ -515,22 +523,28 @@
             };
         }(),
         to_options_tags: function(list, complex){
-            var html = "",
+            var escape_text = doctored.util.escape_text,
+                element_properties,
                 element_name,
-                key,
-                escape_text = doctored.util.escape_text;
-               
+                html = "",
+                keys = Object.keys(list).sort(),
+                key_index;
+
             if(complex === undefined) complex = true;
-            if(complex) {
-                for(element_name in list){
-                    html += '<option value="' + list[element_name].display.replace(/"/g, "&quot;") + '">' + escape_text(element_name) + "</option>";
+            for(key_index = 0; key_index < keys.length; key_index++){
+                element_name       = keys[key_index];
+                element_properties = list[element_name];
+
+                html += '<option value="';
+                if(complex) {
+                    html += element_properties.display.replace(/"/g, "&quot;");
+                } else {
+                    html += element_properties.replace(/"/g, "&quot;");
                 }
-            } else {
-                for(key in list){
-                    element_name = list[key];
-                    html += '<option value="' + element_name.replace(/"/g, "&quot;") + '">' + escape_text(element_name) + "</option>";
+                html += '">' +
+                        escape_text(element_name) +
+                        '</option>';
                 }
-            }
             return html;
         }
     };

@@ -31,6 +31,15 @@
                 }
             }
         },
+        $: function(selector, scope){
+            // very simple node selector
+            scope = scope || document;
+            if(!selector) { console.log("Empty selector"); console.trace(); }
+            if(selector.indexOf(" ") >= 0 || selector.indexOf("[") >= 0) return scope.querySelectorAll(selector);
+            if(selector.substring(0,1) === "#") return scope.getElementById(selector.substring(1));
+            if(selector.substring(0,1) === ".") return scope.getElementsByClassName(selector.substring(1));
+            return scope.getElementsByTagName(selector);
+        },
         _to_be_initialized: [],
         init: function(selector, options){
             window.doctored._to_be_initialized.push({selector: selector, options: options});

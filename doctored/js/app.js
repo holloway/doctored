@@ -1,4 +1,4 @@
-/*globals doctored, alert, console, confirm*/
+/*globals doctored, alert, console, confirm, prompt*/
 (function(){
     "use strict";
 
@@ -9,14 +9,7 @@
             format:                           "docbook", //key from doctored.formats in app-formats.js
             theme:                            "flat" //key from options in hamburger_menu.theme_chooser
         },
-        $ = function(selector, scope){
-            // very simple node selector
-            scope = scope || document;
-            if(selector.indexOf(" ") >= 0) return scope.querySelectorAll(selector);
-            if(selector.substring(0,1) === "#") return scope.getElementById(selector.substring(1));
-            if(selector.substring(0,1) === ".") return scope.getElementsByClassName(selector.substring(1));
-            return scope.getElementsByTagName(selector);
-        },
+        $ = doctored.$,
         $body = $('body')[0],
         transition_end_event = function(){
             var element = document.createElement('fakeelement'),
@@ -75,11 +68,10 @@
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme");
                 
-                this.options.format.init();
+                this.options.format.init(this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
                 this.root.setAttribute("data-element", this.options.format.root_element);
                 this.root.setAttribute("data-attributes", doctored.util.encode_data_attributes(this.options.format.root_attributes));
-                this.root.innerHTML = doctored.util.convert_xml_to_doctored_html(_this.options.format.get_new_document(), this.options.format.elements);
                 this.root.contentEditable = true;
                 this.root.className = "doctored";
                 this.root.addEventListener("input",     lint, false);
@@ -94,7 +86,7 @@
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
                 this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
-                                        '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option value="" disabled selected>Choose Element</option>' + doctored.util.to_options_tags(this.options.format.elements, true) + '</select>' +
+                                        '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option>Loading...</option></select>' +
                                         '<h6>attributes</h6><div></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
@@ -233,14 +225,26 @@
                 var dialog          = this.dialog,
                     element_chooser = dialog.element_chooser,
                     option          = element_chooser.options[this.dialog.element_chooser.selectedIndex],
-                    option_value    = option.getAttribute("value");
+                    option_value    = option.getAttribute("value"),
+                    element_name    = option.innerText,
+                    display_type    = "block";
 
                 if(option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
-                    dialog.target.className = doctored.CONSTANTS.block_or_inline_class_prefix + option_value; //must clobber other values
+                    switch(option_value){
+                        case "inline":
+                        case "block":
+                            display_type = option_value;
+                    }
+                    dialog.target.className = doctored.CONSTANTS.block_or_inline_class_prefix + display_type; //must clobber other values
                 }
-                dialog.target.setAttribute("data-element", option.innerText);
+                if(option_value === "(custom)") {
+                    element_name = prompt("Custom element:");
+                    if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
+                    console.log(element_name)
+                }
+                dialog.target.setAttribute("data-element", element_name);
             },
             properties: function(event){
                 // clicking the 'properties' button
@@ -357,7 +361,7 @@
                 if (browser_selection.rangeCount) {
                     new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection, mouse_position);
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
-                        doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position);
+                        doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.options.format);
                     } else if(within_pseudoelement) {
                         doctored.util.display_element_dialog(target, this.dialog, mouse_position);
                     }
