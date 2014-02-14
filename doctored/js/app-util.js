@@ -291,8 +291,9 @@
             }
             return element;
         },
-        display_element_dialog: function(target, dialog, mouse, format){
-            var attributes_string,
+        display_element_dialog: function(target, dialog, mouse, context_element, format){
+            var this_function = doctored.util.this_function,
+                attributes_string,
                 attributes_item,
                 attributes,
                 target_offset,
@@ -327,7 +328,7 @@
                     dialog.attributes_div.insertBefore(attributes_item, dialog.attributes_add);
                 }
             }
-            format.set_element_chooser_context(target.parentNode.getAttribute("data-element"));
+            this_function(format.set_element_chooser_context, format)(context_element);
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
             dialog.style.display = "block";

@@ -120,6 +120,7 @@
                         y,
                         child_elements,
                         child_element_name;
+
                     if(depth === undefined) depth = 0;
                     for(i = 0; i < nodes.length; i++){
                         node = nodes[i];

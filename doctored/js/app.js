@@ -241,13 +241,12 @@
                 if(option_value === "(custom)") {
                     element_name = prompt("Custom element:");
                     if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
-                    console.log(element_name)
                 }
                 dialog.target.setAttribute("data-element", element_name);
             },
             properties: function(event){
                 // clicking the 'properties' button
-                doctored.util.display_element_dialog(this.root, this.dialog);
+                doctored.util.display_element_dialog(this.root, this.dialog, undefined, this.root.getAttribute("data-element"), this.options.format);
                 event.preventDefault();
             },
             hamburger_button_click: function(event){
@@ -342,7 +341,7 @@
                 if(event.keyCode === esc_key){
                     browser_selection = doctored.util.get_current_selection();
                     parentNode = browser_selection.getRangeAt(0).endContainer.parentNode;
-                    doctored.util.display_element_dialog(parentNode, this.dialog);
+                    doctored.util.display_element_dialog(parentNode, this.dialog, undefined, parentNode.getAttribute("data-element"), this.options.format);
                     this.dialog.element_chooser.focus();
                 } else if(event.shiftKey === false){
                     doctored.util.this_function(this.click, this)(event);
@@ -362,10 +361,10 @@
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
                         doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.options.format);
                     } else if(within_pseudoelement) {
-                        doctored.util.display_element_dialog(target, this.dialog, mouse_position, this.options.format);
+                        doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.options.format);
                     }
                 } else if(within_pseudoelement) {
-                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, this.options.format);
+                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.options.format);
                 }
             },
             add_attribute_item: function(){
