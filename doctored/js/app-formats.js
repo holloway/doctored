@@ -138,6 +138,11 @@
                     }
                 };
 
+            if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node, so there is no parent context
+                context_chooser.setAttribute("label", "Suggested (0 elements)");
+                element_chooser.context_chooser.innerHTML = '<option value="" disabled>(None)</option>';
+                return;
+            }
             if(element_name === this.previously_shown_context) return;
             if(!this.cached_context[element_name]) {
                 gather_elements_below([this.schema_elements[element_name]]);

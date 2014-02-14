@@ -246,7 +246,7 @@
             },
             properties: function(event){
                 // clicking the 'properties' button
-                doctored.util.display_element_dialog(this.root, this.dialog, undefined, this.root.getAttribute("data-element"), this.options.format);
+                doctored.util.display_element_dialog(this.root, this.dialog, undefined, doctored.CONSTANTS.root_context, this.options.format);
                 event.preventDefault();
             },
             hamburger_button_click: function(event){
@@ -415,7 +415,9 @@
         block_label_width_in_pixels:   25,
         xml_declaration: '<?xml version="1.0" ?>',
         theme_prefix: 'doctored-theme-',
-        block_or_inline_class_prefix: 'doctored-'
+        block_or_inline_class_prefix: 'doctored-',
+        root_context: "/"
+
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';
