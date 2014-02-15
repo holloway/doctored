@@ -115,6 +115,11 @@ menu.doctored-dialog {
     display:none;
 }
 
+    menu.doctored-dialog div.doctored-attributes {
+        height:200px;
+        overflow:auto;
+    }
+
     menu.doctored-dialog label,
     menu.doctored-dialog div {
         clear:left;
@@ -172,3 +177,4 @@ menu.doctored-hamburger {
 option.doctored-loading {
     font-style: italic;
 }
+

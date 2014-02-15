@@ -87,7 +87,7 @@
             // that would make it potentially exploitable
             // eg a string of "<a onload='alert(\'deal with it\')'/>"
             // so we're doing string parsing even though it's a bit weird
-            var attributes_regex = /([\-A\-Za-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g, // via http://ejohn.org/files/htmlparser.js
+            var attributes_regex = /([\-A\-Z:a-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g, // originally via but tweaked to support xmlns http://ejohn.org/files/htmlparser.js
                 attributes = {};
 
             attributes_string.replace(attributes_regex, function(match, name){
@@ -293,6 +293,7 @@
         },
         display_element_dialog: function(target, dialog, mouse, context_element, format){
             var this_function = doctored.util.this_function,
+                format_attributes,
                 attributes_string,
                 attributes_item,
                 attributes,
@@ -322,16 +323,21 @@
             if(attributes_string) {
                 attributes = JSON.parse(attributes_string.replace(/&quot;/g, '"'));
                 for(key in attributes){
-                    attributes_item = dialog.attributes_template.cloneNode(true);
-                    attributes_item.childNodes[0].value = key;
-                    attributes_item.childNodes[2].value = attributes[key];
-                    dialog.attributes_div.insertBefore(attributes_item, dialog.attributes_add);
+                    format_attributes = format.attributes[key];
+                    doctored.util.dialog_append_attribute(dialog, key, attributes[key], format_attributes ? format_attributes.help : undefined);
                 }
             }
-            this_function(format.set_element_chooser_context, format)(context_element);
+            this_function(format.set_dialog_context, format)(dialog, context_element, attributes);
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
             dialog.style.display = "block";
+        },
+        dialog_append_attribute: function(dialog, key, value, title){
+            var attributes_item = dialog.attributes_template.cloneNode(true);
+            attributes_item.childNodes[0].value = key;
+            attributes_item.childNodes[2].value = value;
+            if(title) attributes_item.setAttribute("title", title);
+            dialog.attributes_div.insertBefore(attributes_item, dialog.attributes_add);
         },
         get_current_selection: function(){
             return window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
@@ -381,7 +387,7 @@
             dialog.style.left = document.body.scrollLeft + offsets.proposed.x + "px";
             dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
-            format.set_element_chooser_context(inline.parentNode.getAttribute("data-element"));
+            format.set_dialog_context(inline.parentNode.getAttribute("data-element"));
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
             dialog.element_chooser.focus();
         },
@@ -524,6 +530,9 @@
                 return str.replace(/[&<>"']/g, _escape);
             };
         }(),
+        strip_tags: function(markup){
+            return markup.replace(/<.*?>/g, '');
+        },
         to_options_tags: function(list, complex){
             var escape_text = doctored.util.escape_text,
                 element_properties,
@@ -539,11 +548,13 @@
 
                 html += '<option value="';
                 if(complex) {
-                    html += element_properties.display.replace(/"/g, "&quot;");
+                    html += element_properties.display.replace(/"/g, "&quot;") + '"';
+                    if(element_properties.help) html += ' title="' + element_properties.help.replace(/"/g, "&quot;") + '"';
                 } else {
                     html += element_properties.replace(/"/g, "&quot;");
                 }
-                html += '">' +
+
+                html += '>' +
                         escape_text(element_name) +
                         '</option>';
                 }

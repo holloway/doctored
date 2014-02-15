@@ -87,7 +87,7 @@
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
                 this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
                                         '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option>Loading...</option></select>' +
-                                        '<h6>attributes</h6><div></div>';
+                                        '<h6>attributes</h6><div class="doctored-attributes"></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.format_chooser = $('select', this.dialog)[0];
