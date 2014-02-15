@@ -387,7 +387,7 @@
             dialog.style.left = document.body.scrollLeft + offsets.proposed.x + "px";
             dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
-            format.set_dialog_context(inline.parentNode.getAttribute("data-element"));
+            format.set_dialog_context(dialog, inline.parentNode.getAttribute("data-element"));
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
             dialog.element_chooser.focus();
         },

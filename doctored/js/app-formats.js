@@ -14,6 +14,7 @@
                     i;
 
                 this.elements = {};
+                this.schema_elements = {}; //cache some lookups
                 schema_elements = $("element", this.schema.documentElement);
                 for(i = 0; i < schema_elements.length; i++){
                     schema_element = schema_elements[i];
@@ -25,7 +26,7 @@
                             display: block_or_inline,
                             help: schema_element_help ? schema_element_help.textContent : ""
                         };
-
+                        this.schema_elements[node_attribute_name] = schema_element;
                     }
                 }
 
@@ -47,16 +48,6 @@
                     node_attribute_name = schema_element.getAttribute("name");
                     if(node_attribute_name){
                         this.schema_defines[node_attribute_name] = schema_element;
-                    }
-                }
-
-                this.schema_elements = {}; //cache some lookups
-                schema_elements = $("element", this.schema.documentElement);
-                for(i = 0; i < schema_elements.length; i++){
-                    schema_element = schema_elements[i];
-                    node_attribute_name = schema_element.getAttribute("name");
-                    if(node_attribute_name){
-                        this.schema_elements[node_attribute_name] = schema_element;
                     }
                 }
 
@@ -104,6 +95,7 @@
                 }
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
+                    //console.log(element_name, this.schema_elements[element_name]);
                     gather_below([this.schema_elements[element_name]]);
                     this.cached_context[element_name] = context;
                 }
