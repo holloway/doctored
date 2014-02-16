@@ -87,7 +87,7 @@
             // that would make it potentially exploitable
             // eg a string of "<a onload='alert(\'deal with it\')'/>"
             // so we're doing string parsing even though it's a bit weird
-            var attributes_regex = /([\-A\-Z:a-z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g, // originally via but tweaked to support xmlns http://ejohn.org/files/htmlparser.js
+            var attributes_regex = /([\-A\-Z:a-zA-Z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g, // originally via but tweaked to support xmlns http://ejohn.org/files/htmlparser.js
                 attributes = {};
 
             attributes_string.replace(attributes_regex, function(match, name){
