@@ -5,6 +5,22 @@
     var $ = doctored.$;
 
     doctored.util = {
+        transition_end_event: function(){
+            var element = document.createElement('fakeelement'),
+                transitions = {
+                'transition':       'transitionend',
+                'OTransition':      'otransitionEnd',
+                'MozTransition':    'transitionend',
+                'WebkitTransition': 'webkitTransitionEnd'
+                },
+                key;
+
+            for(key in transitions){
+                if(element.style[key] !== undefined){
+                    return transitions[key];
+                }
+            }
+        }(), //self executing in order to calculate the result once
         debounce: function(fn, delay_in_milliseconds, context) {
             var timer = null;
             context = context || this;
@@ -301,8 +317,8 @@
                 key,
                 i;
 
-            dialog.format_chooser.style.display        = "none";
-            dialog.format_chooser_label.style.display  = "none";
+            dialog.format_chooser.style.display        = "block";
+            dialog.format_chooser_label.style.display  = "block";
             dialog.root_element_title.style.display    = (target.classList.contains("doctored") ? "" : "none");
             dialog.attributes_div.style.display        = "";
             dialog.attributes_h6.style.display         = "";
@@ -327,10 +343,27 @@
                     doctored.util.dialog_append_attribute(dialog, key, attributes[key], format_attributes ? format_attributes.help : undefined);
                 }
             }
-            this_function(format.set_dialog_context, format)(dialog, context_element, attributes);
+            if(format) {
+                this_function(format.set_dialog_context, format)(dialog, context_element, attributes);
+            }
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
             dialog.style.display = "block";
+        },
+        process_schema_groups: function(items){
+            var i = 0,
+                item,
+                html = '';
+
+            for(i = 0; i < items.length; i++){
+                item = items[i];
+                if(item.children) {
+                    html += '<optgroup label="' + item.schema_family +'">' + doctored.util.process_schema_groups(item.children) + '</optgroup>';
+                } else {
+                    html += '<option value="' + item.schema + '" data-schema-family="' + item.schema_family + '">' + item.label + '</option>';
+                }
+            }
+            return html;
         },
         dialog_append_attribute: function(dialog, key, value, title){
             var attributes_item = dialog.attributes_template.cloneNode(true);

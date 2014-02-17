@@ -116,7 +116,7 @@ menu.doctored-dialog {
 }
 
     menu.doctored-dialog div.doctored-attributes {
-        height:200px;
+        max-height:200px;
         overflow:auto;
     }
 

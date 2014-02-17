@@ -6,38 +6,24 @@
             autosave_every_milliseconds:      30 * 1000,
             linting_debounce_milliseconds:    1000,
             retry_init_after_milliseconds:    50,
-            format:                           "docbook", //key from doctored.formats in app-formats.js
+            schema:                           "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js
             theme:                            "flat" //key from options in hamburger_menu.theme_chooser
         },
         $ = doctored.$,
-        $body = $('body')[0],
-        transition_end_event = function(){
-            var element = document.createElement('fakeelement'),
-                transitions = {
-                'transition':       'transitionend',
-                'OTransition':      'otransitionEnd',
-                'MozTransition':    'transitionend',
-                'WebkitTransition': 'webkitTransitionEnd'
-                },
-                key;
-
-            for(key in transitions){
-                if(element.style[key] !== undefined){
-                    return transitions[key];
-                }
-            }
-        }(); //self executing in order to calculate the result once
+        $body = $('body')[0];
+       
 
     doctored.event.on("app:ready", function(){
         // called after all manifest items (in doctored.js) are loaded
         var i,
             instance;
 
-        doctored.ready = true;
         for(i = 0; i < doctored._to_be_initialized.length; i++){
             instance = doctored._to_be_initialized[i];
             doctored._init(instance.selector, instance.options);
         }
+        doctored.ready = true;
+        doctored.schemas.init();
     });
 
     doctored._init = function(selector, options){
@@ -46,7 +32,6 @@
             property;
 
         if(!root_element) return console.log("Doctored.js: Unable to find the element selected by: " + selector);
-        if (typeof defaults.format === 'string' || defaults.format instanceof String) defaults.format = doctored.formats[defaults.format];
 
         options = options || {};
         for (property in defaults) {
@@ -60,7 +45,7 @@
             root_selector: selector,
             options: options,
             cache: {},
-            init: function(){
+            init: function(){ //initialize one instance of the editor
                 var _this = this,
                     menu,
                     i,
@@ -68,10 +53,7 @@
                     theme = window.localStorage.getItem("doctored-theme");
                 
                 this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
-                this.options.format.init(this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
-                this.root.setAttribute("data-element", this.options.format.root_element);
-                this.root.setAttribute("data-attributes", doctored.util.encode_data_attributes(this.options.format.root_attributes));
                 this.root.contentEditable = true;
                 this.root.className = "doctored";
                 this.root.addEventListener("input",     this_function(this.lint_soon, this), false);
@@ -85,18 +67,18 @@
                 this.dialog = document.createElement('menu');
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
-                this.dialog.innerHTML = '<a href title="Close">&times;</a><label for="' + this.id + '_formats">format: </label><select  id="' + this.id + '_formats">' + doctored.util.to_options_tags(Object.keys(doctored.formats), false) + '</select>' +
+                this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select id="' + this.id + '_formats"><option>Loading...</option></select>' +
                                         '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option>Loading...</option></select>' +
                                         '<h6>attributes</h6><div class="doctored-attributes"></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.format_chooser = $('select', this.dialog)[0];
-                this.dialog.format_chooser_label = $('label', this.dialog)[0];
-                this.dialog.attributes_h6 = $('h6', this.dialog)[1];
+                this.dialog.format_chooser_label = $('h6', this.dialog)[0];
+                this.dialog.attributes_h6 = $('h6', this.dialog)[2];
                 this.dialog.element_chooser = $('select', this.dialog)[1];
                 this.dialog.element_chooser.addEventListener('blur', this_function(this.element_chooser_change, this), false);
                 this.dialog.element_chooser.addEventListener('mouseup', this_function(this.element_chooser_change, this), false);
-                this.dialog.root_element_title = $('h6', this.dialog)[0];
+                this.dialog.root_element_title = $('h6', this.dialog)[1];
                 this.dialog.attributes_div = $('div', this.dialog)[0];
                 this.dialog.attributes_div.addEventListener('keyup',   this_function(this.keyup_dialog_attributes_enter, this), false);
                 this.dialog.attributes_template = document.createElement("div");
@@ -123,7 +105,7 @@
                 this.menu.view_source.addEventListener('click', this_function(this.view_source, this), false);
                 this.tooltip = document.createElement('samp');
                 this.tooltip.className = "doctored-tooltip";
-                this.tooltip.addEventListener(transition_end_event, this_function(this.hide_tooltip, this), false);
+                this.tooltip.addEventListener(doctored.util.transition_end_event, this_function(this.hide_tooltip, this), false);
                 this.attributes_template = "";
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 doctored.util.set_theme(theme || this.options.theme, this);
@@ -131,6 +113,7 @@
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
+                doctored.event.on("schemas-loaded", this_function(this.schemas_loaded, this));
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -138,9 +121,8 @@
                     this_function(this.options.onload, this)();
                 }
             },
-            lint: function(){
-                // send linting job to one of the workers
-                doctored.linters.lint(this.get_xml_string(), this.options.format.schema_url, this.lint_response, instance);
+            lint: function(){ // send linting job to one of the workers
+                doctored.linters.lint(this.get_xml_string(), this.schema.schema_url, this.lint_response, instance);
             },
             lint_response: function(errors){
                 // handle a linting response, and write it to the page
@@ -181,6 +163,30 @@
 
                 localStorage_key = this.options.localStorage_key;
                 window.localStorage.setItem(localStorage_key, this.get_xml_string());
+            },
+            schemas_loaded: function(event){
+                var i,
+                    option,
+                    first_valid_option,
+                    chosen_schema_option;
+
+                this.dialog.format_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
+                for(i = 0; i < this.dialog.format_chooser.options.length; i++){
+                    option = this.dialog.format_chooser.options[i];
+                    if(option.value && !option.disabled){
+                        if(first_valid_option !== undefined) first_valid_option = i;
+                        if(option.value === this.options.schema) {
+                            this.dialog.format_chooser.selectedIndex = i;
+                            chosen_schema_option = option;
+                        }
+                    }
+                }
+                if(chosen_schema_option === false && first_valid_option) { // if nothing matched the instance's options schema
+                    this.dialog.format_chooser.selectedIndex = first_valid_option;
+                    chosen_schema_option = this.dialog.format_chooser.options[first_valid_option];
+                }
+                if(!chosen_schema_option) return alert("Doctored.js can't find a valid default schema.");
+                this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
             },
             paste: function(event){
                 var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),

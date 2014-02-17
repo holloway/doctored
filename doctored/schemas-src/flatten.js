@@ -13,13 +13,13 @@
         catalog,
         catalogues,
         catalog_path,
+        catalog_path_directory,
         strip_comments = function(markup){
             return markup.replace(/<!--[\s\S]*?-->/g, '');
         },
         parse_attributes_string = function(attributes_string){
             var attributes_regex = /([\-A\-Z:a-zA-Z0-9_]+)(?:\s*=\s*(?:(?:"((?:\\.|[^"])*)")|(?:'((?:\\.|[^'])*)')|([^>\s]+)))?/g, // originally via but tweaked to support xmlns http://ejohn.org/files/htmlparser.js
                 attributes = {};
-
 
             attributes_string.replace(attributes_regex, function(match, name){
                 var value = arguments[2] ? arguments[2] :
@@ -83,12 +83,13 @@
                 for(i = 0; i < resolver_by_value[attributes.schemaLocation].length; i++) {
                     resolver_item = resolver_by_value[attributes.schemaLocation][i];
                     if(xml_path.indexOf(resolver_item.base) >= 0){
-                        include_path = path.join(xml_directory, resolver_item.value);
+                        include_path = path.join(catalog_path_directory, resolver_item.base, resolver_item.value);
                     }
                 }
-                if(include_path === undefined) {
-                    console.log("Unable to find base that matched xml_path\n" + xml_path + " in ", resolver_item, (xml_path.indexOf(resolver_item.base) >= 0));
-                    process.exit();
+                if(include_path === undefined) { //couldn't find a close match, try last match instead
+                    include_path = path.join(catalog_path_directory, resolver_item.base, resolver_item.value);
+                    //console.log("Unable to find base that matched xml_path\n" + xml_path + " in ", resolver_by_value[attributes.schemaLocation], (xml_path.indexOf(resolver_item.base) >= 0));
+                    //process.exit();
                 }
             } else {
                include_path = path.join(xml_directory, attributes.schemaLocation);
@@ -107,6 +108,7 @@
     }
 
     catalog_path = process.argv[2];
+    catalog_path_directory = path.dirname(catalog_path);
     catalog = fs.readFileSync(catalog_path, 'utf8');
     catalog = strip_comments(catalog);
     catalog.replace(/<group[\s\S]*?group>/gm, group_match);

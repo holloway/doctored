@@ -2,8 +2,7 @@
 (function(){
     "use strict";
 
-    var $ = doctored.$,
-        relaxng = {
+    var relaxng = {
             cache_useful_stuff_from_schema: function(){
                 var this_function   = doctored.util.this_function,
                     schema_elements,
@@ -82,8 +81,7 @@
                                     if(node_attribute_name) context.attributes[node_attribute_name] = _this.attributes[node_attribute_name];
                                     break;
                                 case "ref":
-                                    node = _this.schema_defines[node_attribute_name];
-                                    //INTENTIONAL NOT TO HAVE A BREAK HERE
+                                    node = _this.schema_defines[node_attribute_name]; //INTENTIONAL. NOT AN ERROR. SHUT UP JSHINT
                                 default: // we have to go deeper
                                     if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
                             }
@@ -107,11 +105,15 @@
                 alert("W3C Schema isn't currently supported.");
             }
         },
-        format_init = function(instance){
+        $ = doctored.$,
+        format_init = function(instance, schema_url){
             var this_function  = doctored.util.this_function,
-                file_extension = doctored.util.file_extension(this.schema_url),
+                file_extension = doctored.util.file_extension(schema_url),
                 xhr;
 
+            this.schema_url = doctored.base + "schemas" + schema_url;
+
+            console.log(this.schema_url);
             if(this.ready === true) return this_function(this.update_element_chooser, this)();
             this.instance = instance;
             switch(file_extension.toLowerCase()){
@@ -188,9 +190,7 @@
             }
         };
        
-
-
-    doctored.formats = {
+    doctored.schema_family = { //format is a looser concept than schema. A format may have many schemas
         docbook: {
             name:              "DocBook 5",
             root_element:      "book",
@@ -199,8 +199,7 @@
                                     xmlns: "http://docbook.org/ns/docbook",
                                     "xmlns:xlink": "http://wwww.w3.org/1999/xlink/"
                                 },
-            'schema_url':       window.doctored.base + "schemas/docbook5/schema.rng", // must end in .RNG
-            'convert_from_html': function(html_string){
+            convert_from_html: function(html_string){
             // Typically called when people paste HTML and this is supposed to convert that to DocBook
             // this is just a prototype at the moment, not very useful
             // FIXME: improve this A LOT!
@@ -230,11 +229,51 @@
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
-            'schema':  "../../schemas/tei2.6/schema.rng",
             new_document_xml: function(){
                 return '<title>Book Title</title>' +
                        '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
             }()
+        },
+        'dita': {
+            name:              "DITA 1.8",
+            root_element:      "topic",
+            root_attributes:   {
+                xmlns: "http://www.tei-c.org/ns/1.0"
+            },
+            ready: false,
+            init: format_init,
+            update_element_chooser: update_element_chooser,
+            set_dialog_context: set_dialog_context,
+            new_document: new_document,
+            new_document_xml: function(){
+                return '<title>Book Title</title>' +
+                       '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
+            }()
+        },
+    };
+
+
+    doctored.schemas = {
+        init: function(){
+            var xhr = new XMLHttpRequest();
+            
+            xhr.open("GET", doctored.base + "schemas/manifest.json", true);
+            xhr.send(null);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState !== 4) return;
+                doctored.schemas.list = JSON.parse(xhr.responseText);
+                doctored.event.trigger("schemas-loaded");
+            };
+        },
+        get_schema_instance: function(instance, schema_family, schema_url){
+            var schema_instance = doctored.schema_family[schema_family],
+                this_function = doctored.util.this_function;
+
+            if(!schema_instance) return alert("There is no support for the schema family of '" + schema_family + "' @ URL " + schema_url);
+
+            this_function(schema_instance.init, schema_instance)(instance, schema_url);
+            return schema_instance;
         }
     };
+
 }());
