@@ -13,20 +13,21 @@
         $body = $('body')[0];
        
 
-    doctored.event.on("app:ready", function(){
-        // called after all manifest items (in doctored.js) are loaded
+    doctored.event.on("app:ready", function(){ // called after all manifest items (in doctored.js) are loaded
         var i,
             instance;
 
+        doctored.init = doctored._init; // no need to delay loading any future calls, overwrite with the real thing
         for(i = 0; i < doctored._to_be_initialized.length; i++){
             instance = doctored._to_be_initialized[i];
-            doctored._init(instance.selector, instance.options);
+            doctored.init(instance.selector, instance.options);
         }
-        doctored.ready = true;
+        delete doctored._to_be_initialized; //don't need this anymore
         doctored.schemas.init();
+        doctored.ready = true;
     });
 
-    doctored._init = function(selector, options){
+    doctored._init = function(selector, options){ // returns an instance of the editor
         var root_element = $(selector),
             instance,
             property;
@@ -67,14 +68,15 @@
                 this.dialog = document.createElement('menu');
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
-                this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select id="' + this.id + '_formats"><option>Loading...</option></select>' +
+                this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select><option>Loading...</option></select>' +
                                         '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option>Loading...</option></select>' +
                                         '<h6>attributes</h6><div class="doctored-attributes"></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
-                this.dialog.format_chooser = $('select', this.dialog)[0];
-                this.dialog.format_chooser_label = $('h6', this.dialog)[0];
-                this.dialog.attributes_h6 = $('h6', this.dialog)[2];
+                this.dialog.schema_chooser = $('select', this.dialog)[0];
+                this.dialog.schema_chooser.addEventListener('change', this_function(this.schema_chooser_change, this), false);
+                this.dialog.schema_chooser_title = $('h6', this.dialog)[0];
+                this.dialog.attributes_title = $('h6', this.dialog)[2];
                 this.dialog.element_chooser = $('select', this.dialog)[1];
                 this.dialog.element_chooser.addEventListener('blur', this_function(this.element_chooser_change, this), false);
                 this.dialog.element_chooser.addEventListener('mouseup', this_function(this.element_chooser_change, this), false);
@@ -113,7 +115,7 @@
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
-                doctored.event.on("schemas-loaded", this_function(this.schemas_loaded, this));
+                doctored.event.on("schema-manifest-loaded", this_function(this.schema_manifest_loaded, this));
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -121,7 +123,9 @@
                     this_function(this.options.onload, this)();
                 }
             },
-            lint: function(){ // send linting job to one of the workers
+            lint: function(){
+                // send linting job to one of the workers
+                // NOTE you probably shouldn't call this directly instead call lint_soon()
                 doctored.linters.lint(this.get_xml_string(), this.schema.schema_url, this.lint_response, instance);
             },
             lint_response: function(errors){
@@ -157,6 +161,24 @@
             get_xml_string: function(){
                 return doctored.CONSTANTS.xml_declaration + doctored.util.descend_building_xml([this.root]);
             },
+            set_xml_string: function(xml_string){
+                var new_document,
+                    new_document_root,
+                    doctored_html,
+                    data_element,
+                    data_attributes;
+
+                xml_string = xml_string.replace(/<\?[\s\S]*?\?>/, '');
+                doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.elements);
+                new_document = document.createElement('div');
+                new_document.innerHTML = doctored_html;
+                new_document_root = new_document.childNodes[0];
+                data_element = new_document_root.getAttribute("data-element");
+                data_attributes = new_document_root.getAttribute("data-attributes");
+                this.root.setAttribute("data-element", data_element || "ROOT-ERROR-NO-DATA-ELEMENT");
+                this.root.setAttribute("data-attributes", data_attributes || "");
+                this.root.innerHTML = new_document_root.innerHTML;
+            },
             save: function(event){
                 var localStorage_key,
                     xml;
@@ -164,39 +186,53 @@
                 localStorage_key = this.options.localStorage_key;
                 window.localStorage.setItem(localStorage_key, this.get_xml_string());
             },
-            schemas_loaded: function(event){
-                var i,
-                    option,
+            schema_manifest_loaded: function(event){
+                var this_function = doctored.util.this_function,
+                    prefered_schema = localStorage.getItem("doctored-schema-url") || this.options.schema,
+                    chosen_schema_option,
                     first_valid_option,
-                    chosen_schema_option;
+                    option,
+                    i;
 
-                this.dialog.format_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
-                for(i = 0; i < this.dialog.format_chooser.options.length; i++){
-                    option = this.dialog.format_chooser.options[i];
+                this.dialog.schema_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
+                for(i = 0; i < this.dialog.schema_chooser.options.length; i++){
+                    option = this.dialog.schema_chooser.options[i];
                     if(option.value && !option.disabled){
                         if(first_valid_option !== undefined) first_valid_option = i;
-                        if(option.value === this.options.schema) {
-                            this.dialog.format_chooser.selectedIndex = i;
+                        if(option.value === prefered_schema) {
+                            this.dialog.schema_chooser.selectedIndex = i;
                             chosen_schema_option = option;
                         }
                     }
                 }
                 if(chosen_schema_option === false && first_valid_option) { // if nothing matched the instance's options schema
-                    this.dialog.format_chooser.selectedIndex = first_valid_option;
-                    chosen_schema_option = this.dialog.format_chooser.options[first_valid_option];
+                    this.dialog.schema_chooser.selectedIndex = first_valid_option;
+                    chosen_schema_option = this.dialog.schema_chooser.options[first_valid_option];
                 }
                 if(!chosen_schema_option) return alert("Doctored.js can't find a valid default schema.");
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
+                this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, true);
+            },
+            schema_chooser_change: function(event){
+                var new_document         = confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)"),
+                    chosen_schema_option = this.dialog.schema_chooser.options[this.dialog.schema_chooser.selectedIndex],
+                    this_function        = doctored.util.this_function;
+
+                localStorage.setItem("doctored-schema-url", chosen_schema_option.value);
+                this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
+                this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, new_document);
+                this.dialog.style.display = "none";
+                this.root.focus();
             },
             paste: function(event){
                 var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),
                     doctored_html;
 
-                if(this.options.format.convert_from_html && doctored.util.looks_like_html(html)) {
+                if(this.schema.convert_from_html && doctored.util.looks_like_html(html)) {
                     event.returnValue = false;
                     setTimeout(function(){ //for some reason in Chrome it runs confirm twice when it's not in a setTimeout. Odd, suspected browser bug.
-                        if(confirm("That looks like HTML - want to convert it to " + this.options.format.name + "?")) {
-                            html = this.options.format.convert_from_html(html);
+                        if(confirm("That looks like HTML - want to convert it to " + this.schema.name + "?")) {
+                            html = this.schema.convert_from_html(html);
                         }
                         doctored_html = doctored.util.convert_html_to_doctored_html(html);
                         doctored.util.insert_html_at_cursor_position(doctored_html, event);
@@ -252,7 +288,7 @@
             },
             properties: function(event){
                 // clicking the 'properties' button
-                doctored.util.display_element_dialog(this.root, this.dialog, undefined, doctored.CONSTANTS.root_context, this.options.format);
+                doctored.util.display_element_dialog(this.root, this.dialog, undefined, doctored.CONSTANTS.root_context, this.schema);
                 event.preventDefault();
             },
             hamburger_button_click: function(event){
@@ -295,10 +331,7 @@
                 $body.appendChild(textarea);
                 textarea.focus();
                 textarea.addEventListener('blur', function(){
-                    var xml = this.value;
-                    xml = xml.substr(xml.indexOf("\n") + 1);
-                    xml = xml.substr(0, xml.lastIndexOf("\n"));
-                    _this.root.innerHTML = doctored.util.convert_xml_to_doctored_html(xml, _this.options.format.elements);
+                    _this.set_xml_string(this.value);
                     if(this && this.parentNode) {
                         try {
                             this.parentNode.removeChild(this); //FIXME: this try/catch is to work around DOM errors where the node doesn't exist despite the if() check. Investigate later.
@@ -347,7 +380,7 @@
                 if(event.keyCode === esc_key){
                     browser_selection = doctored.util.get_current_selection();
                     parentNode = browser_selection.getRangeAt(0).endContainer.parentNode;
-                    doctored.util.display_element_dialog(parentNode, this.dialog, undefined, parentNode.getAttribute("data-element"), this.options.format);
+                    doctored.util.display_element_dialog(parentNode, this.dialog, undefined, parentNode.getAttribute("data-element"), this.schema);
                     this.dialog.element_chooser.focus();
                 } else if(event.shiftKey === false){
                     doctored.util.this_function(this.click, this)(event);
@@ -365,12 +398,12 @@
                 if (browser_selection.rangeCount) {
                     new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection, mouse_position);
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
-                        doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.options.format);
+                        doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.schema);
                     } else if(within_pseudoelement) {
-                        doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.options.format);
+                        doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.schema);
                     }
                 } else if(within_pseudoelement) {
-                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.options.format);
+                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.schema);
                 }
             },
             add_attribute_item: function(){

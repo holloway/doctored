@@ -41,7 +41,7 @@
             return scope.getElementsByTagName(selector);
         },
         _to_be_initialized: [],
-        init: function(selector, options){
+        init: function(selector, options){ //a stub that delays initialization until Doctored is ready. Replaced with the real thing in app.js that listens to the "app:ready" event.
             window.doctored._to_be_initialized.push({selector: selector, options: options});
         }
     };
@@ -52,7 +52,7 @@
         scripts        = Array.prototype.slice.call($('script')),
         this_script    = scripts[scripts.length-1],
         manifest       = {
-                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app-formats.js", "js/app.js", "js/shims.js", "libs/filesaver.js/FileSaver.js"],
+                         "js" : ["js/app-linters.js", "js/app-util.js", "js/app-schemas.js", "js/app.js", "js/shims.js", "libs/filesaver.js/FileSaver.js"],
                          "css": ["css/themes.css", "css/screen.css"]
                          },
         manifest_count = manifest.js.length + manifest.css.length,

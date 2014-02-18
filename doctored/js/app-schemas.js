@@ -2,7 +2,29 @@
 (function(){
     "use strict";
 
-    var relaxng = {
+    doctored.schemas = {
+        init: function(){
+            var xhr = new XMLHttpRequest();
+            
+            xhr.open("GET", doctored.base + "schemas/manifest.json", true);
+            xhr.send(null);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState !== 4) return;
+                doctored.schemas.list = JSON.parse(xhr.responseText);
+                doctored.event.trigger("schema-manifest-loaded");
+            };
+        },
+        get_schema_instance: function(instance, schema_family_id, schema_url){
+            var schema_family = doctored.schema_family[schema_family_id],
+                this_function = doctored.util.this_function;
+
+            if(!schema_family) return alert("There is no support for the schema family of '" + schema_family_id + "' requested by " + schema_url + "'s config file.");
+            return doctored.util.simple_map_clone(schema_family);
+        }
+    };
+
+    var $ = doctored.$,
+        relaxng = {
             cache_useful_stuff_from_schema: function(){
                 var this_function   = doctored.util.this_function,
                     schema_elements,
@@ -20,7 +42,7 @@
                     node_attribute_name = schema_element.getAttribute("name");
                     if(node_attribute_name){
                         schema_element_help = $("documentation", schema_element)[0];
-                        block_or_inline = (this.inline_elements.indexOf(node_attribute_name) >= 0) ? "inline" : "block";
+                        block_or_inline = (this.inline_elements && this.inline_elements.indexOf(node_attribute_name) >= 0) ? "inline" : "block";
                         this.elements[node_attribute_name] = {
                             display: block_or_inline,
                             help: schema_element_help ? schema_element_help.textContent : ""
@@ -102,18 +124,20 @@
         },
         w3c_schema = {
             cache_useful_stuff_from_schema: function(){
-                alert("W3C Schema isn't currently supported.");
+                
+            },
+            get_valid_nodes_for_context: function(){
+
             }
         },
-        $ = doctored.$,
-        format_init = function(instance, schema_url){
+        schema_init = function(instance, schema_url, new_document){
             var this_function  = doctored.util.this_function,
                 file_extension = doctored.util.file_extension(schema_url),
                 xhr;
 
             this.schema_url = doctored.base + "schemas" + schema_url;
-
-            console.log(this.schema_url);
+            this.elements = {};
+            this.attributes = {};
             if(this.ready === true) return this_function(this.update_element_chooser, this)();
             this.instance = instance;
             switch(file_extension.toLowerCase()){
@@ -139,7 +163,7 @@
                     this.schema = ( new window.DOMParser() ).parseFromString(xhr.responseText, "text/xml");
                 }
                 this_function(this.cache_useful_stuff_from_schema, this)();
-                this_function(this.new_document, this)();
+                if(new_document) this_function(this.new_document, this)();
                 this_function(this.instance.lint_soon, this.instance)();
             }, this);
         },
@@ -160,7 +184,7 @@
             element_chooser.context_chooser = $("optgroup", element_chooser)[0];
         },
         new_document = function(){
-            this.instance.root.innerHTML = doctored.util.convert_xml_to_doctored_html(this.new_document_xml, this.elements);
+            this.instance.set_xml_string(this.new_document_xml());
         },
         set_dialog_context = function(dialog, element_name, existing_attributes){
             var this_function   = doctored.util.this_function,
@@ -173,7 +197,7 @@
                 i;
 
             context = this_function(this.get_valid_nodes_for_context, this)(element_name);
-            number_of_elements = Object.keys(context.elements).length;
+            number_of_elements = (context && context.elements) ? Object.keys(context.elements).length : 0;
             if(number_of_elements === 0) {
                 context_chooser.setAttribute("label", "Suggested (0 elements)"); //TODO fix this, detect valid root nodes
                 element_chooser.context_chooser.innerHTML = '<option value="" disabled>(None)</option>';
@@ -181,7 +205,7 @@
                 context_chooser.setAttribute("label", "Suggested under '" + element_name + "' (" + number_of_elements + " elements)");
                 element_chooser.context_chooser.innerHTML = doctored.util.to_options_tags(context.elements, true);
             }
-            keys = Object.keys(context.attributes).sort();
+            keys = (context && context.attributes) ? Object.keys(context.attributes).sort() : [];
             for(i = 0; i < keys.length; i++){
                 key = keys[i];
                 if(!existing_attributes || !existing_attributes[key]){
@@ -190,15 +214,10 @@
             }
         };
        
-    doctored.schema_family = { //format is a looser concept than schema. A format may have many schemas
+
+    doctored.schema_family = { //a way of grouping multiple schemas into types (e.g. DocBook 4 and 5 are both "docbook")
         docbook: {
             name:              "DocBook 5",
-            root_element:      "book",
-            root_attributes:   {
-                                    version: "5.0",
-                                    xmlns: "http://docbook.org/ns/docbook",
-                                    "xmlns:xlink": "http://wwww.w3.org/1999/xlink/"
-                                },
             convert_from_html: function(html_string){
             // Typically called when people paste HTML and this is supposed to convert that to DocBook
             // this is just a prototype at the moment, not very useful
@@ -208,11 +227,13 @@
                 return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
             },
             new_document_xml: function(){
-                return '<title>Book Title</title>' +
-                       '<chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter>';
-            }(),
+                return '<book version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://wwww.w3.org/1999/xlink/">' +
+                          '<title>Book Title</title>' +
+                          '<chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter>' +
+                        '</book>';
+            },
             parsed: false,
-            init: format_init,
+            init: schema_init,
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
@@ -225,14 +246,14 @@
                 xmlns: "http://www.tei-c.org/ns/1.0"
             },
             ready: false,
-            init: format_init,
+            init: schema_init,
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
             new_document_xml: function(){
-                return '<title>Book Title</title>' +
-                       '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
-            }()
+                return '<TEI><title>Book Title</title>' +
+                       '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter></TEI>';
+            }
         },
         'dita': {
             name:              "DITA 1.8",
@@ -241,39 +262,17 @@
                 xmlns: "http://www.tei-c.org/ns/1.0"
             },
             ready: false,
-            init: format_init,
+            init: schema_init,
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
-            new_document_xml: function(){
-                return '<title>Book Title</title>' +
-                       '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter>';
-            }()
-        },
-    };
-
-
-    doctored.schemas = {
-        init: function(){
-            var xhr = new XMLHttpRequest();
-            
-            xhr.open("GET", doctored.base + "schemas/manifest.json", true);
-            xhr.send(null);
-            xhr.onreadystatechange = function(){
-                if(xhr.readyState !== 4) return;
-                doctored.schemas.list = JSON.parse(xhr.responseText);
-                doctored.event.trigger("schemas-loaded");
-            };
-        },
-        get_schema_instance: function(instance, schema_family, schema_url){
-            var schema_instance = doctored.schema_family[schema_family],
-                this_function = doctored.util.this_function;
-
-            if(!schema_instance) return alert("There is no support for the schema family of '" + schema_family + "' @ URL " + schema_url);
-
-            this_function(schema_instance.init, schema_instance)(instance, schema_url);
-            return schema_instance;
+            new_document_xml: function(){ //FIXME obviously this XML is wrong
+                return '<root><wuh>sdfsdsdf</wuh>' +
+                       '<p>zipp</p></root>';
+            }
         }
     };
+
+
 
 }());

@@ -23,7 +23,7 @@
                 console.log("Can't find options file for schema at either " + file_options + " or " + directory_options);
                 process.exit();
             }
-            return JSON.parse(fs.readFileSync(options_path))['common-format'];
+            return JSON.parse(fs.readFileSync(options_path))['schema-family'];
         },
         walk = function(files, current_directory){
             var i,

@@ -88,7 +88,7 @@
                 linters = doctored.linters;
 
             if(typeof window.Worker !== "function") {
-                alert("Doctored.js requires a browser that supports Web Workers.");
+                alert("Doctored.js schema validation requires a browser that supports Web Workers.");
                 linters.config.number_of_workers = 0;
             }
 
@@ -100,5 +100,4 @@
     };
 
     doctored.linters.init();
-
 }());

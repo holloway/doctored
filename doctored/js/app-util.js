@@ -169,20 +169,6 @@
             }
             return attributes;
         },
-        sniff_display_type: function(node){
-            switch(node.nodeType){
-                case node.TEXT_NODE:
-                    return Node.TEXT_NODE;
-                case node.ELEMENT_NODE:
-                    if(node.classList.contains(doctored.CONSTANTS.block_class)) {
-                        return doctored.util.display_types.block;
-                    } else if(doctored.CONSTANTS.inline_class){
-                        return doctored.util.display_types.inline;
-                    }
-                    return alert("Unknown element type. className was " + node.className);
-            }
-            alert("Unknown element type. nodeName was " + node.nodeName);
-        },
         descend_building_xml: function(nodes, depth){
             //FIXME: this is old code. It works but it's a bit shit. Fix it to note depend on display_type and instead just use classList.contains() directly
             var i,
@@ -201,8 +187,7 @@
                 switch(node.nodeType){
                     case Node.ELEMENT_NODE:
                         data_element = node.getAttribute("data-element");
-                        if(!data_element) continue;
-                        display_type = doctored.util.sniff_display_type(node);
+                        if(!data_element) data_element = "ERROR-NO-DATA-ELEMENT-ATTRIBUTE-FOUND";
                         xml_string += "<" + data_element;
                         attributes_string = node.getAttribute("data-attributes");
                         if(attributes_string) {
@@ -216,7 +201,7 @@
                             xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
                         }
                         xml_string += "</" + data_element + ">";
-                        if(depth === 1 && display_type === doctored.util.display_types.block){
+                        if(depth === 1 && node.classList.contains(doctored.CONSTANTS.block_class)){
                             xml_string += "\n";
                         }
                         break;
@@ -307,9 +292,9 @@
             }
             return element;
         },
-        display_element_dialog: function(target, dialog, mouse, context_element, format){
+        display_element_dialog: function(target, dialog, mouse, context_element, schema){
             var this_function = doctored.util.this_function,
-                format_attributes,
+                schema_attributes,
                 attributes_string,
                 attributes_item,
                 attributes,
@@ -317,11 +302,11 @@
                 key,
                 i;
 
-            dialog.format_chooser.style.display        = "block";
-            dialog.format_chooser_label.style.display  = "block";
+            dialog.schema_chooser.style.display        = "block";
+            dialog.schema_chooser_title.style.display  = "block";
             dialog.root_element_title.style.display    = (target.classList.contains("doctored") ? "" : "none");
             dialog.attributes_div.style.display        = "";
-            dialog.attributes_h6.style.display         = "";
+            dialog.attributes_title.style.display         = "";
             if(mouse === undefined){
                 target_offset = target.getBoundingClientRect();
                 mouse = {x:target_offset.left, y:target_offset.top};
@@ -339,28 +324,29 @@
             if(attributes_string) {
                 attributes = JSON.parse(attributes_string.replace(/&quot;/g, '"'));
                 for(key in attributes){
-                    format_attributes = format.attributes[key];
-                    doctored.util.dialog_append_attribute(dialog, key, attributes[key], format_attributes ? format_attributes.help : undefined);
+                    schema_attributes = schema.attributes[key];
+                    doctored.util.dialog_append_attribute(dialog, key, attributes[key], schema_attributes ? schema_attributes.help : undefined);
                 }
             }
-            if(format) {
-                this_function(format.set_dialog_context, format)(dialog, context_element, attributes);
-            }
+            this_function(schema.set_dialog_context, schema)(dialog, context_element, attributes);
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
             dialog.style.display = "block";
         },
-        process_schema_groups: function(items){
+        process_schema_groups: function(items, depth){
             var i = 0,
                 item,
-                html = '';
+                html = '',
+                depth_padding;
 
+            depth = depth || 1;
+            depth_padding = (new Array(depth)).join("&nbsp; ");
             for(i = 0; i < items.length; i++){
                 item = items[i];
-                if(item.children) {
-                    html += '<optgroup label="' + item.schema_family +'">' + doctored.util.process_schema_groups(item.children) + '</optgroup>';
+                if(item.children) { // Nested optgroups aren't really supported (the browser will flatten them, like nested paragraphs) so we fake it http://stackoverflow.com/questions/1037732/nesting-optgroups-in-a-dropdownlist-select
+                    html += '<optgroup label="' + depth_padding + item.schema_family +'">' + doctored.util.process_schema_groups(item.children, depth + 1) + '</optgroup>';
                 } else {
-                    html += '<option value="' + item.schema + '" data-schema-family="' + item.schema_family + '">' + item.label + '</option>';
+                    html += '<option value="' + item.schema + '" data-schema-family="' + item.schema_family + '">' + depth_padding + item.label + '</option>';
                 }
             }
             return html;
@@ -374,6 +360,18 @@
         },
         get_current_selection: function(){
             return window.getSelection() || document.getSelection() || (document.selection ? document.selection.createRange() : null);
+        },
+        simple_map_clone: function(map){
+            // copies values into new map
+            var new_map = {},
+                key;
+
+            for(key in map){
+                if(map.hasOwnProperty(key)){
+                    new_map[key] = map[key];
+                }
+            }
+            return new_map;
         },
         set_element_chooser_to_element: function(element, element_chooser){
             var data_element = element.getAttribute("data-element"),
@@ -390,17 +388,17 @@
                 }
             }
         },
-        display_dialog_around_inline: function(inline, dialog, mouse, format){
+        display_dialog_around_inline: function(inline, dialog, mouse, schema){
             var offsets = doctored.util.inlineOffset(inline);
             
             if(mouse){
                 offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
             }
-            dialog.format_chooser.style.display = "none";
-            dialog.format_chooser_label.style.display = "none";
+            dialog.schema_chooser.style.display = "none";
+            dialog.schema_chooser_title.style.display = "none";
             dialog.root_element_title.style.display = "none";
             dialog.attributes_div.style.display = "none";
-            dialog.attributes_h6.style.display = "none";
+            dialog.attributes_title.style.display = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
 
@@ -420,7 +418,7 @@
             dialog.style.left = document.body.scrollLeft + offsets.proposed.x + "px";
             dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
-            format.set_dialog_context(dialog, inline.parentNode.getAttribute("data-element"));
+            schema.set_dialog_context(dialog, inline.parentNode.getAttribute("data-element"));
             doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
             dialog.element_chooser.focus();
         },
@@ -480,9 +478,6 @@
             for(var list=[];list[--i]=i;){} //this code works and is intentional; it's not a mistake thanks to good ole variable hoisting
             /* jshint ignore:end */
             return list;
-        },
-        get_formats: function(){
-
         },
         simple_transform: function(markup, element_mapping, attribute_mapping) {
             // transform one markup format
@@ -548,6 +543,7 @@
         file_extension: function(uri){
             return uri.substr(uri.lastIndexOf(".") + 1);
         },
+
         escape_text: function(){
             // Note is a closure
             var _escape_chars = {
