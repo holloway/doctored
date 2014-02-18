@@ -159,7 +159,9 @@
                 }
             },
             get_xml_string: function(){
-                return doctored.CONSTANTS.xml_declaration + doctored.util.descend_building_xml([this.root]);
+                return doctored.CONSTANTS.xml_declaration +
+                       (this.schema.dtd ? this.schema.dtd : "") +
+                       doctored.util.descend_building_xml([this.root]);
             },
             set_xml_string: function(xml_string){
                 var new_document,
@@ -168,7 +170,7 @@
                     data_element,
                     data_attributes;
 
-                xml_string = xml_string.replace(/<\?[\s\S]*?\?>/, '');
+                xml_string = xml_string.replace(/<\?[\s\S]*?\?>/, '').replace(/<!.*?>/g, '');
                 doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.elements);
                 new_document = document.createElement('div');
                 new_document.innerHTML = doctored_html;

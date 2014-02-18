@@ -20,7 +20,7 @@
             } else if(fs.existsSync && fs.existsSync(directory_options) || path.existsSync && path.existsSync(directory_options)){
                 options_path = directory_options;
             } else {
-                console.log("Can't find options file for schema at either " + file_options + " or " + directory_options);
+                console.log("Can't find options file for schema at either " + file_options + " or " + directory_options + ". This file should define the schema-family so that Doctored.js can offer a better UI for editing. The schema-family value should align with a key in app-schemas.js and the variable doctored.schema_family = { ... ");
                 process.exit();
             }
             return JSON.parse(fs.readFileSync(options_path))['schema-family'];

@@ -184,7 +184,7 @@
             element_chooser.context_chooser = $("optgroup", element_chooser)[0];
         },
         new_document = function(){
-            this.instance.set_xml_string(this.new_document_xml());
+            this.instance.set_xml_string(this.new_document_xml);
         },
         set_dialog_context = function(dialog, element_name, existing_attributes){
             var this_function   = doctored.util.this_function,
@@ -226,50 +226,44 @@
                     attribute_mapping = {"href": "url"};
                 return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
             },
-            new_document_xml: function(){
-                return '<book version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://wwww.w3.org/1999/xlink/">' +
-                          '<title>Book Title</title>' +
-                          '<chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter>' +
-                        '</book>';
-            },
-            parsed: false,
+            new_document: new_document,
+            new_document_xml: '<book version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://wwww.w3.org/1999/xlink/">' +
+                                '<title>Book Title</title>' +
+                                '<chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter>' +
+                              '</book>',
             init: schema_init,
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
-            new_document: new_document,
             inline_elements: ["abbrev","accel","acronym","address","alt","anchor","annotation","application","author","bibliolist","biblioref","blockquote","bridgehead","calloutlist","caution","citation","citebiblioid","citerefentry","citetitle","classname","classsynopsis","cmdsynopsis","code","command","computeroutput","constant","constraintdef","constructorsynopsis","coref","database","date","destructorsynopsis","editor","email","emphasis","envar","epigraph","equation","errorcode","errorname","errortext","errortype","example","exceptionname","fieldsynopsis","figure","filename","footnote","footnoteref","foreignphrase","funcsynopsis","function","glosslist","guibutton","guiicon","guilabel","guimenu","guimenuitem","guisubmenu","hardware","important","indexterm","info","informalequation","informalexample","informalfigure","initializer","inlineequation","inlinemediaobject","interfacename","itemizedlist","jobtitle","keycap","keycode","keycombo","keysym","link","literal","literallayout","markup","mediaobject","menuchoice","methodname","methodsynopsis","modifier","mousebutton","msgset","nonterminal","note","olink","option","optional","orderedlist","org","orgname","package","parameter","person","personname","phrase","procedure","productionset","productname","productnumber","programlisting","programlistingco","prompt","property","qandaset","quote","remark","replaceable","returnvalue","revhistory","screen","screenco","screenshot","segmentedlist","shortcut","sidebar","simplelist","subscript","superscript","symbol","synopsis","systemitem","tag","task","termdef","tip","token","trademark","type","uri","userinput","variablelist","varname","warning","wordasword","xref"]
         },
         'tei': {
-            name:              "TEI 2.6.0",
-            root_element:      "TEI",
-            root_attributes:   {
-                xmlns: "http://www.tei-c.org/ns/1.0"
-            },
+            name: "TEI 2.6.0",
             ready: false,
             init: schema_init,
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
-            new_document_xml: function(){
-                return '<TEI><title>Book Title</title>' +
-                       '<chapter><para>First paragraph <ulink url="http://docvert.org/">with hyperlink</ulink>.</para></chapter></TEI>';
-            }
+            new_document_xml: '<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Review: an electronic transcription</title></titleStmt><publicationStmt><p>Published as an example for the Introduction module of TBE.</p></publicationStmt><sourceDesc><p>No source: born digital.</p></sourceDesc></fileDesc></teiHeader><text><body><head>Review</head><p><title>Die Leiden des jungen Werther</title><note place="foot">by <name>Goethe</name></note>is an <emph>exceptionally</emph> good example of a book full of <term>Weltschmerz</term>.</p> </body> </text> </TEI>'
         },
         'dita': {
-            name:              "DITA 1.8",
-            root_element:      "topic",
-            root_attributes:   {
-                xmlns: "http://www.tei-c.org/ns/1.0"
-            },
+            name: "DITA 1.8",
             ready: false,
             init: schema_init,
+            dtd: '<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "../../dtd/concept.dtd">',
+            file_extension: ".dita",
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
             new_document: new_document,
-            new_document_xml: function(){ //FIXME obviously this XML is wrong
-                return '<root><wuh>sdfsdsdf</wuh>' +
-                       '<p>zipp</p></root>';
-            }
+            new_document_xml: '<!-- This file is part of the DITA Open Toolkit project hosted on Sourceforge.net. Common Public License v1.0 --><!-- (c) Copyright IBM Corp. 2004, 2005 All Rights Reserved. --><!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "../../dtd/concept.dtd"><concept id="bookmap-readme" xml:lang="en-us">  <title>Bookmap Readme</title>  <prolog/>  <conbody>    <p>This demonstration provides a proof-of-concept implementation of the DITA bookmap proposal. The proposal adds book output to DITA using a specialized DITA map known as a bookmap. The bookmap organizes the DITA topics with the correct nesting and sequence for the book. In addition, the bookmap assigns roles such as preface, chapter, and appendix to top-level topics within the book. </p>    <p class="- topic/p ">For more detailed information about the proposal, see the detailed posting on the DITA forum at <xref href="news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com" format="news">news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com</xref>.</p>    <note>This demonstration has the following limitations:<ul>        <li>For XSL-FO formatting and thus PDF generation, only the basics have been implemented. Through specialization, the DITA XHTML-based outputs for DITA map are also available for bookmap.</li>        <li>The design for the book info component of the proposal has been fleshed out based on antecedents in DocBook and IBMIDDoc (see the comments in the <codeph>bookinfo.mod</codeph> file). Most of the elements in bookinfo aren&apos;t processed.</li>        <li>The book list component of the proposal hasn&apos;t been implemented yet. Possible designs for a glossary list have been discussed extensively on the DITA forum (resulting in the proposal posted as <xref href="news://news.software.ibm.com:119/3FA29F54.83AFB251@ca.ibm.com" format="news">news://news.software.ibm.com:119/blfg38$5k0q$1@news.boulder.ibm.com</xref>).</li>        <li>The book style component of the proposal is much more experimental than the bookmap and bookinfo components. Processing for this component is limited.</li>      </ul></note>  </conbody></concept>'
+        },
+        'marc': {
+            name: "MARC21 Slim",
+            init: schema_init,
+            ready: false,
+            update_element_chooser: update_element_chooser,
+            set_dialog_context: set_dialog_context,
+            new_document: new_document,
+            new_document_xml: '<?xml version="1.0" encoding="UTF-8"?> <collection xmlns="http://www.loc.gov/MARC21/slim">   <record>     <leader>01142cam  2200301 a 4500</leader>     <controlfield tag="001">   92005291 </controlfield>     <controlfield tag="003">DLC</controlfield>     <controlfield tag="005">19930521155141.9</controlfield>     <controlfield tag="008">920219s1993    caua   j      000 0 eng  </controlfield>     <datafield tag="010" ind1=" " ind2=" ">       <subfield code="a">   92005291 </subfield>     </datafield>     <datafield tag="020" ind1=" " ind2=" ">       <subfield code="a">0152038655 :</subfield>       <subfield code="c">$15.95</subfield>     </datafield>     <datafield tag="040" ind1=" " ind2=" ">       <subfield code="a">DLC</subfield>       <subfield code="c">DLC</subfield>       <subfield code="d">DLC</subfield>     </datafield>     <datafield tag="042" ind1=" " ind2=" ">       <subfield code="a">lcac</subfield>     </datafield>     <datafield tag="050" ind1="0" ind2="0">       <subfield code="a">PS3537.A618</subfield>       <subfield code="b">A88 1993</subfield>     </datafield>     <datafield tag="082" ind1="0" ind2="0">       <subfield code="a">811/.52</subfield>       <subfield code="2">20</subfield>     </datafield>     <datafield tag="100" ind1="1" ind2=" ">       <subfield code="a">Sandburg, Carl,</subfield>       <subfield code="d">1878-1967.</subfield>     </datafield>     <datafield tag="245" ind1="1" ind2="0">       <subfield code="a">Arithmetic /</subfield>       <subfield code="c">Carl Sandburg ; illustrated as an anamorphic adventure by Ted Rand.</subfield>     </datafield>     <datafield tag="250" ind1=" " ind2=" ">       <subfield code="a">1st ed.</subfield>     </datafield>     <datafield tag="260" ind1=" " ind2=" ">       <subfield code="a">San Diego :</subfield>       <subfield code="b">Harcourt Brace Jovanovich,</subfield>       <subfield code="c">c1993.</subfield>     </datafield>     <datafield tag="300" ind1=" " ind2=" ">       <subfield code="a">1 v. (unpaged) :</subfield>       <subfield code="b">ill. (some col.) ;</subfield>       <subfield code="c">26 cm.</subfield>     </datafield>     <datafield tag="500" ind1=" " ind2=" ">       <subfield code="a">One Mylar sheet included in pocket.</subfield>     </datafield>     <datafield tag="520" ind1=" " ind2=" ">       <subfield code="a">A poem about numbers and their characteristics. Features anamorphic, or distorted, drawings which can be restored to normal by viewing from a particular angle or by viewing the image\'s reflection in the provided Mylar cone.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="0">       <subfield code="a">Arithmetic</subfield>       <subfield code="x">Juvenile poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="0">       <subfield code="a">Children\'s poetry, American.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">Arithmetic</subfield>       <subfield code="x">Poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">American poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">Visual perception.</subfield>     </datafield>     <datafield tag="700" ind1="1" ind2=" ">       <subfield code="a">Rand, Ted,</subfield>       <subfield code="e">ill.</subfield>     </datafield>   </record> </collection>'
         }
     };
 
