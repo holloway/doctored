@@ -1,7 +1,7 @@
 // Note: Useful only for debug purposes when using desktop browsers.
 //
 // Be sure to also start Chrome with web security disabled
-//
+//ff
 // ~$ google-chrome --disable-web-security -–allow-file-access-from-files
 
 var http = require("http"),
