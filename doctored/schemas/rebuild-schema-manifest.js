@@ -8,7 +8,7 @@
         i,
         schemas,
         manifest_path = path.join(approot, 'manifest.json'),
-        blacklist = [path.basename(__filename), 'manifest.json', 'options.json'],
+        blacklist = [path.basename(__filename), 'manifest.json', 'options.json', 'README.txt'],
         manifest = {},
         get_schema_family = function(full_path){
             var file_options = full_path.substr(0, full_path.length - path.extname(full_path).length) + '.json',
