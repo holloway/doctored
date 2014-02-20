@@ -3,11 +3,11 @@
     "use strict";
 
     var defaults = {
-            autosave_every_milliseconds:      30 * 1000,
-            linting_debounce_milliseconds:    1000,
-            retry_init_after_milliseconds:    50,
-            schema:                           "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js
-            theme:                            "flat" //key from options in hamburger_menu.theme_chooser
+            autosave_every_milliseconds:   30 * 1000,
+            linting_debounce_milliseconds: 1000,
+            retry_init_after_milliseconds: 50,
+            schema:                        "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js
+            theme:                         "flat" //key from options in hamburger_menu.theme_chooser
         },
         $ = doctored.$,
         $body = $('body')[0];
@@ -69,7 +69,8 @@
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
                 this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select><option>Loading...</option></select>' +
-                                        '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><option>Loading...</option></select>' +
+                                        '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><optgroup label="Suggested elements in this context">' +
+                                        '<option value="" disabled class="doctored-loading">Loading...</option></optgroup></select>' +
                                         '<h6>attributes</h6><div class="doctored-attributes"></div>';
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
@@ -126,6 +127,8 @@
             lint: function(){
                 // send linting job to one of the workers
                 // NOTE you probably shouldn't call this directly instead call lint_soon()
+                this.root.classList.remove("valid");
+                this.root.classList.remove("invalid");
                 doctored.linters.lint(this.get_xml_string(), this.schema.schema_url, this.lint_response, instance);
             },
             lint_response: function(errors){
@@ -150,7 +153,7 @@
                         }
                     }
                 }
-                if(errors && errors.error_lines && errors.error_lines.length === 0) {
+                if(errors && errors.error_lines && errors.error_lines.length === 0 && (errors.error_summary === undefined || errors.error_summary.message.length === 0)) {
                     this.root.classList.add("valid");
                     this.root.classList.remove("invalid");
                 } else {
@@ -170,8 +173,7 @@
                     data_element,
                     data_attributes;
 
-                xml_string = xml_string.replace(/<\?[\s\S]*?\?>/, '').replace(/<!.*?>/g, '');
-                doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.elements);
+                doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.elements).trim();
                 new_document = document.createElement('div');
                 new_document.innerHTML = doctored_html;
                 new_document_root = new_document.childNodes[0];
@@ -214,6 +216,7 @@
                 if(!chosen_schema_option) return alert("Doctored.js can't find a valid default schema.");
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
                 this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, true);
+                this_function(this.lint_soon, this)();
             },
             schema_chooser_change: function(event){
                 var new_document         = confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)"),
@@ -228,6 +231,7 @@
             },
             paste: function(event){
                 var html = doctored.util.get_clipboard_xml_as_html_string(event.clipboardData),
+                    this_function = doctored.util.this_function,
                     doctored_html;
 
                 if(this.schema.convert_from_html && doctored.util.looks_like_html(html)) {
@@ -243,6 +247,7 @@
                 }
                 doctored_html = doctored.util.convert_xml_to_doctored_html(html);
                 doctored.util.insert_html_at_cursor_position(doctored_html, event);
+                this_function(this.lint_soon, this)();
             },
             element_chooser_change: function(event){
                 // actually the blur event from dialog's <select> calls this
@@ -270,9 +275,10 @@
                     option          = element_chooser.options[this.dialog.element_chooser.selectedIndex],
                     option_value    = option.getAttribute("value"),
                     element_name    = option.innerText,
-                    display_type    = "block";
+                    display_type    = "block",
+                    this_function   = doctored.util.this_function;
 
-                if(option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
+                if(option_value && option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
                     switch(option_value){
@@ -287,6 +293,7 @@
                     if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
                 }
                 dialog.target.setAttribute("data-element", element_name);
+                this_function(this.lint_soon, this)();
             },
             properties: function(event){
                 // clicking the 'properties' button

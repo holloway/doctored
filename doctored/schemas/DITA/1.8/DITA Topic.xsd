@@ -3,42 +3,12 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ditaarch="http://dita.oasis-open.org/architecture/2005/" xmlns:xml="http://www.w3.org/XML/1998/namespace">
 	<xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="xml.xsd"/>
 	<xs:import namespace="http://dita.oasis-open.org/architecture/2005/" schemaLocation="ditaarch.xsd"/>
-	<!-- ======= INCLUDE ======= -->
-	<!-- base domains -->
+	<!-- Add the domains to the base topic XML Schema -->
+	<!--  ================ TOPIC DOMAINS =====================  -->
 	<!--  ================ GROUP DEFINITIONS =====================  -->
-	<xs:group name="keywords">
-		<xs:choice>
-			<xs:sequence>
-				<xs:choice>
-					<xs:element ref="keywords"/>
-				</xs:choice>
-			</xs:sequence>
-			<xs:group ref="delay-d-keywords"/>
-		</xs:choice>
-	</xs:group>
 	<!-- =================  MODULE INLCUDE DEFINITION  ==================  -->
 	<!-- ======== Table elements ======== -->
 	<!-- ======= MetaData elements, plus keyword and indexterm ======= -->
-	<xs:group name="topicref">
-		<xs:choice>
-			<xs:sequence>
-				<xs:choice>
-					<xs:element ref="topicref"/>
-				</xs:choice>
-			</xs:sequence>
-			<xs:group ref="mapgroup-d-topicref"/>
-		</xs:choice>
-	</xs:group>
-	<xs:group name="index-base">
-		<xs:choice>
-			<xs:sequence>
-				<xs:choice>
-					<xs:element ref="index-base"/>
-				</xs:choice>
-			</xs:sequence>
-			<xs:group ref="indexing-d-index-base"/>
-		</xs:choice>
-	</xs:group>
 	<xs:group name="ph">
 		<xs:choice>
 			<xs:sequence>
@@ -59,6 +29,16 @@
 			<xs:group ref="ut-d-fig"/>
 		</xs:choice>
 	</xs:group>
+	<xs:group name="index-base">
+		<xs:choice>
+			<xs:sequence>
+				<xs:choice>
+					<xs:element ref="index-base"/>
+				</xs:choice>
+			</xs:sequence>
+			<xs:group ref="indexing-d-index-base"/>
+		</xs:choice>
+	</xs:group>
 	<xs:group name="note">
 		<xs:choice>
 			<xs:sequence>
@@ -69,491 +49,487 @@
 			<xs:group ref="hazard-d-note"/>
 		</xs:choice>
 	</xs:group>
+	<xs:group name="info-types">
+		<xs:sequence/>
+	</xs:group>
 	<xs:attributeGroup name="domains-att">
-		<xs:attribute name="domains" type="xs:string" default="(map mapgroup-d) 
-                                            (topic delay-d)
-                                            (topic hazard-d)
-                                            (topic hi-d) 
-                                            (topic indexing-d) 
-                                            (topic ut-d)" form="unqualified"/>
+		<xs:attribute name="domains" type="xs:string" default="(topic hazard-d)
+                                            (topic hi-d)  
+                                            (topic indexing-d)
+                                            (topic ut-d)                                              
+                                             " form="unqualified"/>
 	</xs:attributeGroup>
-	<!-- ======= IMPORT - XML attributes and namespace ======= -->
+	<!-- ==================== Import Section ======================= -->
+	<!-- these are common for some classes of resources and exhibits -->
+	<xs:attributeGroup name="rel-atts">
+		<xs:annotation>
+			<xs:documentation>Relational attributes (&lt;<keyword>%rel-atts;</keyword>>) is a
+        parameter entity declaration in the topic XSD that includes attributes whose
+        values may be used for representing navigational relationships. These attributes
+        occur only on elements that represent relationships between topics.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="type" type="xs:string" form="qualified"/>
+		<xs:attribute name="role" type="role-att.class" form="qualified"/>
+		<xs:attribute name="otherrole" type="xs:string" form="qualified"/>
+		<xs:attribute name="format" type="xs:string" form="qualified"/>
+		<xs:attribute name="scope" type="scope-att.class" form="qualified"/>
+	</xs:attributeGroup>
+	<!-- Predefined content.model groups, based on the previous, element-only categories: -->
+	<!-- txt.incl is appropriate for any mixed content definitions (those that have PCDATA) -->
+	<!-- the context for blocks is implicitly an InfoMaster "containing_division" -->
+	<!-- <!ENTITY % body.cnt             "%basic.block;|%required-cleanup;"> -->
+	<xs:group name="body.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="required-cleanup"/>
+				<xs:group ref="draft-comment"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="example.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="title"/>
+				<xs:group ref="txt.incl"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<!-- <!ENTITY % section.cnt          "#PCDATA | %basic.ph; | %basic.block; | %title; |  %txt.incl;"> -->
+	<xs:group name="section.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="title"/>
+				<xs:group ref="sectiondiv"/>
+				<xs:group ref="txt.incl"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<!-- <!ENTITY % section.notitle.cnt  "#PCDATA | %basic.ph; | %basic.block; |             %txt.incl;"> -->
+	<xs:group name="section.notitle.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="sectiondiv"/>
+				<xs:group ref="txt.incl"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
 	<!-- STRUCTURAL MEMBERS ======================================================== -->
 	<!-- things that can be nested under topic after body - redefined when specializing -->
-	<!--xs:simpleType name="topicreftypes.class">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="topic"/>
-      <xs:enumeration value="concept"/>
-      <xs:enumeration value="task"/>
-      <xs:enumeration value="reference"/>
-      <xs:enumeration value="external"/>
-      <xs:enumeration value="local"/>
-    </xs:restriction>
-  </xs:simpleType>-->
-	<xs:attributeGroup name="topicref-atts">
-		<xs:annotation>
-			<xs:documentation>
-        The %topicref-atts; parameter entity represents a group of attributes
-        used in numerous map elements: map, topicref, relcolspec, relcell, topichead,
-        and topicgroup. The set is similar to those documented in <xref href="topicref-atts-no-toc.xml">topicref-atts-no-toc</xref>
-        but includes the <i>
-					<keyword>toc</keyword>
-				</i> attribute.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" form="unqualified"/>
-	</xs:attributeGroup>
-	<xs:simpleType name="collection-type.class">
+	<xs:simpleType name="topicreftypes-att.class">
 		<xs:restriction base="xs:string">
-			<xs:enumeration value="choice"/>
-			<xs:enumeration value="unordered"/>
-			<xs:enumeration value="sequence"/>
-			<xs:enumeration value="family"/>
+			<xs:enumeration value="topic"/>
+			<xs:enumeration value="concept"/>
+			<xs:enumeration value="task"/>
+			<xs:enumeration value="reference"/>
+			<xs:enumeration value="external"/>
+			<xs:enumeration value="local"/>
 			<xs:enumeration value="-dita-use-conref-target"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:simpleType name="linkingtypes.class">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="targetonly"/>
-			<xs:enumeration value="sourceonly"/>
-			<xs:enumeration value="normal"/>
-			<xs:enumeration value="none"/>
-			<xs:enumeration value="-dita-use-conref-target"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:attributeGroup name="topicref-atts-no-toc">
+	<xs:group name="topic-info-types">
+		<xs:choice>
+			<xs:group ref="topic"/>
+			<xs:group ref="info-types"/>
+		</xs:choice>
+	</xs:group>
+	<!--  infotype 'topic'
+ | Topic is the archetype from which other typed topics may be derived.
+ | Its body has completely optional content, which allows topic to be used as a titled container
+ | role: migration target for XHTML, other hierarchically structured source
+ *-->
+	<xs:element name="topic">
 		<xs:annotation>
-			<xs:documentation>
-        The %topicref-atts-no-toc; parameter entity represents the set
-        of attributes used in the 
-          <xref href="reltable.xml">reltable</xref>
-         map
-        element. The set is similar to those documented in 
-          <xref href="topicref-atts.xml">topicref-atts</xref>
-         but
-        for &lt;<keyword>reltable</keyword>&gt; the <i>
-					<keyword>toc</keyword>
-				</i> attribute
-        defaults to <q>no</q>. For the other elements that use the %topicref-atts;
-        group declaration, the <i>
-					<keyword>toc</keyword>
-				</i> attribute doesn't have
-        a default; they can inherit their <i>
-					<keyword>toc</keyword>
-				</i> value from
-        the nearest container, otherwise it functions upon output as if set to <q>yes</q>.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" default="no" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" form="unqualified"/>
-	</xs:attributeGroup>
-	<xs:simpleType name="print-att.class">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="yes"/>
-			<xs:enumeration value="no"/>
-			<xs:enumeration value="printonly"/>
-			<xs:enumeration value="-dita-use-conref-target"/>
-		</xs:restriction>
-	</xs:simpleType>
-	<xs:element name="map">
-		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>map</keyword>&gt; element is used to define a map
-        which describes the relationships among a set of DITA topics. Maps consist
-        of references to topics organized into hierarchies and tables. Maps provide
-        a way to express these relationships in a single common format that can be
-        used for different outputs. 
-      </xs:documentation>
+			<xs:documentation>The &lt;<keyword>topic</keyword>> element is the top-level DITA
+        element for a single-subject topic or article. Other top-level DITA elements
+        that are more content-specific are &lt;<keyword>concept</keyword>>, &lt;<keyword>task</keyword>>,
+        and &lt;<keyword>reference</keyword>>.
+</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="map.class">
-					<xs:attribute ref="class" default="- map/map "/>
+				<xs:extension base="topic.class">
+					<xs:attribute ref="class" default="- topic/topic "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
-	<xs:complexType name="map.class">
+	<xs:complexType name="topic.class">
 		<xs:sequence>
-			<xs:group ref="map.content"/>
+			<xs:group ref="topic.content"/>
 		</xs:sequence>
-		<xs:attributeGroup ref="map.attributes"/>
+		<xs:attributeGroup ref="topic.attributes"/>
 	</xs:complexType>
-	<xs:group name="map.content">
+	<xs:group name="topic.content">
 		<xs:sequence>
 			<xs:sequence>
-				<xs:group ref="title" minOccurs="0"/>
-				<xs:group ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="navref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="topicref"/>
-					<xs:group ref="reltable"/>
-					<xs:group ref="data.elements.incl"/>
+				<xs:group ref="title"/>
+				<xs:group ref="titlealts" minOccurs="0"/>
+				<xs:choice minOccurs="0">
+					<xs:group ref="shortdesc"/>
+					<xs:group ref="abstract"/>
 				</xs:choice>
+				<xs:group ref="prolog" minOccurs="0"/>
+				<xs:group ref="body" minOccurs="0"/>
+				<xs:group ref="related-links" minOccurs="0"/>
+				<xs:group ref="topic-info-types" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:sequence>
 	</xs:group>
-	<xs:attributeGroup name="map.attributes">
-		<xs:attribute name="title" type="xs:string" form="unqualified"/>
-		<xs:attribute name="id" type="xs:ID" form="unqualified"/>
+	<xs:attributeGroup name="topic.attributes">
+		<xs:attribute name="id" type="xs:ID" use="required" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
 		<xs:attributeGroup ref="conref-atts"/>
-		<xs:attribute name="anchorref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
+		<xs:attribute ref="ditaarch:DITAArchVersion"/>
 		<xs:attributeGroup ref="domains-att"/>
-		<xs:attributeGroup ref="topicref-atts"/>
 		<xs:attributeGroup ref="select-atts"/>
 		<xs:attributeGroup ref="localization-atts"/>
-		<xs:attribute ref="ditaarch:DITAArchVersion"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
-	<xs:element name="navref">
+	<!-- Rename null to no-topic-nesting -->
+	<xs:element name="no-topic-nesting">
 		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>navref</keyword>&gt; element references a map file
-        from within a map file.  The reference is resolved at runtime for Eclipse
-        navigation, typically to pull together the navigation for multiple components
-        into a product navigation. <ph conref="commonLRdefs.xml#commonLRdefs/only4eclipse"/>
+			<xs:documentation>The &lt;<keyword>no-topic-nesting</keyword>> element is a placeholder
+        in the DITA architecture. It is not actually used by the DITA XSDs; it is
+        for use only when creating a customized XSD where the information designer
+        wants to eliminate the ability to nest topics. <b>Not for use by authors.</b>
 			</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="navref.class">
-					<xs:attribute ref="class" default="- map/navref "/>
+				<xs:extension base="no-topic-nesting.class">
+					<xs:attribute ref="class" default="- topic/no-topic-nesting "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
-	<xs:complexType name="navref.class">
-		<xs:attributeGroup ref="navref.attributes"/>
+	<xs:complexType name="no-topic-nesting.class">
+		<xs:attributeGroup ref="no-topic-nesting.attributes"/>
 	</xs:complexType>
-	<xs:attributeGroup name="navref.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attribute name="mapref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
+	<xs:attributeGroup name="no-topic-nesting.attributes">
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
-	<xs:element name="topicref">
+	<xs:element name="titlealts">
 		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>topicref</keyword>&gt; element designates a topic
-        (such as a concept, task, or reference) as a link in a DITA map. A &lt;<keyword>topicref</keyword>&gt;
-        can contain other&lt;<keyword>topicref</keyword>&gt; elements, allowing you to
-        express navigation or table-of-contents hierarchies, as well as implying relationships
-        between the containing &lt;<keyword>topicref</keyword>&gt; and its children.
-        You can set the collection-type of a container &lt;<keyword>topicref</keyword>&gt;
-        to determine how its children are related to each other. Relationships end
-        up expressed as links in the output (with each participant in a relationship
-        having links to the other participants). 
+			<xs:documentation>The alternate title element (&lt;<keyword>titlealts</keyword>>)
+        is optional, but can occur after the topic title. Two elements can be inserted
+        as sub-elements of &lt;<keyword>titlealts</keyword>>: navigation title &lt;<keyword>navtitle</keyword>>
+        and search title &lt;<keyword>searchtitle</keyword>>. When your DITA topic
+        is transformed to XHTML, the &lt;<keyword>searchtitle</keyword>> element is
+        used to create a title element at the top of the resulting XHTML file. This
+        title may differ from the first level heading that shows in the main browser
+        window. In HTML output, the &lt;<keyword>navtitle</keyword>> may be used to
+        create navigation panels when your DITA topics are part of an HTML-based help
+        or information system. The design intent is to enable navigation for HTML
+        Help and Eclipse help systems.
       </xs:documentation>
 		</xs:annotation>
 		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="topicref.class">
-					<xs:attribute ref="class" default="- map/topicref "/>
+				<xs:extension base="titlealts.class">
+					<xs:attribute ref="class" default="- topic/titlealts "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
-	<xs:complexType name="topicref.class">
+	<xs:complexType name="titlealts.class">
 		<xs:sequence>
-			<xs:group ref="topicref.content"/>
+			<xs:group ref="titlealts.content"/>
 		</xs:sequence>
-		<xs:attributeGroup ref="topicref.attributes"/>
+		<xs:attributeGroup ref="titlealts.attributes"/>
 	</xs:complexType>
-	<xs:group name="topicref.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="navref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="topicref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topicref.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="topicref-atts"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="reltable">
-		<xs:annotation>
-			<xs:documentation>
-        The relationship table (&lt;<keyword>reltable</keyword>&gt;) defines
-        relationships between topics, based on the familiar table model of rows (&lt;<keyword>relrow</keyword>&gt;),
-        columns (&lt;<keyword>relheader</keyword>&gt;), and cells (&lt;<keyword>relcell</keyword>>).
-        The &lt;<keyword>relcell</keyword>&gt; elements can contain &lt;<keyword>topicref</keyword>&gt;
-        elements, which are then related to other &lt;<keyword>topicref</keyword>&gt;
-        elements in the same row (although not necessarily in the same cell). By default,
-        the contents of a &lt;<keyword>reltable</keyword>&gt; element are not output
-        for navigation or TOC purposes, and are used only to define relationships
-        that can be expressed as topic-to-topic links.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="reltable.class">
-					<xs:attribute ref="class" default="- map/reltable "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="reltable.class">
-		<xs:sequence>
-			<xs:group ref="reltable.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="reltable.attributes"/>
-	</xs:complexType>
-	<xs:group name="reltable.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="topicmeta" minOccurs="0"/>
-				<xs:group ref="relheader" minOccurs="0"/>
-				<xs:group ref="relrow" maxOccurs="unbounded"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="reltable.attributes">
-		<xs:attribute name="title" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="topicref-atts-no-toc"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="relheader">
-		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>relheader</keyword>&gt; element is a row of column
-        definitions (&lt;<keyword>relcolspec</keyword>&gt; elements) in a relationship
-        table. Each table can have only one set of column definitions.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="relheader.class">
-					<xs:attribute ref="class" default="- map/relheader "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="relheader.class">
-		<xs:sequence>
-			<xs:group ref="relheader.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="relheader.attributes"/>
-	</xs:complexType>
-	<xs:group name="relheader.content">
-		<xs:sequence>
-			<xs:sequence maxOccurs="unbounded">
-				<xs:group ref="relcolspec"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="relheader.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="relcolspec">
-		<xs:annotation>
-			<xs:documentation>
-        A column definition in the relationship table. You can use &lt;<keyword>relcolspec</keyword>&gt;
-        column definitions to set defaults for the attributes of &lt;<keyword>topicref</keyword>&gt;
-        elements in the column. For example, you can set type="concept" to treat all
-        untyped &lt;<keyword>topicref</keyword>&gt; elements in the column as concepts.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="relcolspec.class">
-					<xs:attribute ref="class" default="- map/relcolspec "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<!-- <!ELEMENT relcolspec ((%title;)?, (%topicmeta;)?, (%topicref)*)>  #12048 -->
-	<xs:complexType name="relcolspec.class">
-		<xs:sequence>
-			<xs:group ref="relcolspec.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="relcolspec.attributes"/>
-	</xs:complexType>
-	<xs:group name="relcolspec.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="title" minOccurs="0"/>
-				<xs:group ref="topicmeta" minOccurs="0"/>
-				<xs:group ref="topicref" minOccurs="0" maxOccurs="unbounded"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="relcolspec.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="topicref-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="relrow">
-		<xs:annotation>
-			<xs:documentation>
-        A &lt;<keyword>relrow</keyword>&gt; is a row in the relationship table.
-        This creates a relationship between the cells in the row, which will end up
-        expressed as links among the &lt;<keyword>topicref</keyword>&gt; elements in
-        the cells.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="relrow.class">
-					<xs:attribute ref="class" default="- map/relrow "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="relrow.class">
-		<xs:sequence>
-			<xs:group ref="relrow.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="relrow.attributes"/>
-	</xs:complexType>
-	<xs:group name="relrow.content">
-		<xs:sequence>
-			<xs:sequence minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="relcell"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="relrow.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="relcell">
-		<xs:annotation>
-			<xs:documentation>
-        A &lt;<keyword>relcell</keyword>&gt; element is a cell in the relationship
-        table. The &lt;<keyword>topicref</keyword>&gt; elements it contains will be related
-        to topicrefs in other cells of the same row. By default, topicrefs in the
-        same cell are not related to each other, unless you change the relcell's collection-type
-        attribute to indicate that they are related.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="relcell.class">
-					<xs:attribute ref="class" default="- map/relcell "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="relcell.class">
-		<xs:sequence>
-			<xs:group ref="relcell.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="relcell.attributes"/>
-	</xs:complexType>
-	<xs:group name="relcell.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="topicref"/>
-				<xs:group ref="data.elements.incl"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="relcell.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="topicref-atts"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="anchor">
-		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>anchor</keyword>&gt; element is used for runtime
-        integration of navigation. It provides an integration point that another map
-        can point to in order to insert its navigation into the current navigation
-        tree. It is currently supported by Eclipse output only.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="anchor.class">
-					<xs:attribute ref="class" default="- map/anchor "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="anchor.class">
-		<xs:attributeGroup ref="anchor.attributes"/>
-	</xs:complexType>
-	<xs:attributeGroup name="anchor.attributes">
-		<xs:attribute name="id" type="xs:ID" use="required" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="conref-atts"/>
-		<xs:attributeGroup ref="localization-atts"/>
-		<xs:attributeGroup ref="select-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="topicmeta">
-		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>topicmeta</keyword>&gt; element defines the metadata
-        that applies to a topic and the topic's children. When creating links, it
-        can also be used to override the title and short description of the topic.
-        In addition, it can insert index entries through the &lt;<keyword>keywords</keyword>&gt;
-        element.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="topicmeta.class">
-					<xs:attribute ref="class" default="- map/topicmeta "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="topicmeta.class">
-		<xs:sequence>
-			<xs:group ref="topicmeta.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="topicmeta.attributes"/>
-	</xs:complexType>
-	<xs:group name="topicmeta.content">
+	<xs:group name="titlealts.content">
 		<xs:sequence>
 			<xs:sequence>
 				<xs:group ref="navtitle" minOccurs="0"/>
-				<xs:group ref="linktext" minOccurs="0"/>
 				<xs:group ref="searchtitle" minOccurs="0"/>
-				<xs:group ref="shortdesc" minOccurs="0"/>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="titlealts.attributes">
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="searchtitle">
+		<xs:annotation>
+			<xs:documentation>When your DITA topic is transformed to XHTML, the &lt;<keyword>searchtitle</keyword>>
+        element is used to create a title element at the top of the resulting HTML
+        file. This title is normally used in search result summaries by some search
+        engines, such as that in Eclipse (
+          <xref format="html" href="http://eclipse.org" scope="external">http://eclipse.org</xref>
+        ); if not set, the XHTML's
+        title element defaults to the source topic's title content (which may not
+        be as well optimized for search summaries)
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="searchtitle.class">
+					<xs:attribute ref="class" default="- topic/searchtitle "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="searchtitle.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="searchtitle.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="searchtitle.attributes"/>
+	</xs:complexType>
+	<xs:group name="searchtitle.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt" minOccurs="0"/>
+				<xs:group ref="ph" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="searchtitle.attributes">
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="body">
+		<xs:annotation>
+			<xs:documentation>The &lt;<keyword>body</keyword>> element is the container for the
+        main content of a &lt;<keyword>topic</keyword>>.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="body.class">
+					<xs:attribute ref="class" default="- topic/body "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="body.class">
+		<xs:sequence>
+			<xs:group ref="body.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="body.attributes"/>
+	</xs:complexType>
+	<xs:group name="body.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="body.cnt" minOccurs="0"/>
+				<xs:group ref="bodydiv" minOccurs="0"/>
+				<xs:group ref="section" minOccurs="0"/>
+				<xs:group ref="example" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="body.attributes">
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="section">
+		<xs:annotation>
+			<xs:documentation> The &lt;<keyword>section</keyword>> element represents an organizational
+        division in a topic. Sections are used to organize subsets of information
+        that are directly related to the topic. For example, the titles <b>Reference
+          Syntax</b>, <b>Example</b> and <b>Properties</b> might represent section-level
+        discourse within a topic about a command-line process—the content in each
+        section relates uniquely to the subject of that topic. Multiple sections within
+        a single topic do not represent a hierarchy, but rather peer divisions of
+        that topic. Sections cannot be nested. A section may have an optional title.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="section.class">
+					<xs:attribute ref="class" default="- topic/section "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="section.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="section.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="section.attributes"/>
+	</xs:complexType>
+	<xs:group name="section.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="section.cnt" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="section.attributes">
+		<xs:attribute name="spectitle" type="xs:string" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="bodydiv">
+		<xs:annotation>
+			<xs:documentation>
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="bodydiv.class">
+					<xs:attribute ref="class" default="- topic/bodydiv "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="bodydiv.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="bodydiv.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="bodydiv.attributes"/>
+	</xs:complexType>
+	<xs:group name="bodydiv.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="bodydiv.cnt" minOccurs="0"/>
+				<xs:group ref="bodydiv" minOccurs="0"/>
+				<xs:group ref="section" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="bodydiv.attributes">
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:group name="bodydiv.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+				<xs:group ref="txt.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:element name="sectiondiv">
+		<xs:annotation>
+			<xs:documentation> 
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="sectiondiv.class">
+					<xs:attribute ref="class" default="- topic/sectiondiv "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="sectiondiv.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="sectiondiv.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="sectiondiv.attributes"/>
+	</xs:complexType>
+	<xs:group name="sectiondiv.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="sectiondiv.cnt" minOccurs="0"/>
+				<xs:group ref="sectiondiv" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="sectiondiv.attributes">
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:group name="sectiondiv.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+				<xs:group ref="txt.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:element name="example">
+		<xs:annotation>
+			<xs:documentation>The &lt;<keyword>example</keyword>> element is a section with the
+        specific role of containing examples that illustrate or support the current
+        topic.  The &lt;<keyword>example</keyword>> element has the same content model
+        as &lt;<keyword>section</keyword>>.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="example.class">
+					<xs:attribute ref="class" default="- topic/example "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="example.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="example.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="example.attributes"/>
+	</xs:complexType>
+	<xs:group name="example.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="example.cnt" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="example.attributes">
+		<xs:attribute name="spectitle" type="xs:string" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<!-- PROLOG (metadata for topics) =================================== -->
+	<!-- TYPED DATA ELEMENTS: ======================================================= -->
+	<!-- typed content definitions  -->
+	<!-- typed, localizable content -->
+	<xs:element name="prolog">
+		<xs:annotation>
+			<xs:documentation>The &lt;<keyword>prolog</keyword>> element contains information
+        about the topic as an whole (for example, author information or subject category)
+        that is either entered by the author or machine-maintained. Much of the metadata
+        inside the &lt;<keyword>prolog</keyword>> will not be displayed with the topic
+        on output, but may be used by processes that generate search indexes or customize
+        navigation.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="prolog.class">
+					<xs:attribute ref="class" default="- topic/prolog "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="prolog.class">
+		<xs:sequence>
+			<xs:group ref="prolog.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="prolog.attributes"/>
+	</xs:complexType>
+	<xs:group name="prolog.content">
+		<xs:sequence>
+			<xs:sequence>
 				<xs:group ref="author" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:group ref="source" minOccurs="0"/>
 				<xs:group ref="publisher" minOccurs="0"/>
@@ -561,11 +537,6 @@
 				<xs:group ref="critdates" minOccurs="0"/>
 				<xs:group ref="permissions" minOccurs="0"/>
 				<xs:group ref="metadata" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="audience" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="category" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="keywords" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="prodinfo" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="othermeta" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:group ref="resourceid" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:choice minOccurs="0" maxOccurs="unbounded">
 					<xs:group ref="data.elements.incl"/>
@@ -574,25 +545,179 @@
 			</xs:sequence>
 		</xs:sequence>
 	</xs:group>
-	<xs:attributeGroup name="topicmeta.attributes">
-		<xs:attribute name="lockmeta" type="yesno-att.class" form="unqualified"/>
+	<xs:attributeGroup name="prolog.attributes">
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<!-- ================ LINKS GROUPING - START ================ -->
+	<xs:element name="related-links">
+		<xs:annotation>
+			<xs:documentation>The related information links of a topic (&lt;<keyword>related-links</keyword>>
+        element) are stored in a special section following the body of the topic.
+        After a topic is processed into it final output form, the related links are
+        usually displayed at the end of the topic, although some Web-based help systems
+        might display them in a separate navigation frame.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="related-links.class">
+					<xs:attribute ref="class" default="- topic/related-links "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="related-links.class">
+		<xs:sequence>
+			<xs:group ref="related-links.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="related-links.attributes"/>
+	</xs:complexType>
+	<xs:group name="related-links.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="link" minOccurs="0"/>
+				<xs:group ref="linklist" minOccurs="0"/>
+				<xs:group ref="linkpool" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="related-links.attributes">
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="rel-atts"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="linklist">
+		<xs:annotation>
+			<xs:documentation>The &lt;<keyword>linklist</keyword>> element defines an author-arranged
+        group of links. Within &lt;<keyword>linklist</keyword>>, the organization
+        of links on final output is in the same order as originally authored in the
+        DITA topic file.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="linklist.class">
+					<xs:attribute ref="class" default="- topic/linklist "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="linklist.class">
+		<xs:sequence>
+			<xs:group ref="linklist.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="linklist.attributes"/>
+	</xs:complexType>
+	<xs:group name="linklist.content">
+		<xs:sequence>
+			<xs:sequence>
+				<xs:group ref="title" minOccurs="0"/>
+				<xs:group ref="desc" minOccurs="0"/>
+				<xs:choice minOccurs="0" maxOccurs="unbounded">
+					<xs:group ref="linklist"/>
+					<xs:group ref="link"/>
+				</xs:choice>
+				<xs:group ref="linkinfo" minOccurs="0"/>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="linklist.attributes">
+		<xs:attribute name="collection-type" type="collection-type.class" form="qualified"/>
+		<xs:attribute name="duplicates" type="yesno-att.class" form="qualified"/>
+		<xs:attribute name="mapkeyref" type="xs:string" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attribute name="spectitle" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="rel-atts"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="linkinfo">
+		<xs:annotation>
+			<xs:documentation>
+        The &lt;<keyword>linkinfo</keyword>> element allows you to place
+        a descriptive paragraph following a list of links in a <xref href="linklist.xml">linklist</xref>  element. 
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="linkinfo.class">
+					<xs:attribute ref="class" default="- topic/linkinfo "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="linkinfo.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="linkinfo.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="linkinfo.attributes"/>
+	</xs:complexType>
+	<xs:group name="linkinfo.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="desc.cnt"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="linkinfo.attributes">
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="linkpool">
+		<xs:annotation>
+			<xs:documentation>The &lt;<keyword>linkpool</keyword>> element defines a group of
+        links that have common characteristics, such as type or audience or source.
+        Within &lt;<keyword>linkpool</keyword>>, the organization of links on final
+        output is determined by the output process, not by the order that the links
+        actually occur in the DITA topic file.
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="linkpool.class">
+					<xs:attribute ref="class" default="- topic/linkpool "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="linkpool.class">
+		<xs:sequence>
+			<xs:group ref="linkpool.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="linkpool.attributes"/>
+	</xs:complexType>
+	<xs:group name="linkpool.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="linkpool" minOccurs="0"/>
+				<xs:group ref="link" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="linkpool.attributes">
+		<xs:attribute name="collection-type" type="collection-type.class" form="qualified"/>
+		<xs:attribute name="duplicates" type="yesno-att.class" form="qualified"/>
+		<xs:attribute name="mapkeyref" type="xs:string" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="rel-atts"/>
 		<xs:attributeGroup ref="univ-atts"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
 	<xs:element name="linktext">
 		<xs:annotation>
-			<xs:documentation>
-        The &lt;<keyword>linktext</keyword>&gt; element provides the literal
+			<xs:documentation>The &lt;<keyword>linktext</keyword>> element provides the literal
         label or line of text for a link. In most cases, the text of a link can be
         resolved during processing by cross reference with the target resource. Use
-        the &lt;<keyword>linktext</keyword>&gt; element only when the target cannot be
+        the &lt;<keyword>linktext</keyword>> element only when the target cannot be
         reached, such as when it is a peer or external link.
       </xs:documentation>
 		</xs:annotation>
 		<xs:complexType mixed="true">
 			<xs:complexContent>
 				<xs:extension base="linktext.class">
-					<xs:attribute ref="class" default="- map/linktext "/>
+					<xs:attribute ref="class" default="- topic/linktext "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
@@ -606,57 +731,109 @@
 	<xs:group name="linktext.content">
 		<xs:sequence>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt"/>
-				<xs:group ref="ph"/>
+				<xs:group ref="words.cnt" minOccurs="0"/>
+				<xs:group ref="ph" minOccurs="0"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
 	<xs:attributeGroup name="linktext.attributes">
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
 		<xs:attributeGroup ref="univ-atts"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
-	<xs:element name="searchtitle">
+	<xs:element name="link">
 		<xs:annotation>
-			<xs:documentation>
-        When your DITA topic is transformed to XHTML, the &lt;<keyword>searchtitle</keyword>&gt;
-        element is used to create a title element at the top of the resulting HTML
-        file. This title is normally used in search result summaries by some search
-        engines, such as that in Eclipse (<xref format="html" href="http://eclipse.org" scope="external">http://eclipse.org</xref>); if not set, the XHTML's
-        title element defaults to the source topic's title content (which may not
-        be as well optimized for search summaries)
+			<xs:documentation>The &lt;<keyword>link</keyword>> element defines a relationship
+        to another topic. Links represent the types and roles of topics in a web of
+        information, and therefore represent navigational links within that web. The
+        parent structures of link allow authors to define named groups and even sort
+        orders that can be applied to sets of links.  
       </xs:documentation>
 		</xs:annotation>
-		<xs:complexType mixed="true">
+		<xs:complexType>
 			<xs:complexContent>
-				<xs:extension base="searchtitle.class">
-					<xs:attribute ref="class" default="- map/searchtitle "/>
+				<xs:extension base="link.class">
+					<xs:attribute ref="class" default="- topic/link "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
-	<xs:complexType name="searchtitle.class" mixed="true">
+	<xs:complexType name="link.class">
 		<xs:sequence>
-			<xs:group ref="searchtitle.content"/>
+			<xs:group ref="link.content"/>
 		</xs:sequence>
-		<xs:attributeGroup ref="searchtitle.attributes"/>
+		<xs:attributeGroup ref="link.attributes"/>
 	</xs:complexType>
-	<xs:group name="searchtitle.content">
+	<xs:group name="link.content">
 		<xs:sequence>
-			<xs:sequence minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt"/>
+			<xs:sequence>
+				<xs:group ref="linktext" minOccurs="0"/>
+				<xs:group ref="desc" minOccurs="0"/>
 			</xs:sequence>
 		</xs:sequence>
 	</xs:group>
-	<xs:attributeGroup name="searchtitle.attributes">
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
+	<xs:attributeGroup name="link.attributes">
+		<xs:attribute name="href" type="xs:string" form="qualified"/>
+		<xs:attribute name="keyref" type="xs:string" form="qualified"/>
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
+		<xs:attribute name="query" type="xs:string" form="qualified"/>
+		<xs:attributeGroup ref="rel-atts"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:simpleType name="collection-type.class">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="choice"/>
+			<xs:enumeration value="unordered"/>
+			<xs:enumeration value="sequence"/>
+			<xs:enumeration value="family"/>
+			<xs:enumeration value="-dita-use-conref-target"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- ================ LINKS GROUPING - END ================ -->
+	<!--                    LONG NAME: Abstract                        -->
+	<!-- <!ELEMENT abstract      (%section.notitle.cnt; | %shortdesc;)*       > -->
+	<xs:element name="abstract">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="abstract.class">
+					<xs:attribute ref="class" default="- topic/abstract "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="abstract.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="abstract.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="abstract.attributes"/>
+	</xs:complexType>
+	<xs:group name="abstract.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="abstract.cnt" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="abstract.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.block"/>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="data.elements.incl"/>
+				<xs:group ref="foreign.unknown.incl"/>
+				<xs:group ref="shortdesc"/>
+				<xs:group ref="txt.incl"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="abstract.attributes">
+		<xs:attribute name="outputclass" type="xs:string" form="qualified"/>
 		<xs:attributeGroup ref="univ-atts"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
 	<xs:element name="shortdesc">
 		<xs:annotation>
-			<xs:documentation>
-        The short description (&lt;<keyword>shortdesc</keyword>&gt;) element
+			<xs:documentation>The short description (&lt;<keyword>shortdesc</keyword>>) element
         occurs between the topic title and the topic body, as the initial paragraph-like
         content of a topic. The short description, which represents the purpose or
         theme of the topic, is also intended to be used as a link preview and for
@@ -666,269 +843,11 @@
 		<xs:complexType mixed="true">
 			<xs:complexContent>
 				<xs:extension base="shortdesc.class">
-					<xs:attribute ref="class" default="- map/shortdesc "/>
+					<xs:attribute ref="class" default="- topic/shortdesc "/>
 				</xs:extension>
 			</xs:complexContent>
 		</xs:complexType>
 	</xs:element>
-	<!--<xs:complexType name="shortdesc.class" mixed="true">
-    <xs:sequence minOccurs="0" maxOccurs="unbounded">
-      <xs:group ref="words.cnt"/>
-    </xs:sequence>
-    <xs:attributeGroup ref="global-atts" />
-  </xs:complexType >-->
-	<xs:group name="metadata">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="metadata"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="author">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="author"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="source">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="source"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="publisher">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="publisher"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="copyright">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="copyright"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="copyryear">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="copyryear"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="copyrholder">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="copyrholder"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="critdates">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="critdates"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="revised">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="revised"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="created">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="created"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="resourceid">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="resourceid"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="audience">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="audience"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="category">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="category"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="othermeta">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="othermeta"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="permissions">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="permissions"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="prodinfo">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="prodinfo"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="brand">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="brand"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="series">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="series"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="platform">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="platform"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="prognum">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="prognum"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="featnum">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="featnum"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="component">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="component"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="prodname">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="prodname"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="vrmlist">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="vrmlist"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="vrm">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="vrm"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="map">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="map"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="navref">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="navref"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="reltable">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="reltable"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="relheader">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="relheader"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="relcolspec">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="relcolspec"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="relrow">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="relrow"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="relcell">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="relcell"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="anchor">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="anchor"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="topicmeta">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="topicmeta"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="linktext">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="linktext"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="searchtitle">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="searchtitle"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
 	<xs:group name="title">
 		<xs:sequence>
 			<xs:choice>
@@ -5134,977 +5053,125 @@
 		<xs:attributeGroup ref="univ-atts"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
-	<xs:group name="table">
+	<xs:group name="topic">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="table"/>
+				<xs:element ref="topic"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="tgroup">
+	<xs:group name="no-topic-nesting">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="tgroup"/>
+				<xs:element ref="no-topic-nesting"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="colspec">
+	<xs:group name="titlealts">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="colspec"/>
+				<xs:element ref="titlealts"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="thead">
+	<xs:group name="searchtitle">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="thead"/>
+				<xs:element ref="searchtitle"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="tbody">
+	<xs:group name="body">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="tbody"/>
+				<xs:element ref="body"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="row">
+	<xs:group name="section">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="row"/>
+				<xs:element ref="section"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="entry">
+	<xs:group name="bodydiv">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="entry"/>
+				<xs:element ref="bodydiv"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:annotation>
-		<xs:appinfo>
-			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic hazard-d)</dita:domainsModule>
-		</xs:appinfo>
-		<xs:documentation>
-      
-    </xs:documentation>
-	</xs:annotation>
-	<xs:group name="hazard-d-note">
-		<xs:choice>
-			<xs:element ref="hazardstatement"/>
-		</xs:choice>
-	</xs:group>
-	<xs:group name="hazardstatement">
+	<xs:group name="sectiondiv">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="hazardstatement"/>
+				<xs:element ref="sectiondiv"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="messagepanel">
+	<xs:group name="example">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="messagepanel"/>
+				<xs:element ref="example"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="hazardsymbol">
+	<xs:group name="prolog">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="hazardsymbol"/>
+				<xs:element ref="prolog"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="typeofhazard">
+	<xs:group name="related-links">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="typeofhazard"/>
+				<xs:element ref="related-links"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="consequence">
+	<xs:group name="linklist">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="consequence"/>
+				<xs:element ref="linklist"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="howtoavoid">
+	<xs:group name="linkinfo">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="howtoavoid"/>
+				<xs:element ref="linkinfo"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<!--  
-      Any content model that includes the hazard.cnt group must also set  mixed="true" 
-   >-->
-	<xs:group name="hazard.cnt">
+	<xs:group name="linkpool">
 		<xs:sequence>
 			<xs:choice>
-				<xs:group ref="basic.ph"/>
-				<xs:group ref="sl"/>
-				<xs:group ref="simpletable"/>
+				<xs:element ref="linkpool"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:element name="hazardstatement">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="hazardstatement.class">
-					<xs:attribute ref="class" default="+ topic/note hazard-d/hazardstatement "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="hazardstatement.class">
-		<xs:sequence>
-			<xs:group ref="hazardstatement.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="hazardstatement.attributes"/>
-	</xs:complexType>
-	<xs:group name="hazardstatement.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="messagepanel" maxOccurs="unbounded"/>
-				<xs:group ref="hazardsymbol" minOccurs="0" maxOccurs="unbounded"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="hazardstatement.attributes">
-		<xs:attribute name="type" type="type-note-atts.class"/>
-		<xs:attribute name="spectitle" type="xs:string"/>
-		<xs:attribute name="othertype" type="xs:string"/>
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="messagepanel">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="messagepanel.class">
-					<xs:attribute ref="class" default="+ topic/ul hazard-d/messagepanel "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="messagepanel.class">
-		<xs:sequence>
-			<xs:group ref="messagepanel.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="messagepanel.attributes"/>
-	</xs:complexType>
-	<xs:group name="messagepanel.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="typeofhazard"/>
-				<xs:group ref="consequence" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:group ref="howtoavoid" maxOccurs="unbounded"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="messagepanel.attributes">
-		<xs:attribute name="spectitle" type="xs:string"/>
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="hazardsymbol">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="hazardsymbol.class">
-					<xs:attribute ref="class" default="+ topic/image hazard-d/hazardsymbol "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="hazardsymbol.class">
-		<xs:sequence>
-			<xs:group ref="hazardsymbol.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="hazardsymbol.attributes"/>
-	</xs:complexType>
-	<xs:group name="hazardsymbol.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="alt" minOccurs="0"/>
-				<xs:group ref="longdescref" minOccurs="0"/>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="hazardsymbol.attributes">
-		<xs:attribute name="href" type="xs:string" use="required"/>
-		<xs:attribute name="keyref" type="xs:string"/>
-		<!-- <xs:attribute name="alt" type="xs:string"/> -->
-		<xs:attribute name="longdescref" type="xs:string"/>
-		<xs:attribute name="height" type="xs:NMTOKEN"/>
-		<xs:attribute name="width" type="xs:NMTOKEN"/>
-		<xs:attribute name="scale" type="xs:NMTOKEN"/>
-		<xs:attribute name="scalefit" type="yesno-att.class"/>
-		<xs:attribute name="scope" type="scope-att.class"/>
-		<xs:attribute name="align" type="xs:string"/>
-		<xs:attribute name="placement" type="image-placement-att.class" default="inline"/>
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="typeofhazard">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="typeofhazard.class">
-					<xs:attribute ref="class" default="+ topic/li hazard-d/typeofhazard "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="typeofhazard.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="typeofhazard.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="typeofhazard.attributes"/>
-	</xs:complexType>
-	<xs:group name="typeofhazard.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt" minOccurs="0"/>
-				<xs:group ref="ph" minOccurs="0"/>
-				<xs:group ref="tm" minOccurs="0"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="typeofhazard.attributes">
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="consequence">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="consequence.class">
-					<xs:attribute ref="class" default="+ topic/li hazard-d/consequence "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="consequence.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="consequence.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="consequence.attributes"/>
-	</xs:complexType>
-	<xs:group name="consequence.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt" minOccurs="0"/>
-				<xs:group ref="ph" minOccurs="0"/>
-				<xs:group ref="tm" minOccurs="0"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="consequence.attributes">
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="howtoavoid">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="howtoavoid.class">
-					<xs:attribute ref="class" default="+ topic/li hazard-d/howtoavoid "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="howtoavoid.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="howtoavoid.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="howtoavoid.content"/>
-	</xs:complexType>
-	<xs:group name="howtoavoid.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="hazard.cnt" minOccurs="0"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="howtoavoid.content">
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<!--<!ENTITY mapgroup-d-att "(map mapgroup-d)"                           >-->
-	<xs:annotation>
-		<xs:appinfo>
-			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic mapgroup-d)</dita:domainsModule>
-		</xs:appinfo>
-		<xs:documentation> 
-    
-    </xs:documentation>
-	</xs:annotation>
-	<xs:group name="mapgroup-d-topicref">
-		<xs:choice>
-			<xs:element ref="anchorref"/>
-			<xs:element ref="keydef"/>
-			<xs:element ref="mapref"/>
-			<xs:element ref="topicgroup"/>
-			<xs:element ref="topichead"/>
-			<xs:element ref="topicset"/>
-			<xs:element ref="topicsetref"/>
-		</xs:choice>
-	</xs:group>
-	<xs:group name="topichead">
+	<xs:group name="linktext">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="topichead"/>
+				<xs:element ref="linktext"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="topicgroup">
+	<xs:group name="link">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="topicgroup"/>
+				<xs:element ref="link"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="anchorref">
+	<xs:group name="abstract">
 		<xs:sequence>
 			<xs:choice>
-				<xs:element ref="anchorref"/>
+				<xs:element ref="abstract"/>
 			</xs:choice>
 		</xs:sequence>
 	</xs:group>
-	<xs:group name="mapref">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="mapref"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="topicset">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="topicset"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="topicsetref">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="topicsetref"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="keydef">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="keydef"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topicref-atts-without-format">
-		<xs:annotation>
-			<xs:documentation>
-        The %topicref-atts-without-format; parameter entity represents a group of attributes
-        used in numerous map elements: mapref,
-        and topicgroup. The set is similar to those documented in <xref href="topicref-atts.xml">topicref-atts</xref> but
-        excludes the <i>
-					<keyword>format</keyword>
-				</i> attribute.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" form="unqualified"/>
-	</xs:attributeGroup>
-	<xs:element name="topichead">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>topichead</keyword>> element provides a title-only
-          entry in a navigation map, as an alternative to the fully-linked title provided
-          by the &lt;<keyword>topicref</keyword>> element.
-        </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="topichead.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/topichead "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="topichead.class">
-		<xs:sequence>
-			<xs:group ref="topichead.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="topichead.attributes"/>
-	</xs:complexType>
-	<xs:group name="topichead.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="navref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="topicref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topichead.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="topicref-atts"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="topicgroup">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>topicgroup</keyword>> element is for creating
-        groups of &lt;<keyword>topicref</keyword>> elements without affecting the
-        hierarchy, as opposed to nested &lt;<keyword>topicref</keyword>> elements
-        within a &lt;<keyword>topicref</keyword>>, which does imply a structural hierarchy.
-        It is typically used outside a hierarchy to identify groups for linking without
-        affecting the resulting toc/navigation output.          
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="topicgroup.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/topicgroup "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="topicgroup.class">
-		<xs:sequence>
-			<xs:group ref="topicgroup.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="topicgroup.attributes"/>
-	</xs:complexType>
-	<xs:group name="topicgroup.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:group ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="navref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="topicref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topicgroup.attributes">
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="topicref-atts"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="anchorref">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>anchorref</keyword>>  specializes &lt;topicref> to set format="ditamap" 
-        and type="anchor" defaults for a reference to an &lt;<keyword>anchor</keyword>> to enable push of collections
-        of content smaller than a map onto an anchor.
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="anchorref.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/anchorref "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="anchorref.class">
-		<xs:sequence>
-			<xs:group ref="anchorref.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="anchorref.attributes"/>
-	</xs:complexType>
-	<xs:group name="anchorref.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="topicref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="anchorref.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" default="anchor" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" default="ditamap" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" default="to-navigation" form="unqualified"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="mapref">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>anchorref</keyword>>  specializes &lt;topicref> to set a format="ditamap" 
-        default for more intuitive map references        
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="mapref.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/mapref "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="mapref.class">
-		<xs:sequence>
-			<xs:group ref="mapref.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="mapref.attributes"/>
-	</xs:complexType>
-	<xs:group name="mapref.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="mapref.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="topicref-atts-without-format"/>
-		<xs:attribute name="format" type="xs:string" default="ditamap" form="unqualified"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="topicset">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>topicset</keyword>>  specializes &lt;topicref> to set a chunk="to-navigation" 
-        default and required id attribute to make it easy to delimit standalone, reusable collections of content within a 
-        map (such as lessons within a course or large tasks explained by a collection of discrete task topics).        
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="topicset.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/topicset "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="topicset.class">
-		<xs:sequence>
-			<xs:group ref="topicset.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="topicset.attributes"/>
-	</xs:complexType>
-	<xs:group name="topicset.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="topicref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="navref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topicset.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<!-- topic-ref-att plus chuck defaulted to "to-navigation" -->
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" default="to-navigation" form="unqualified"/>
-		<xs:attribute name="id" type="xs:NMTOKEN" use="required" form="unqualified"/>
-		<xs:attributeGroup ref="select-atts"/>
-		<xs:attributeGroup ref="localization-atts"/>
-		<xs:attributeGroup ref="conref-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="topicsetref">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>topicsetref</keyword>>  pecializes &lt;topicref> to set format="ditamap" and 
-        type="branch" defaults for a reference to a &lt;topicset> to enable reuse of small collections within a 
-        map (especially for task composition approaches in which multiple larger task collections reuse smaller component task collections). 
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="topicsetref.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/topicsetref "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="topicsetref.class">
-		<xs:sequence>
-			<xs:group ref="topicsetref.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="topicsetref.attributes"/>
-	</xs:complexType>
-	<xs:group name="topicsetref.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="topicref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="topicsetref.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<!-- topic-ref-att plus chuck fixed to "to-navigation" -->
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" default="topicset" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" default="ditamap" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="keydef">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>keydef</keyword>>  specializes &lt;topicref> to set a chunk="to-navigation" 
-        default and required id attribute to make it easy to delimit standalone, reusable collections of content within a 
-        map (such as lessons within a course or large tasks explained by a collection of discrete task topics).        
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="keydef.class">
-					<xs:attribute ref="class" default="+ map/topicref mapgroup-d/keydef "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="keydef.class">
-		<xs:sequence>
-			<xs:group ref="keydef.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="keydef.attributes"/>
-	</xs:complexType>
-	<xs:group name="keydef.content">
-		<xs:sequence>
-			<xs:sequence>
-				<xs:element ref="topicmeta" minOccurs="0"/>
-				<xs:choice minOccurs="0" maxOccurs="unbounded">
-					<xs:group ref="topicref"/>
-					<xs:group ref="anchor"/>
-					<xs:group ref="navref"/>
-					<xs:group ref="data.elements.incl"/>
-				</xs:choice>
-			</xs:sequence>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="keydef.attributes">
-		<xs:attribute name="navtitle" type="xs:string" form="unqualified"/>
-		<xs:attribute name="href" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keyref" type="xs:string" form="unqualified"/>
-		<xs:attribute name="keys" type="xs:string" use="required" form="unqualified"/>
-		<xs:attribute name="query" type="xs:string" form="unqualified"/>
-		<xs:attribute name="copy-to" type="xs:string" form="unqualified"/>
-		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
-		<xs:attribute name="collection-type" type="collection-type.class" form="unqualified"/>
-		<xs:attribute name="processing-role" type="processing-role-att.class" default="resource-only" form="unqualified"/>
-		<xs:attribute name="type" type="xs:string" form="unqualified"/>
-		<xs:attribute name="scope" type="scope-att.class" form="unqualified"/>
-		<xs:attribute name="locktitle" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="format" type="xs:string" form="unqualified"/>
-		<xs:attribute name="linking" type="linkingtypes.class" form="unqualified"/>
-		<xs:attribute name="toc" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="print" type="print-att.class" form="unqualified"/>
-		<xs:attribute name="search" type="yesno-att.class" form="unqualified"/>
-		<xs:attribute name="chunk" type="xs:string" form="unqualified"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:annotation>
-		<xs:appinfo>
-			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic indexing-d)</dita:domainsModule>
-		</xs:appinfo>
-		<xs:documentation> 
-    
-    </xs:documentation>
-	</xs:annotation>
-	<xs:group name="indexing-d-index-base">
-		<xs:choice>
-			<xs:element ref="index-see"/>
-			<xs:element ref="index-see-also"/>
-			<xs:element ref="index-sort-as"/>
-		</xs:choice>
-	</xs:group>
-	<xs:group name="index-see">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="index-see"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="index-see-also">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="index-see-also"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="index-sort-as">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="index-sort-as"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:element name="index-see">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="index-see.class">
-					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-see "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="index-see.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="index-see.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="index-see.attributes"/>
-	</xs:complexType>
-	<xs:group name="index-see.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt"/>
-				<xs:group ref="indexterm"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="index-see.attributes">
-		<xs:attribute name="keyref" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="index-see-also">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="index-see-also.class">
-					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-see-also "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="index-see-also.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="index-sort-also.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="index-sort-also.attributes"/>
-	</xs:complexType>
-	<xs:group name="index-sort-also.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt"/>
-				<xs:group ref="indexterm"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="index-sort-also.attributes">
-		<xs:attribute name="keyref" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="index-sort-as">
-		<xs:complexType mixed="true">
-			<xs:complexContent>
-				<xs:extension base="index-sort-as.class">
-					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-sort-as "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="index-sort-as.class" mixed="true">
-		<xs:sequence>
-			<xs:group ref="index-sort-as.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="index-sort-as.attributes"/>
-	</xs:complexType>
-	<xs:group name="index-sort-as.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="words.cnt"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="index-sort-as.attributes">
-		<xs:attribute name="keyref" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:annotation>
-		<xs:appinfo>
-			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic delay-d)</dita:domainsModule>
-		</xs:appinfo>
-		<xs:documentation>
-      
-    </xs:documentation>
-	</xs:annotation>
-	<xs:group name="delay-d-keywords">
-		<xs:choice>
-			<xs:group ref="exportanchors"/>
-		</xs:choice>
-	</xs:group>
-	<xs:group name="exportanchors">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="exportanchors"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="anchorid">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="anchorid"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:group name="anchorkey">
-		<xs:sequence>
-			<xs:choice>
-				<xs:element ref="anchorkey"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:element name="exportanchors">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="exportanchors.class">
-					<xs:attribute ref="class" default="+ topic/keywords delay-d/exportanchors "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="exportanchors.class">
-		<xs:sequence>
-			<xs:group ref="exportanchors.content"/>
-		</xs:sequence>
-		<xs:attributeGroup ref="exportanchors.attributes"/>
-	</xs:complexType>
-	<xs:group name="exportanchors.content">
-		<xs:sequence>
-			<xs:choice minOccurs="0" maxOccurs="unbounded">
-				<xs:group ref="anchorid" minOccurs="0"/>
-				<xs:group ref="anchorkey" minOccurs="0"/>
-			</xs:choice>
-		</xs:sequence>
-	</xs:group>
-	<xs:attributeGroup name="exportanchors.attributes">
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="anchorid">
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="anchorid.class">
-					<xs:attribute ref="class" default="+ topic/keyword delay-d/anchorid "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="anchorid.class">
-		<xs:attributeGroup ref="anchorid.attributes"/>
-	</xs:complexType>
-	<xs:attributeGroup name="anchorid.attributes">
-		<xs:attribute name="keyref" type="xs:string"/>
-		<xs:attribute name="id" type="xs:NMTOKEN" use="required"/>
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="localization-atts"/>
-		<xs:attributeGroup ref="select-atts"/>
-		<xs:attributeGroup ref="conref-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
-	<xs:element name="anchorkey">
-		<xs:annotation>
-			<xs:documentation>The &lt;<keyword>keyword</keyword>> element identifies a keyword
-        or token, such as a single value from an enumerated list, the name of a command
-        or parameter, or a lookup key for a message (contrast with <xref href="term.xml">term</xref>).
-      </xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:complexContent>
-				<xs:extension base="anchorkey.class">
-					<xs:attribute ref="class" default="+ topic/keyword delay-d/anchorkey "/>
-				</xs:extension>
-			</xs:complexContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="anchorkey.class">
-		<xs:attributeGroup ref="anchorkey.attributes"/>
-	</xs:complexType>
-	<xs:attributeGroup name="anchorkey.attributes">
-		<xs:attribute name="keyref" type="xs:string" use="required"/>
-		<xs:attribute name="outputclass" type="xs:string"/>
-		<xs:attributeGroup ref="univ-atts"/>
-		<xs:attributeGroup ref="global-atts"/>
-	</xs:attributeGroup>
 	<xs:annotation>
 		<xs:appinfo>
 			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic hi-d)</dita:domainsModule>
@@ -6574,4 +5641,606 @@
 		<xs:attribute name="outputclass" type="xs:string" form="unqualified"/>
 		<xs:attributeGroup ref="global-atts"/>
 	</xs:attributeGroup>
+	<xs:annotation>
+		<xs:appinfo>
+			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic indexing-d)</dita:domainsModule>
+		</xs:appinfo>
+		<xs:documentation> 
+    
+    </xs:documentation>
+	</xs:annotation>
+	<xs:group name="indexing-d-index-base">
+		<xs:choice>
+			<xs:element ref="index-see"/>
+			<xs:element ref="index-see-also"/>
+			<xs:element ref="index-sort-as"/>
+		</xs:choice>
+	</xs:group>
+	<xs:group name="index-see">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="index-see"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="index-see-also">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="index-see-also"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="index-sort-as">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="index-sort-as"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:element name="index-see">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="index-see.class">
+					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-see "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="index-see.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="index-see.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="index-see.attributes"/>
+	</xs:complexType>
+	<xs:group name="index-see.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt"/>
+				<xs:group ref="indexterm"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="index-see.attributes">
+		<xs:attribute name="keyref" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="index-see-also">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="index-see-also.class">
+					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-see-also "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="index-see-also.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="index-sort-also.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="index-sort-also.attributes"/>
+	</xs:complexType>
+	<xs:group name="index-sort-also.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt"/>
+				<xs:group ref="indexterm"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="index-sort-also.attributes">
+		<xs:attribute name="keyref" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="index-sort-as">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="index-sort-as.class">
+					<xs:attribute ref="class" default="+ topic/index-base indexing-d/index-sort-as "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="index-sort-as.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="index-sort-as.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="index-sort-as.attributes"/>
+	</xs:complexType>
+	<xs:group name="index-sort-as.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="index-sort-as.attributes">
+		<xs:attribute name="keyref" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:annotation>
+		<xs:appinfo>
+			<dita:domainsModule xmlns:dita="http://dita.oasis-open.org/architecture/2005/">(topic hazard-d)</dita:domainsModule>
+		</xs:appinfo>
+		<xs:documentation>
+      
+    </xs:documentation>
+	</xs:annotation>
+	<xs:group name="hazard-d-note">
+		<xs:choice>
+			<xs:element ref="hazardstatement"/>
+		</xs:choice>
+	</xs:group>
+	<xs:group name="hazardstatement">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="hazardstatement"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="messagepanel">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="messagepanel"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="hazardsymbol">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="hazardsymbol"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="typeofhazard">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="typeofhazard"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="consequence">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="consequence"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="howtoavoid">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="howtoavoid"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<!--  
+      Any content model that includes the hazard.cnt group must also set  mixed="true" 
+   >-->
+	<xs:group name="hazard.cnt">
+		<xs:sequence>
+			<xs:choice>
+				<xs:group ref="basic.ph"/>
+				<xs:group ref="sl"/>
+				<xs:group ref="simpletable"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:element name="hazardstatement">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="hazardstatement.class">
+					<xs:attribute ref="class" default="+ topic/note hazard-d/hazardstatement "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="hazardstatement.class">
+		<xs:sequence>
+			<xs:group ref="hazardstatement.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="hazardstatement.attributes"/>
+	</xs:complexType>
+	<xs:group name="hazardstatement.content">
+		<xs:sequence>
+			<xs:sequence>
+				<xs:group ref="messagepanel" maxOccurs="unbounded"/>
+				<xs:group ref="hazardsymbol" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="hazardstatement.attributes">
+		<xs:attribute name="type" type="type-note-atts.class"/>
+		<xs:attribute name="spectitle" type="xs:string"/>
+		<xs:attribute name="othertype" type="xs:string"/>
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="messagepanel">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="messagepanel.class">
+					<xs:attribute ref="class" default="+ topic/ul hazard-d/messagepanel "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="messagepanel.class">
+		<xs:sequence>
+			<xs:group ref="messagepanel.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="messagepanel.attributes"/>
+	</xs:complexType>
+	<xs:group name="messagepanel.content">
+		<xs:sequence>
+			<xs:sequence>
+				<xs:group ref="typeofhazard"/>
+				<xs:group ref="consequence" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:group ref="howtoavoid" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="messagepanel.attributes">
+		<xs:attribute name="spectitle" type="xs:string"/>
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="hazardsymbol">
+		<xs:complexType>
+			<xs:complexContent>
+				<xs:extension base="hazardsymbol.class">
+					<xs:attribute ref="class" default="+ topic/image hazard-d/hazardsymbol "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="hazardsymbol.class">
+		<xs:sequence>
+			<xs:group ref="hazardsymbol.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="hazardsymbol.attributes"/>
+	</xs:complexType>
+	<xs:group name="hazardsymbol.content">
+		<xs:sequence>
+			<xs:sequence>
+				<xs:group ref="alt" minOccurs="0"/>
+				<xs:group ref="longdescref" minOccurs="0"/>
+			</xs:sequence>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="hazardsymbol.attributes">
+		<xs:attribute name="href" type="xs:string" use="required"/>
+		<xs:attribute name="keyref" type="xs:string"/>
+		<!-- <xs:attribute name="alt" type="xs:string"/> -->
+		<xs:attribute name="longdescref" type="xs:string"/>
+		<xs:attribute name="height" type="xs:NMTOKEN"/>
+		<xs:attribute name="width" type="xs:NMTOKEN"/>
+		<xs:attribute name="scale" type="xs:NMTOKEN"/>
+		<xs:attribute name="scalefit" type="yesno-att.class"/>
+		<xs:attribute name="scope" type="scope-att.class"/>
+		<xs:attribute name="align" type="xs:string"/>
+		<xs:attribute name="placement" type="image-placement-att.class" default="inline"/>
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="typeofhazard">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="typeofhazard.class">
+					<xs:attribute ref="class" default="+ topic/li hazard-d/typeofhazard "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="typeofhazard.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="typeofhazard.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="typeofhazard.attributes"/>
+	</xs:complexType>
+	<xs:group name="typeofhazard.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt" minOccurs="0"/>
+				<xs:group ref="ph" minOccurs="0"/>
+				<xs:group ref="tm" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="typeofhazard.attributes">
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="consequence">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="consequence.class">
+					<xs:attribute ref="class" default="+ topic/li hazard-d/consequence "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="consequence.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="consequence.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="consequence.attributes"/>
+	</xs:complexType>
+	<xs:group name="consequence.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="words.cnt" minOccurs="0"/>
+				<xs:group ref="ph" minOccurs="0"/>
+				<xs:group ref="tm" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="consequence.attributes">
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:element name="howtoavoid">
+		<xs:complexType mixed="true">
+			<xs:complexContent>
+				<xs:extension base="howtoavoid.class">
+					<xs:attribute ref="class" default="+ topic/li hazard-d/howtoavoid "/>
+				</xs:extension>
+			</xs:complexContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="howtoavoid.class" mixed="true">
+		<xs:sequence>
+			<xs:group ref="howtoavoid.content"/>
+		</xs:sequence>
+		<xs:attributeGroup ref="howtoavoid.content"/>
+	</xs:complexType>
+	<xs:group name="howtoavoid.content">
+		<xs:sequence>
+			<xs:choice minOccurs="0" maxOccurs="unbounded">
+				<xs:group ref="hazard.cnt" minOccurs="0"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:attributeGroup name="howtoavoid.content">
+		<xs:attribute name="outputclass" type="xs:string"/>
+		<xs:attributeGroup ref="univ-atts"/>
+		<xs:attributeGroup ref="global-atts"/>
+	</xs:attributeGroup>
+	<xs:group name="metadata">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="metadata"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="author">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="author"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="source">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="source"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="publisher">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="publisher"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="copyright">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="copyright"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="copyryear">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="copyryear"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="copyrholder">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="copyrholder"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="critdates">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="critdates"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="revised">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="revised"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="created">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="created"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="resourceid">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="resourceid"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="audience">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="audience"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="category">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="category"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="keywords">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="keywords"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="othermeta">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="othermeta"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="permissions">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="permissions"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="prodinfo">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="prodinfo"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="brand">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="brand"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="series">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="series"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="platform">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="platform"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="prognum">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="prognum"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="featnum">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="featnum"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="component">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="component"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="prodname">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="prodname"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="vrmlist">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="vrmlist"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="vrm">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="vrm"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="table">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="table"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="tgroup">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="tgroup"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="colspec">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="colspec"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="thead">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="thead"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="tbody">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="tbody"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="row">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="row"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
+	<xs:group name="entry">
+		<xs:sequence>
+			<xs:choice>
+				<xs:element ref="entry"/>
+			</xs:choice>
+		</xs:sequence>
+	</xs:group>
 </xs:schema>

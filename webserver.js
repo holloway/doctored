@@ -1,18 +1,12 @@
 // Note: Useful only for debug purposes when using desktop browsers.
-//
-// Be sure to also start Chrome with web security disabled
-//ff
-// ~$ google-chrome --disable-web-security -–allow-file-access-from-files
-
 var http = require("http"),
-    url = require("url"),
+    url  = require("url"),
     path = require("path"),
-    fs = require("fs"),
+    fs   = require("fs"),
     port = process.argv[2] || 8888;
 
 http.createServer(function(request, response) {
-
-  var uri = url.parse(request.url).pathname,
+  var uri      = url.parse(request.url).pathname,
       filename = path.join(process.cwd(), uri).replace(/%20/g, ' ');
 
   path.exists(filename, function(exists) {
@@ -22,21 +16,16 @@ http.createServer(function(request, response) {
       response.end();
       return;
     }
-
     if (fs.statSync(filename).isDirectory()) filename += '/index.html';
-
     fs.readFile(filename, "binary", function(err, file) {
       if(err) {
         response.writeHead(500, {
           "Content-Type": "text/plain"
           });
-        // "Access-Control-Allow-Origin": "https://wrms.catalyst.net.nz",
-        // "Access-Control-Allow-Credentials": "true"
         response.write(err + "\n");
         response.end();
         return;
       }
-
       response.writeHead(200);
       response.write(file, "binary");
       response.end();

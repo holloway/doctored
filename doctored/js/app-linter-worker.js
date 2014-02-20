@@ -8,6 +8,7 @@
 	var current_event,
 		xml_file = "document.xml",
 		rng_file = "schema.rng",
+		xsd_file = "schema.xsd",
 		schemas = {},
 		last_line_number = 0,
 		console = {log: function(debug_string){
@@ -55,7 +56,7 @@
 					line = line.substr("element ".length).trim();
 					response.target = line.substr(0, line.indexOf(":"));
 				} else {
-					//console.log(line);
+					console.log("Lint weirdness. Bug in the code? " + line);
 				}
 				line = line.substr(line.indexOf(":") + 1).trim();
 				if(line.substr(0, "Relax-NG validity error :".length) === "Relax-NG validity error :"){
@@ -93,27 +94,40 @@
 			xmllint_line,
 			line,
 			i,
+			schema_file_extension,
 			error_lines = [],
 			error_summary = "",
 			last_line_number;
 		
 		current_event = event.data;
+		schema_file_extension = current_event.schema_url.substr(current_event.schema_url.lastIndexOf("."));
 		module = {
 			"xml":       to_ncrs(current_event.xml),
 			"schema":    get_schema(current_event.schema_url),
-			"arguments": ["--noout", "--relaxng", rng_file, xml_file]
+			
 		};
-
+		switch(schema_file_extension){
+			case ".xsd":
+				module.arguments = ["--noout", "--schema", xsd_file, xml_file];
+				break;
+			case ".rng":
+				module.arguments = ["--noout", "--relaxng", rng_file, xml_file];
+				break;
+			default:
+				console.log("Error. Schema URL must end in either RNG or XSD.")
+		}
 		xmllint_lines = validateXML(module).split("\n");
 
 		for(i = 0; i < xmllint_lines.length; i++){
 			xmllint_line = xmllint_lines[i];
 			if(!xmllint_line.length) continue;
 			line = parse_xmllint_line(xmllint_line, xml_file, rng_file);
-			if(line["type"] === "error_line"){
+			if(line.type === "error_line"){
 				error_lines.push(line);
-			} else if(line["type"] === "error_summary"){
+			} else if(line.type === "error_summary"){
 				error_summary = line;
+			} else {
+				console.log("New Line.type = " + line.type);
 			}
 		}
 
