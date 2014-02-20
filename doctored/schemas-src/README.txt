@@ -1,8 +1,11 @@
-Flatten.js processes XML catalogues, and Schemas, resolving all the includes to make a single file.
+Schemas must be flattened before Doctored.js can use them.
+Doctored.js cannot resolve includes.
+That means you need to resolve all the includes to make a single file.
 
-Usage: 
+RELAXNG .RNG
+Trang/Jing can be used to flatten RelaxNG (I think).
 
-   node ./flatten.js dita1.8/catalog.xml dita1.8/base/xsd/basemap.xsd > ../schemas/dita1.8/schema.xsd
-
-
-Trang should be used to flatten schemas. Doctored can only load schemas without imports.
+W3C SCHEMA .XSD
+There isn't any Free software that I'm aware of that can
+flatten XSDs that have XML catalogues and includes.
+XML Spy for Windows (which can run in Wine) can flatten.

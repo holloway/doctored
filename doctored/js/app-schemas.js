@@ -5,7 +5,6 @@
     doctored.schemas = {
         init: function(){
             var xhr = new XMLHttpRequest();
-            
             xhr.open("GET", doctored.base + "schemas/manifest.json", true);
             xhr.send(null);
             xhr.onreadystatechange = function(){
@@ -107,7 +106,6 @@
                                 default: // we have to go deeper
                                     if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
                             }
-                            
                         }
                     };
                 if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node so we use different logic because there is no parent node
@@ -254,7 +252,7 @@
             file_extension: ".dita",
             update_element_chooser: update_element_chooser,
             set_dialog_context: set_dialog_context,
-            inline_elements: ["xref", ""],
+            inline_elements: ["xref", "codeph"],
             new_document: new_document,
             new_document_xml: '<!-- This file is part of the DITA Open Toolkit project hosted on Sourceforge.net. Common Public License v1.0 --><!-- (c) Copyright IBM Corp. 2004, 2005 All Rights Reserved. --><!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "../../dtd/concept.dtd"><concept id="bookmap-readme" xml:lang="en-us">  <title>Bookmap Readme</title>  <prolog/>  <conbody>    <p>This demonstration provides a proof-of-concept implementation of the DITA bookmap proposal. The proposal adds book output to DITA using a specialized DITA map known as a bookmap. The bookmap organizes the DITA topics with the correct nesting and sequence for the book. In addition, the bookmap assigns roles such as preface, chapter, and appendix to top-level topics within the book. </p>    <p class="- topic/p ">For more detailed information about the proposal, see the detailed posting on the DITA forum at <xref href="news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com" format="news">news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com</xref>.</p>    <note>This demonstration has the following limitations:<ul>        <li>For XSL-FO formatting and thus PDF generation, only the basics have been implemented. Through specialization, the DITA XHTML-based outputs for DITA map are also available for bookmap.</li>        <li>The design for the book info component of the proposal has been fleshed out based on antecedents in DocBook and IBMIDDoc (see the comments in the <codeph>bookinfo.mod</codeph> file). Most of the elements in bookinfo aren&apos;t processed.</li>        <li>The book list component of the proposal hasn&apos;t been implemented yet. Possible designs for a glossary list have been discussed extensively on the DITA forum (resulting in the proposal posted as <xref href="news://news.software.ibm.com:119/3FA29F54.83AFB251@ca.ibm.com" format="news">news://news.software.ibm.com:119/blfg38$5k0q$1@news.boulder.ibm.com</xref>).</li>        <li>The book style component of the proposal is much more experimental than the bookmap and bookinfo components. Processing for this component is limited.</li>      </ul></note>  </conbody></concept>'
         },

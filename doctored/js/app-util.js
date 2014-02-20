@@ -390,7 +390,7 @@
             var indexOf = target.substring(startpos || 0).search(regex);
             return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
         },
-        set_element_chooser_to_element: function(element, element_chooser){
+        set_element_chooser_to_element: function(element, element_chooser, schema){
             var data_element = element.getAttribute("data-element"),
                 option,
                 i;
@@ -407,7 +407,11 @@
             }
             option = document.createElement("option");
             option.text = data_element;
-            option.setAttribute("class", "block");
+            if(schema && schema.inline_elements && schema.inline_elements.indexOf(element) >= 0){
+                option.setAttribute("class", "inline");
+            } else {
+                option.setAttribute("class", "block");
+            }
             element_chooser.appendChild(option);
             element_chooser.selectedIndex = element_chooser.options.length - 1;
         },
@@ -442,7 +446,7 @@
             dialog.style.top  = document.body.scrollTop + offsets.proposed.y + "px";
             dialog.mode = "createElement";
             schema.set_dialog_context(dialog, inline.parentNode.getAttribute("data-element"));
-            doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser);
+            doctored.util.set_element_chooser_to_element(inline, dialog.element_chooser, schema);
             dialog.element_chooser.focus();
         },
         inlineOffset: function() {
