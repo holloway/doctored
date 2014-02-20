@@ -70,10 +70,7 @@
                         this.schema_defines[node_attribute_name] = schema_element;
                     }
                 }
-
                 this.cached_context = {};
-
-                return this_function(this.update_element_chooser, this)();
             },
             get_valid_nodes_for_context: function(element_name){
                 var _this = this,
@@ -95,6 +92,8 @@
                             node_attribute_name = (node.nodeType === node.ELEMENT_NODE) ? node.getAttribute("name") : undefined;
                             if(node_name === "element" && depth === 0) node_name = "we're not interested in this element so this is some random thing to skip to 'default' in switch/case";
                             switch(node_name) {
+                                case "#text":
+                                    break;
                                 case "element":
                                     if(node_attribute_name) context.elements[node_attribute_name] = _this.elements[node_attribute_name];
                                     break;
@@ -114,7 +113,9 @@
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
                     //console.log(element_name, this.schema_elements[element_name]);
-                    gather_below([this.schema_elements[element_name]]);
+                    if(this.schema_elements[element_name]) {
+                        gather_below([this.schema_elements[element_name]]);
+                    }
                     this.cached_context[element_name] = context;
                 }
                 return this.cached_context[element_name];
@@ -122,10 +123,114 @@
         },
         w3c_schema = {
             cache_useful_stuff_from_schema: function(){
-                
-            },
-            get_valid_nodes_for_context: function(){
+                var this_function   = doctored.util.this_function,
+                    schema_elements,
+                    schema_element,
+                    schema_element_help,
+                    node_attribute_name,
+                    block_or_inline,
+                    i;
 
+                this.elements = {};
+                this.schema_elements = {}; //cache some lookups
+                schema_elements = $("element", this.schema.documentElement);
+                for(i = 0; i < schema_elements.length; i++){
+                    schema_element = schema_elements[i];
+                    node_attribute_name = schema_element.getAttribute("name");
+                    if(node_attribute_name){
+                        schema_element_help = $("documentation", schema_element)[0];
+                        block_or_inline = (this.inline_elements && this.inline_elements.indexOf(node_attribute_name) >= 0) ? "inline" : "block";
+                        this.elements[node_attribute_name] = {
+                            display: block_or_inline,
+                            help: schema_element_help ? doctored.util.remove_excessive_whitespace(schema_element_help.textContent) : ""
+                        };
+                        this.schema_elements[node_attribute_name] = schema_element;
+                    }
+                }
+
+                this.attributes = {};
+                schema_elements = $("attribute", this.schema.documentElement);
+                for(i = 0; i < schema_elements.length; i++){
+                    schema_element = schema_elements[i];
+                    node_attribute_name = schema_element.getAttribute("name");
+                    if(node_attribute_name){
+                        schema_element_help = $("documentation", schema_element)[0];
+                        this.attributes[node_attribute_name] = {help: schema_element_help ? doctored.util.remove_excessive_whitespace(schema_element_help.textContent) : ""};
+                    }
+                }
+
+                this.schema_defines = {}; //cache some lookups
+                schema_elements = $("[name]", this.schema.documentElement);
+                for(i = 0; i < schema_elements.length; i++){
+                    schema_element = schema_elements[i];
+                    node_attribute_name = schema_element.getAttribute("name");
+                    if(node_attribute_name){
+                        if(!this.schema_defines[schema_element.nodeName]) this.schema_defines[schema_element.nodeName] = {};
+                        this.schema_defines[schema_element.nodeName][node_attribute_name] = schema_element;
+                    }
+                }
+                this.cached_context = {};
+            },
+            get_valid_nodes_for_context: function(element_name){
+                var _this = this,
+                    context,
+                    max_depth = 25,
+                    selector,
+                    gather_below = function(nodes, depth){
+                        var node,
+                            node_name,
+                            node_attribute_name,
+                            node_attribute_ref,
+                            i,
+                            child_elements,
+                            child_element_name;
+
+                        if(depth === undefined) depth = 0;
+                        for(i = 0; i < nodes.length; i++){
+                            node = nodes[i];
+                            node_attribute_name = undefined;
+                            node_attribute_ref  = undefined;
+                            if(node.nodeType === node.ELEMENT_NODE){
+                                node_attribute_ref = node.getAttribute("ref");
+                                if(node_attribute_ref) {
+                                    node = _this.schema_defines[node.nodeName][node_attribute_ref];
+                                }
+                                node_attribute_name = node.getAttribute("name");
+                            }
+                            node_name = node.nodeName;
+                            if(node_name === "element" && depth === 0) node_name = "we're not interested in this element so this is some random thing to skip to 'default' in switch/case";
+                            switch(node_name) {
+                                case "#text":
+                                    break;
+                                case "xs:element":
+                                case "element":
+                                    if(node_attribute_name) context.elements[node_attribute_name] = _this.elements[node_attribute_name];
+                                    break;
+                                case "xs:attribute":
+                                case "attribute":
+                                    console.log("ATTRIBUTE? ATTRIBUTEATTRIBUTEATTRIBUTE ATTRIBUTEATTRIBUTE ATTRIBUTE");
+                                    if(node_attribute_name) context.attributes[node_attribute_name] = _this.attributes[node_attribute_name];
+                                    break;
+                                default: // we have to go deeper
+                                    console.log("DEEPER", node_name);
+                                    if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
+                            }
+                        }
+                    };
+                if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node so we use different logic because there is no parent node
+                    return {elements: {}, attributes: {}}; //FIXME allow different root nodes
+                }
+                console.log(element_name);
+                if(!this.cached_context[element_name]) {
+                    context = {elements: {}, attributes: {}};
+                    if(this.schema_elements[element_name]) {
+                        console.log("what", context.attributes);
+                        gather_below([this.schema_elements[element_name]]);
+                    }
+                    this.cached_context[element_name] = context;
+                }
+                
+                return this.cached_context[element_name];
             }
         },
         schema_init = function(instance, schema_url, new_document){
@@ -161,6 +266,7 @@
                     this.schema = ( new window.DOMParser() ).parseFromString(xhr.responseText, "text/xml");
                 }
                 this_function(this.cache_useful_stuff_from_schema, this)();
+                this_function(this.update_element_chooser, this)();
                 if(new_document) this_function(this.new_document, this)();
                 this_function(this.instance.lint_soon, this.instance)();
             }, this);

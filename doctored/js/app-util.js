@@ -305,8 +305,12 @@
             }
             return element;
         },
+        remove_excessive_whitespace: function(content){
+            return content.trim().replace(/[\n\t]/g, " ").replace(/  /g, " ");
+        },
         display_element_dialog: function(target, dialog, mouse, context_element, schema){
             var this_function = doctored.util.this_function,
+                is_root       = target.classList.contains("doctored"),
                 schema_attributes,
                 attributes_string,
                 attributes_item,
@@ -315,11 +319,11 @@
                 key,
                 i;
 
-            dialog.schema_chooser.style.display        = "block";
-            dialog.schema_chooser_title.style.display  = "block";
-            dialog.root_element_title.style.display    = (target.classList.contains("doctored") ? "" : "none");
-            dialog.attributes_div.style.display        = "";
-            dialog.attributes_title.style.display         = "";
+            dialog.schema_chooser.style.display       = (is_root ? "" : "none");
+            dialog.schema_chooser_title.style.display = (is_root ? "" : "none");
+            dialog.root_element_title.style.display   = (is_root ? "" : "none");
+            dialog.attributes_div.style.display       = "";
+            dialog.attributes_title.style.display     = "";
             if(mouse === undefined){
                 target_offset = target.getBoundingClientRect();
                 mouse = {x:target_offset.left, y:target_offset.top};
