@@ -202,7 +202,9 @@
                     option = this.dialog.schema_chooser.options[i];
                     console.log(i, option.value, !option.disabled, option.innerHTML);
                     if(option.value && !option.disabled){
+                        console.log("VALID OPTION", i, option.value, !option.disabled, option.innerHTML);
                         if(first_valid_option === undefined) first_valid_option = i;
+                        console.log("first valid option", first_valid_option);
                         if(option.value === prefered_schema) {
                             this.dialog.schema_chooser.selectedIndex = i;
                             chosen_schema_option = option;
