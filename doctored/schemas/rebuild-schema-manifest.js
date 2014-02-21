@@ -7,6 +7,9 @@
         approot = __dirname,
         i,
         schemas,
+        app_schemas,
+        app_schemas_marker = /\{MANIFEST\-START\}[\s\S]*?\{MANIFEST\-END\}/g,
+        app_schemas_path = path.join(path.dirname(approot), 'js', 'app-schemas.js'),
         manifest_path = path.join(approot, 'manifest.json'),
         blacklist = [path.basename(__filename), 'manifest.json', 'options.json', 'README.txt'],
         manifest = {},
@@ -55,9 +58,19 @@
 
     manifest = walk(fs.readdirSync(approot), approot);
 
+    app_schemas = fs.readFileSync(app_schemas_path, 'utf8');
+
+    if(!app_schemas.match(app_schemas_marker)){
+        console.log("ERROR: No app_schemas_marker found in " + app_schemas_path);
+        process.exit();
+    }
+    app_schemas = app_schemas.replace(app_schemas_marker, function(match){
+        return '{MANIFEST-START}\n    doctored.schemas_manifest = ' + JSON.stringify(manifest) + ';\n    // {MANIFEST-END}';
+    });
+
     fs.writeFileSync(
-        manifest_path,
-        JSON.stringify(manifest)
+        app_schemas_path,
+        app_schemas
     );
 
     console.log("Done. Manifest written to " + manifest_path);

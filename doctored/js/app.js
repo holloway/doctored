@@ -219,10 +219,11 @@
                 this_function(this.lint_soon, this)();
             },
             schema_chooser_change: function(event){
-                var new_document         = confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)"),
+                var new_document         = confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)") !== null,
                     chosen_schema_option = this.dialog.schema_chooser.options[this.dialog.schema_chooser.selectedIndex],
                     this_function        = doctored.util.this_function;
 
+                if(!chosen_schema_option) return alert("No schema chosen");
                 localStorage.setItem("doctored-schema-url", chosen_schema_option.value);
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
                 this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, new_document);

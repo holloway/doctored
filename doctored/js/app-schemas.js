@@ -5,8 +5,9 @@
     // DO NOT EDIT THE FOLLOWING
     // it is dynamically inserted by schemas/rebuild-schema-manifest.js
     // {MANIFEST-START}
-    // DATA
+    doctored.schemas_manifest = [{"schema_family":"DITA","children":[{"schema_family":"1.8","children":[{"schema":"/DITA/1.8/DITA Base.xsd","label":"DITA Base","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Bookmap.xsd","label":"DITA Bookmap","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Topic.xsd","label":"DITA Topic","schema_family":"dita"}]}]},{"schema_family":"DocBook","children":[{"schema":"/DocBook/DocBook 5.0.rng","label":"DocBook 5.0","schema_family":"docbook"}]},{"schema_family":"MARC","children":[{"schema":"/MARC/MARC21.xsd","label":"MARC21","schema_family":"marc"}]},{"schema_family":"TEI","children":[{"schema":"/TEI/TEI 2.6.rng","label":"TEI 2.6","schema_family":"tei"}]}];
     // {MANIFEST-END}
+    // DO NOT EDIT THE PRECEDING
 }());
 
 (function(){
@@ -14,14 +15,8 @@
 
     doctored.schemas = {
         init: function(){
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", doctored.base + "schemas/manifest.json", true);
-            xhr.send(null);
-            xhr.onreadystatechange = function(){
-                if(xhr.readyState !== 4) return;
-                doctored.schemas.list = JSON.parse(xhr.responseText);
-                doctored.event.trigger("schema-manifest-loaded");
-            };
+            doctored.schemas.list = doctored.schemas_manifest;
+            doctored.event.trigger("schema-manifest-loaded");
         },
         get_schema_instance: function(instance, schema_family_id, schema_url){
             var schema_family = doctored.schema_family[schema_family_id],
