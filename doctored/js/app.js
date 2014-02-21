@@ -208,9 +208,14 @@
                         }
                     }
                 }
+                console.log(this.dialog.schema_chooser.innerHTML);
+                console.log(prefered_schema);
+                console.log(first_valid_option);
+                console.log(chosen_schema_option);
+                
                 if(chosen_schema_option === undefined && first_valid_option) { // if nothing matched the instance's options schema
                     this.dialog.schema_chooser.selectedIndex = first_valid_option;
-                    chosen_schema_option = this.dialog.schema_chooser.options[first_valid_option];
+                    chosen_schema_option = this.dialog.schema_chooser.options[this.dialog.schema_chooser.selectedIndex];
                 }
                 if(!chosen_schema_option) return alert("Doctored.js can't find a valid default schema.");
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
