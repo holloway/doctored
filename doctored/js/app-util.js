@@ -115,10 +115,10 @@
             });
             return attributes;
         },
-        convert_xml_to_doctored_html: function(xml, elements){
+        convert_xml_to_doctored_html: function(xml, inline_elements){
             return xml.replace(/<\?[\s\S]*?\?>/, '')
-                      .replace(/<!.*?>/g, '')
-                      .replace(/<(.*?)>/g, function(match, contents, offset, s){
+                      .replace(/<![\s\S]*?>/g, '')
+                      .replace(/<([\s\S]*?)>/g, function(match, contents, offset, s){
                             var element_name,
                                 attributes = "",
                                 after = "",
@@ -145,8 +145,8 @@
                                 after = "</" + element_name + ">";
                             }
 
-                            if(elements && elements[element_name]) {
-                                display = doctored.CONSTANTS.block_or_inline_class_prefix + elements[element_name].display;
+                            if(inline_elements && inline_elements.indexOf(element_name) >= 0) {
+                                display = doctored.CONSTANTS.inline_class;
                             }
                             return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>' + after;
                     });

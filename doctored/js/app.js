@@ -173,7 +173,7 @@
                     data_element,
                     data_attributes;
 
-                doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.elements).trim();
+                doctored_html = doctored.util.convert_xml_to_doctored_html(xml_string, this.schema.inline_elements).trim();
                 new_document = document.createElement('div');
                 new_document.innerHTML = doctored_html;
                 new_document_root = new_document.childNodes[0];
@@ -272,13 +272,13 @@
                 // after choosing an element in the dialog... (see element_chooser_change, above)
                 var dialog          = this.dialog,
                     element_chooser = dialog.element_chooser,
-                    option          = element_chooser.options[this.dialog.element_chooser.selectedIndex],
+                    option          = element_chooser.options[element_chooser.selectedIndex],
                     option_value    = option.getAttribute("value"),
                     element_name    = option.innerText,
                     display_type    = "block",
                     this_function   = doctored.util.this_function;
 
-                if(option_value && option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
+                if(!option_value || option_value.length === 0)return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
                     switch(option_value){

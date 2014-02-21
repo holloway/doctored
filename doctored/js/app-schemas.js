@@ -212,7 +212,6 @@
                                     if(node_attribute_name) context.attributes[node_attribute_name] = _this.attributes[node_attribute_name];
                                     break;
                                 default: // we have to go deeper
-                                    console.log("DEEPER", node_name);
                                     if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
                             }
                         }
@@ -220,11 +219,11 @@
                 if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node so we use different logic because there is no parent node
                     return {elements: {}, attributes: {}}; //FIXME allow different root nodes
                 }
-                console.log(element_name);
+                //console.log(element_name);
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
                     if(this.schema_elements[element_name]) {
-                        console.log("what", context.attributes);
+                        //console.log("what", context.attributes);
                         gather_below([this.schema_elements[element_name]]);
                     }
                     this.cached_context[element_name] = context;
