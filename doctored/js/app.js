@@ -190,15 +190,14 @@
             },
             schema_chooser_init: function(){
                 var this_function = doctored.util.this_function,
-                    prefered_schema = localStorage.getItem("doctored-schema-url") || this.options.schema,
+                    localStorage_schema = localStorage.getItem("doctored-schema-url"),
+                    prefered_schema = localStorage_schema || this.options.schema,
                     chosen_schema_option,
                     first_valid_option,
                     option,
                     i;
 
                 this.dialog.schema_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
-                console.log(this.dialog.schema_chooser.innerHTML);
-                console.log(prefered_schema);
                 for(i = 0; i < this.dialog.schema_chooser.options.length; i++){
                     option = this.dialog.schema_chooser.options[i];
                     if(option.value && !option.disabled){
@@ -209,7 +208,7 @@
                         }
                     }
                 }
-                if(chosen_schema_option === false && first_valid_option) { // if nothing matched the instance's options schema
+                if(chosen_schema_option === undefined && first_valid_option) { // if nothing matched the instance's options schema
                     this.dialog.schema_chooser.selectedIndex = first_valid_option;
                     chosen_schema_option = this.dialog.schema_chooser.options[first_valid_option];
                 }
