@@ -17,13 +17,13 @@
         var i,
             instance;
 
+        doctored.schemas.init();
         doctored.init = doctored._init; // no need to delay loading any future calls, overwrite with the real thing
         for(i = 0; i < doctored._to_be_initialized.length; i++){
             instance = doctored._to_be_initialized[i];
             doctored.init(instance.selector, instance.options);
         }
         delete doctored._to_be_initialized; //don't need this anymore
-        doctored.schemas.init();
         doctored.ready = true;
     });
 
@@ -68,7 +68,7 @@
                 this.dialog = document.createElement('menu');
                 this.dialog.className = "doctored-dialog";
                 this.dialog.addEventListener('keyup',   this_function(this.keyup_dialog_esc, this), false);
-                this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select><option>Loading...</option></select>' +
+                this.dialog.innerHTML = '<a href title="Close">&times;</a><h6>schema</h6><select></select>' +
                                         '<h6>root element</h6><select id="' + this.id + '_elements" title="Change element"><optgroup label="Suggested elements in this context">' +
                                         '<option value="" disabled class="doctored-loading">Loading...</option></optgroup></select>' +
                                         '<h6>attributes</h6><div class="doctored-attributes"></div>';
@@ -116,7 +116,7 @@
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
-                doctored.event.on("schema-manifest-loaded", this_function(this.schema_manifest_loaded, this));
+                this_function(this.schema_chooser_init, this)();
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -190,7 +190,7 @@
                 localStorage_key = this.options.localStorage_key;
                 window.localStorage.setItem(localStorage_key, this.get_xml_string());
             },
-            schema_manifest_loaded: function(event){
+            schema_chooser_init: function(){
                 var this_function = doctored.util.this_function,
                     prefered_schema = localStorage.getItem("doctored-schema-url") || this.options.schema,
                     chosen_schema_option,
