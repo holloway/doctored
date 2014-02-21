@@ -12,12 +12,10 @@
         $ = doctored.$,
         $body = $('body')[0];
        
-
     doctored.event.on("app:ready", function(){ // called after all manifest items (in doctored.js) are loaded
         var i,
             instance;
 
-        doctored.schemas.init();
         doctored.init = doctored._init; // no need to delay loading any future calls, overwrite with the real thing
         for(i = 0; i < doctored._to_be_initialized.length; i++){
             instance = doctored._to_be_initialized[i];
@@ -41,7 +39,7 @@
         }
 
         instance = {
-            doctored: 0.9,
+            doctored: 0.91,
             root: root_element,
             root_selector: selector,
             options: options,
@@ -75,6 +73,7 @@
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.schema_chooser = $('select', this.dialog)[0];
+                this_function(this.schema_chooser_init, this)();
                 this.dialog.schema_chooser.addEventListener('change', this_function(this.schema_chooser_change, this), false);
                 this.dialog.schema_chooser_title = $('h6', this.dialog)[0];
                 this.dialog.attributes_title = $('h6', this.dialog)[2];
@@ -116,7 +115,6 @@
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
-                this_function(this.schema_chooser_init, this)();
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -199,6 +197,8 @@
                     i;
 
                 this.dialog.schema_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
+                console.log(this.dialog.schema_chooser.innerHTML);
+                console.log(prefered_schema);
                 for(i = 0; i < this.dialog.schema_chooser.options.length; i++){
                     option = this.dialog.schema_chooser.options[i];
                     if(option.value && !option.disabled){

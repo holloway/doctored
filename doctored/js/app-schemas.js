@@ -14,10 +14,7 @@
     "use strict";
 
     doctored.schemas = {
-        init: function(){
-            doctored.schemas.list = doctored.schemas_manifest;
-            doctored.event.trigger("schema-manifest-loaded");
-        },
+        list: doctored.schemas_manifest,
         get_schema_instance: function(instance, schema_family_id, schema_url){
             var schema_family = doctored.schema_family[schema_family_id],
                 this_function = doctored.util.this_function;
