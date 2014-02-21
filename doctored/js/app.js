@@ -200,6 +200,7 @@
                 this.dialog.schema_chooser.innerHTML = '<option value="" disabled>Choose Schema</option>' + doctored.util.process_schema_groups(doctored.schemas.list);
                 for(i = 0; i < this.dialog.schema_chooser.options.length; i++){
                     option = this.dialog.schema_chooser.options[i];
+                    console.log(i, option.value, !option.disabled, option.innerHTML);
                     if(option.value && !option.disabled){
                         if(first_valid_option !== undefined) first_valid_option = i;
                         if(option.value === prefered_schema) {
