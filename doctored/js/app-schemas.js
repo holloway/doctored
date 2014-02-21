@@ -1,4 +1,14 @@
 /*globals doctored, console, alert*/
+
+(function(){
+    "use strict";
+    // DO NOT EDIT THE FOLLOWING
+    // it is dynamically inserted by schemas/rebuild-schema-manifest.js
+    // {MANIFEST-START}
+    // DATA
+    // {MANIFEST-END}
+}());
+
 (function(){
     "use strict";
 
@@ -375,3 +385,4 @@
 
 
 }());
+
