@@ -432,7 +432,7 @@
                     cursor   = "auto";
 
                 if(!target) return;
-                if(doctored.util.within_pseudoelement(target, {x:event.x,y:event.y})) cursor = "pointer";
+                if(doctored.util.within_pseudoelement(target, {x:event.x || event.clientX, y:event.y || event.clientY})) cursor = "pointer";
                 this.root.style.cursor = cursor;
             },
             show_tooltip: function(text, x, y){
