@@ -413,7 +413,7 @@
             click: function(event){
                 var browser_selection = doctored.util.get_current_selection(),
                     target   = event.toElement || event.target,
-                    mouse_position = event.x ? {x:event.x, y:event.y} : undefined,
+                    mouse_position = event.x || event.clientX ? {x:event.x || event.clientX, y:event.y || event.clientY} : undefined,
                     within_pseudoelement = doctored.util.within_pseudoelement(target, mouse_position),
                     new_doctored_selection;
 
