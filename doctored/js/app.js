@@ -54,7 +54,7 @@
                 this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
                 this.root.contentEditable = true;
-                this.root.className = "doctored";
+                this.root.className = doctored.CONSTANTS.doctored_container_class;
                 this.root.addEventListener("input",     this_function(this.lint_soon, this), false);
                 this.root.addEventListener('paste',     this_function(this.paste, this), false);
                 this.root.addEventListener('mouseup',   this_function(this.click, this), false);
@@ -361,7 +361,7 @@
             },
             keyup_dialog_esc: function(event){
                 // keyup event in the dialog, and we're only interested in the 'esc' key
-                var esc_key = 27;
+                var esc_key = doctored.CONSTANTS.key.esc;
 
                 if(event.keyCode != esc_key) return;
                 doctored.util.remove_old_selection(this.dialog.target, this);
@@ -370,7 +370,7 @@
             },
             keyup_dialog_attributes_enter: function(event){
                 // keyup event occuring in the dialog attributes div, and we're only interested in 'enter' key
-                var enter_key = 13,
+                var enter_key = doctored.CONSTANTS.key.enter,
                     attributes,
                     selection;
 
@@ -382,15 +382,30 @@
             },
             keyup_contentEditable: function(event){
                 // keyup event occuring in the editable area
-                var esc_key = 27,
+                var esc_key = doctored.CONSTANTS.key.esc,
+                    enter_key = doctored.CONSTANTS.key.enter,
                     browser_selection,
-                    parentNode;
+                    parentNode,
+                    brs;
 
                 if(event.keyCode === esc_key){
                     browser_selection = doctored.util.get_current_selection();
                     parentNode = browser_selection.getRangeAt(0).endContainer.parentNode;
                     doctored.util.display_element_dialog(parentNode, this.dialog, undefined, parentNode.getAttribute("data-element"), this.schema);
                     this.dialog.element_chooser.focus();
+                } else if(event.keyCode === enter_key && !event.shiftKey){
+                    if(doctored.util.is_webkit) return;
+                    // Processing BRs rather than intercepting keydown keyCode = enter is intentional.
+                    // On <enter> Chrome breaks <div>s like a block (cloning following siblings) whereas
+                    // Firefox just inserts a BR which isn't what we want (<shift-enter> is for that).
+                    // There doesn't seem to be a feature detect for this behaviour (other than inspecting)
+                    // the DOM after keyup, so that's essentially what we're doing
+                    // (except Chrome never gets this far)
+                    // This way Chrome goes fast (because it returns above and breaks DIVs as we want
+                    // natively, by default) and looking for BRs means we don't have to insert a marker
+                    // to split text nodes
+                    doctored.util.process_linebreaks($("br", this.root));
+                    event.preventDefault();
                 } else if(event.shiftKey === false){
                     doctored.util.this_function(this.click, this)(event);
                 }
@@ -459,11 +474,17 @@
     };
 
     doctored.CONSTANTS = {
+        key: {
+            enter: 13,
+            esc: 27
+        },
         inline_label_height_in_pixels: 10,
         block_label_width_in_pixels:   25,
-        xml_declaration: '<?xml version="1.0" ?>',
-        theme_prefix: 'doctored-theme-',
-        block_or_inline_class_prefix: 'doctored-',
+        doctored_container_class:      "doctored",
+        xml_declaration:               '<?xml version="1.0" ?>',
+        theme_prefix:                  'doctored-theme-',
+        block_or_inline_class_prefix:  'doctored-',
+        intentional_linebreak_class:   'doctored-linebreak',
         root_context: "/"
 
     };

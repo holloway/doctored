@@ -368,6 +368,62 @@
             }
             return html;
         },
+        is_webkit: !!window.webkitURL,
+        process_linebreaks: function(brs){
+            var br,
+                block,
+                block_clone,
+                i,
+                y,
+                node,
+                $ = doctored.$,
+                to_delete = [];
+
+            brs = Array.prototype.slice.call(brs);
+
+            for(i = 0; i < brs.length; i++){
+                br = brs[i];
+                if(br && br.classList.contains(doctored.CONSTANTS.intentional_linebreak)) continue;
+                block = doctored.util.get_closest_block(br);
+                block_clone = block.cloneNode(true);
+                block.parentNode.insertBefore(block_clone, block.nextSibling);
+                node = br;
+                to_delete.push(node);
+                while(node) {
+                    if(node.classList && node.classList.contains(doctored.CONSTANTS.block_class)) {
+                        node = undefined;
+                    } else if(node.nextSibling){
+                        to_delete.push(node.nextSibling);
+                        node = node.nextSibling;
+                    } else if(node.parentNode){
+                        node = node.parentNode;
+                    }
+                }
+                node = $("br", block_clone)[0];
+                to_delete.push(node);
+                while(node) {
+                    if(node.classList && node.classList.contains(doctored.CONSTANTS.block_class)) {
+                        node = undefined;
+                    } else if(node.previousSibling){
+                        to_delete.push(node.previousSibling);
+                        node = node.previousSibling;
+                    } else if(node.parentNode){
+                        node = node.parentNode;
+                    }
+                }
+                for(y = 0; y < to_delete.length; y++){
+                    node = to_delete[y];
+                    node.parentNode.removeChild(node);
+                }
+            }
+        },
+        to_xml_string: function(xml_element){
+            return (new XMLSerializer()).serializeToString(xml_element);
+        },
+        get_closest_block: function(element) {
+            if(element.classList.contains(doctored.CONSTANTS.block_class) || element.classList.contains(doctored.CONSTANTS.doctored_container_class)) return element;
+            return doctored.util.get_closest_block(element.parentNode);
+        },
         dialog_append_attribute: function(dialog, key, value, title){
             var attributes_item = dialog.attributes_template.cloneNode(true);
             attributes_item.childNodes[0].value = key;
