@@ -345,7 +345,7 @@
                     doctored.util.dialog_append_attribute(dialog, key, attributes[key], schema_attributes ? schema_attributes.help : undefined);
                 }
             }
-            this_function(schema.set_dialog_context, schema)(dialog, context_element, attributes);
+            this_function(schema.set_dialog_context, schema)(dialog, context_element, dialog.target.getAttribute("data-element"), attributes);
             doctored.util.set_element_chooser_to_element(target, dialog.element_chooser);
             dialog.element_chooser.focus();
             dialog.style.display = "block";
