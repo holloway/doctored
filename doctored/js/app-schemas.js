@@ -183,6 +183,7 @@
                             node_name,
                             node_attribute_name,
                             node_attribute_ref,
+                            node_attribute_base,
                             i,
                             child_elements,
                             child_element_name;
@@ -194,13 +195,20 @@
                             node_attribute_ref  = undefined;
                             if(node.nodeType === node.ELEMENT_NODE){
                                 node_attribute_ref = node.getAttribute("ref");
-                                if(node_attribute_ref) {
-                                    node = _this.schema_defines[node.nodeName][node_attribute_ref];
+                                node_attribute_base = node.getAttribute("base");
+                                //console.log("REFER", node_attribute_base, node_attribute_ref)
+                                if(node_attribute_ref && _this.schema_defines[node.nodeName][node_attribute_ref]) {
+                                    //console.log("following ref", node.nodeName, node_attribute_ref, _this.schema_defines[node.nodeName][node_attribute_ref])
+                                    gather_below([_this.schema_defines[node.nodeName][node_attribute_ref]], depth + 1);
+                                } else if(node_attribute_base && _this.schema_defines["xs:complexType"][node_attribute_base]) {
+                                    //console.log("drop the base")
+                                    gather_below([_this.schema_defines["xs:complexType"][node_attribute_base]], depth + 1);
                                 }
                                 node_attribute_name = node.getAttribute("name");
                             }
                             node_name = node.nodeName;
                             if(node_name === "element" && depth === 0) node_name = "we're not interested in this element so this is some random thing to skip to 'default' in switch/case";
+                            //console.log(node_name, node_attribute_name, node);
                             switch(node_name) {
                                 case "#text":
                                     break;
@@ -210,12 +218,10 @@
                                     break;
                                 case "xs:attribute":
                                 case "attribute":
-                                    console.log("ATTRIBUTE? ATTRIBUTEATTRIBUTEATTRIBUTE ATTRIBUTEATTRIBUTE ATTRIBUTE");
                                     if(node_attribute_name) context.attributes[node_attribute_name] = _this.attributes[node_attribute_name];
                                     break;
-                                default: // we have to go deeper
-                                    if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
                             }
+                            if(depth <= max_depth && node.childNodes.length > 0) gather_below(node.childNodes, depth + 1);
                         }
                     };
                 if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node so we use different logic because there is no parent node
@@ -226,11 +232,10 @@
                     context = {elements: {}, attributes: {}};
                     if(this.schema_elements[element_name]) {
                         //console.log("what", context.attributes);
-                        gather_below([this.schema_elements[element_name]]);
+                        gather_below(this.schema_elements[element_name].childNodes);
                     }
                     this.cached_context[element_name] = context;
                 }
-                
                 return this.cached_context[element_name];
             }
         },
