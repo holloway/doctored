@@ -380,7 +380,6 @@
                 to_delete = [];
 
             brs = Array.prototype.slice.call(brs);
-
             for(i = 0; i < brs.length; i++){
                 br = brs[i];
                 if(br && br.classList.contains(doctored.CONSTANTS.intentional_linebreak)) continue;
@@ -389,7 +388,6 @@
                 block.parentNode.insertBefore(block_clone, block);
                 node = $("br", block_clone)[0]; //FIXME this matches intentional inline BRs...should be a loop instead that filters those out (or a better selector that avoids them?)
                 to_delete.push(node);
-                
                 while(node) {
                     if(node.classList && node.classList.contains(doctored.CONSTANTS.block_class)) {
                         node = undefined;

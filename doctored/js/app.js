@@ -250,13 +250,19 @@
                 this_function(this.lint_soon, this)();
             },
             element_chooser_change: function(event){
-                // actually the blur event from dialog's <select> calls this
+                var element_chooser,
+                    element_chooser_value;
+
                 if(this.cache.just_hit_esc) {
                     this.cache.just_hit_esc = false;
                     return;
                 }
                 switch(this.dialog.mode){
                     case "createElement":
+                        element_chooser = this.dialog.element_chooser;
+                        element_chooser_value = element_chooser.options[element_chooser.selectedIndex].getAttribute("value");
+                        console.log(element_chooser_value);
+                        if(!element_chooser_value) return;
                         doctored.util.this_function(this.update_element, this)(event);
                         this.dialog.style.display = "none";
                         delete this.dialog.target;
@@ -274,11 +280,11 @@
                     element_chooser = dialog.element_chooser,
                     option          = element_chooser.options[element_chooser.selectedIndex],
                     option_value    = option.getAttribute("value"),
-                    element_name    = option.innerText,
+                    element_name    = option.innerText || option.textContent,
                     display_type    = "block",
                     this_function   = doctored.util.this_function;
 
-                if(!option_value || option_value.length === 0)return doctored.util.remove_old_selection(dialog.target, dialog);
+                if(!option_value || option_value.length === 0) return doctored.util.remove_old_selection(dialog.target, dialog);
                 if(!dialog.target) return "Trying to update element when there is no target?";
                 if(!dialog.target.classList.contains("doctored")) { //set it unless it's the Doctored root node
                     switch(option_value){
