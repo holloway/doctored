@@ -211,7 +211,7 @@ samp.doctored-tooltip.doctored-theme-flat {
             background: #eee;
             color: black;
             border: none;
-            width:70px;
+            width:65px;
             outline: none;
             border-radius:2px;
         }
@@ -514,7 +514,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
             background: #333;
             color: white;
             border: none;
-            width:81px;
+            width:65px;
             outline: none;
             border-radius:2px;
         }
@@ -794,7 +794,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-name,
         menu.doctored-dialog.doctored-theme-highcontrast .doctored-attribute-value {
             border: none;
-            width:81px;
+            width:65px;
             outline: none;
             border-radius:2px;
         }
