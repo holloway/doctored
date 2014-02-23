@@ -251,24 +251,28 @@
             },
             element_chooser_change: function(event){
                 var element_chooser,
+                    element_chooser_option,
+                    element_chooser_text,
                     element_chooser_value;
 
                 if(this.cache.just_hit_esc) {
                     this.cache.just_hit_esc = false;
                     return;
                 }
+                element_chooser = this.dialog.element_chooser;
+                element_chooser_option = element_chooser.options[element_chooser.selectedIndex];
+                element_chooser_text = element_chooser_option.innerText || element_chooser_option.textContent;
+                element_chooser_value = element_chooser_option.getAttribute("value");
+                if(!element_chooser_value) return;
                 switch(this.dialog.mode){
                     case "createElement":
-                        element_chooser = this.dialog.element_chooser;
-                        element_chooser_value = element_chooser.options[element_chooser.selectedIndex].getAttribute("value");
-                        console.log(element_chooser_value);
-                        if(!element_chooser_value) return;
                         doctored.util.this_function(this.update_element, this)(event);
                         this.dialog.style.display = "none";
                         delete this.dialog.target;
                         break;
                     case "editElement":
                         doctored.util.this_function(this.update_element, this)(event);
+                        this.schema.set_dialog_context(this.dialog, undefined, element_chooser_text);
                         break;
                     default:
                         alert("Unrecognised dialog mode " + this.dialog.mode);

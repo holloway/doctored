@@ -296,32 +296,43 @@
         new_document = function(){
             this.instance.set_xml_string(this.new_document_xml);
         },
-        set_dialog_context = function(dialog, parent_element_name, element_name, existing_attributes){
-            var this_function   = doctored.util.this_function,
-                context_chooser = dialog.element_chooser.context_chooser || $("optgroup", dialog.element_chooser)[0],
-                element_chooser = dialog.element_chooser,
+        set_dialog_context = function(dialog, elements_under_element_name, attributes_for_element_name, existing_attributes){
+            var this_function        = doctored.util.this_function,
+                context_chooser      = dialog.element_chooser.context_chooser || $("optgroup", dialog.element_chooser)[0],
+                element_chooser      = dialog.element_chooser,
                 number_of_elements,
                 context,
                 keys,
                 key,
                 i;
 
-            context = this_function(this.get_valid_nodes_for_context, this)(parent_element_name);
-            number_of_elements = (context && context.elements) ? Object.keys(context.elements).length : 0;
-            if(number_of_elements === 0) {
-                context_chooser.setAttribute("label", "Suggested (0 elements)"); //TODO fix this, detect valid root nodes
-                context_chooser.innerHTML = '<option value="" disabled>(None)</option>';
-            } else {
-                context_chooser.setAttribute("label", "Suggested under '" + parent_element_name + "' (" + number_of_elements + " elements)");
-                context_chooser.innerHTML = doctored.util.to_options_tags(context.elements, true);
-            }
-            context = this_function(this.get_valid_nodes_for_context, this)(element_name);
-            keys = (context && context.attributes) ? Object.keys(context.attributes).sort() : [];
-            for(i = 0; i < keys.length; i++){
-                key = keys[i];
-                if(!existing_attributes || !existing_attributes[key]){
-                    doctored.util.dialog_append_attribute(dialog, key, "", context.attributes[key].help);
+            if(elements_under_element_name) {
+                context = this_function(this.get_valid_nodes_for_context, this)(elements_under_element_name);
+                number_of_elements = (context && context.elements) ? Object.keys(context.elements).length : 0;
+                if(number_of_elements === 0) {
+                    context_chooser.setAttribute("label", "Suggested (0 elements)"); //TODO fix this, detect valid root nodes
+                    context_chooser.innerHTML = '<option value="" disabled>(None)</option>';
+                } else {
+                    context_chooser.setAttribute("label", "Suggested under '" + elements_under_element_name + "' (" + number_of_elements + " elements)");
+                    context_chooser.innerHTML = doctored.util.to_options_tags(context.elements, true);
                 }
+            }
+            if(attributes_for_element_name){
+                //step 1. clear existing attributes that are empty
+                for(i = 0; i < dialog.attributes_div.childNodes.length - 1; i++){ // note the " - 1" because the last row is irrelevant
+                    if($(".doctored-attribute-value", dialog.attributes_div.childNodes[i])[0].value.length) {
+                        dialog.attributes_div.removeChild(dialog.attributes_div.childNodes[i]);
+                    }
+                }
+                context = this_function(this.get_valid_nodes_for_context, this)(attributes_for_element_name);
+                keys = (context && context.attributes) ? Object.keys(context.attributes).sort() : [];
+                for(i = 0; i < keys.length; i++){
+                    key = keys[i];
+                    if(!existing_attributes || !existing_attributes[key]){
+                        doctored.util.dialog_append_attribute(dialog, key, "", context.attributes[key].help);
+                    }
+                }
+                dialog.attributes_title.innerHTML = "Attributes for " + doctored.util.escape_text(attributes_for_element_name);
             }
         };
        
