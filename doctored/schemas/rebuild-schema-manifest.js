@@ -73,6 +73,6 @@
         app_schemas
     );
 
-    console.log("Done. Manifest written to " + manifest_path);
+    console.log("Done. Manifest written to " + app_schemas_path);
 
 }());
