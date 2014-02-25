@@ -148,10 +148,6 @@
                             if(inline_elements && inline_elements.indexOf(element_name) >= 0) {
                                 display = doctored.CONSTANTS.inline_class;
                             }
-
-                            if(self_closing){
-                                console.log('<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>' + after);
-                            }
                             return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>' + after;
                     });
         },
