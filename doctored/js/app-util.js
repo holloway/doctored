@@ -142,11 +142,15 @@
                             }
 
                             if(self_closing) {
-                                after = "</" + element_name + ">";
+                                after = "</div>";
                             }
 
                             if(inline_elements && inline_elements.indexOf(element_name) >= 0) {
                                 display = doctored.CONSTANTS.inline_class;
+                            }
+
+                            if(self_closing){
+                                console.log('<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>' + after);
                             }
                             return '<div class="' + display + '" data-element="' + element_name + '"' + attributes + '>' + after;
                     });
@@ -183,7 +187,6 @@
             return attributes;
         },
         descend_building_xml: function(nodes, depth){
-            //FIXME: this is old code. It works but it's a bit shit. Fix it to note depend on display_type and instead just use classList.contains() directly
             var i,
                 node,
                 xml_string = "",
@@ -191,7 +194,8 @@
                 data_element,
                 text_node,
                 display_type,
-                escape_text = doctored.util.escape_text;
+                escape_text = doctored.util.escape_text,
+                has_children;
             
             if(depth === undefined) depth = 0;
 
@@ -206,14 +210,18 @@
                         if(attributes_string) {
                             xml_string += doctored.util.build_xml_attributes_from_json_string(attributes_string.replace(/&quot;/g, '"'));
                         }
+                        has_children = node.hasChildNodes();
+                        if(!has_children) {
+                            xml_string += " /";
+                        }
                         xml_string += ">";
                         if(depth === 0){
                             xml_string += "\n";
                         }
-                        if(node.hasChildNodes()) {
+                        if(has_children) {
                             xml_string += doctored.util.descend_building_xml(node.childNodes, depth+1);
+                            xml_string += "</" + data_element + ">";
                         }
-                        xml_string += "</" + data_element + ">";
                         if(depth === 1 && node.classList.contains(doctored.CONSTANTS.block_class)){
                             xml_string += "\n";
                         }
