@@ -541,9 +541,12 @@
             if(position === undefined) return false;
             target_offset = target.getBoundingClientRect();
             if(target.classList.contains(doctored.CONSTANTS.inline_class)       && position.y > target_offset.top  - doctored.CONSTANTS.inline_label_height_in_pixels + target.offsetHeight) {
-                within = true;
+                within = doctored.CONSTANTS.edit_element_css_cursor;
             } else if(target.classList.contains(doctored.CONSTANTS.block_class) && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
-                within = true;
+                within = doctored.CONSTANTS.edit_element_css_cursor;
+                if(position.y - target_offset.top < doctored.CONSTANTS.duplicate_block_height_pixels){
+                    within = doctored.CONSTANTS.duplicate_element_css_cursor;
+                }
             }
             return within;
         },

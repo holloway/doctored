@@ -425,7 +425,8 @@
                     target   = event.toElement || event.target,
                     mouse_position = event.x || event.clientX ? {x:event.x || event.clientX, y:event.y || event.clientY} : undefined,
                     within_pseudoelement = doctored.util.within_pseudoelement(target, mouse_position),
-                    new_doctored_selection;
+                    new_doctored_selection,
+                    target_clone;
 
                 this.dialog.style.display = "none";
                 doctored.util.remove_old_selection(this.dialog.target, this.dialog);
@@ -433,11 +434,13 @@
                     new_doctored_selection = doctored.util.surround_selection_with_element("div", "doctored-selection", this, browser_selection, mouse_position);
                     if(new_doctored_selection && new_doctored_selection.parentNode) { //if it's attached to the page
                         doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.schema);
-                    } else if(within_pseudoelement) {
+                    } else if(within_pseudoelement === doctored.CONSTANTS.edit_element_css_cursor) {
                         doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.schema);
+                    } else if(within_pseudoelement === doctored.CONSTANTS.duplicate_element_css_cursor){
+                        target_clone = target.cloneNode(true);
+                        target_clone.innerHTML = "";
+                        target.parentNode.insertBefore(target_clone, target.nextSibling);
                     }
-                } else if(within_pseudoelement) {
-                    doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.schema);
                 }
             },
             add_attribute_item: function(){
@@ -454,10 +457,14 @@
             },
             mousemove: function(event){
                 var target   = event.toElement || event.target,
-                    cursor   = "auto";
+                    cursor   = "auto",
+                    within;
 
                 if(!target) return;
-                if(doctored.util.within_pseudoelement(target, {x:event.x || event.clientX, y:event.y || event.clientY})) cursor = "pointer";
+                within = (doctored.util.within_pseudoelement(target, {x:event.x || event.clientX, y:event.y || event.clientY}));
+                if(within !== false){
+                    cursor = within;
+                }
                 this.root.style.cursor = cursor;
             },
             show_tooltip: function(text, x, y){
@@ -490,6 +497,9 @@
         },
         inline_label_height_in_pixels: 10,
         block_label_width_in_pixels:   25,
+        duplicate_block_height_pixels: 20,
+        edit_element_css_cursor:       "pointer",
+        duplicate_element_css_cursor:  "crosshair",
         doctored_container_class:      "doctored",
         xml_declaration:               '<?xml version="1.0" ?>',
         theme_prefix:                  'doctored-theme-',

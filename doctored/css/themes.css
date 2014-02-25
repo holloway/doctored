@@ -354,6 +354,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
             font-weight:bold;
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
+            content: "\271A \00A0 " attr(data-element);
         }
 
         .doctored.doctored-theme-shadow div.doctored-block.has_errors:before {
@@ -650,6 +651,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
             color:#000;
             font-weight:bold;
             font-size:small;
+            content: "\271A \00A0 " attr(data-element);
         }
 
         .doctored.doctored-theme-highcontrast div.doctored-block.has_errors:before {
