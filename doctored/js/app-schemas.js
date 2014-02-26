@@ -32,6 +32,7 @@
     };
 
     var $ = doctored.$,
+        $xml = doctored.$xml,
         relaxng = {
             cache_useful_stuff_from_schema: function(){
                 var this_function   = doctored.util.this_function,
@@ -131,6 +132,9 @@
             }
         },
         w3c_schema = {
+            namespace: {
+                default: "http://www.w3.org/2001/XMLSchema"
+            },
             cache_useful_stuff_from_schema: function(){
                 var this_function   = doctored.util.this_function,
                     schema_elements,
@@ -142,12 +146,12 @@
 
                 this.elements = {};
                 this.schema_elements = {}; //cache some lookups
-                schema_elements = $("element", this.schema.documentElement);
+                schema_elements = $xml("element", this.schema.documentElement, w3c_schema.namespace.default);
                 for(i = 0; i < schema_elements.length; i++){
                     schema_element = schema_elements[i];
                     node_attribute_name = schema_element.getAttribute("name");
                     if(node_attribute_name){
-                        schema_element_help = $("documentation", schema_element)[0];
+                        schema_element_help = $xml("documentation", schema_element, w3c_schema.namespace.default)[0];
                         block_or_inline = (this.inline_elements && this.inline_elements.indexOf(node_attribute_name) >= 0) ? "inline" : "block";
                         this.elements[node_attribute_name] = {
                             display: block_or_inline,
@@ -158,12 +162,12 @@
                 }
 
                 this.attributes = {};
-                schema_elements = $("attribute", this.schema.documentElement);
+                schema_elements = $xml("attribute", this.schema.documentElement, w3c_schema.namespace.default);
                 for(i = 0; i < schema_elements.length; i++){
                     schema_element = schema_elements[i];
                     node_attribute_name = schema_element.getAttribute("name");
                     if(node_attribute_name){
-                        schema_element_help = $("documentation", schema_element)[0];
+                        schema_element_help = $("xs:documentation", schema_element)[0];
                         this.attributes[node_attribute_name] = {help: schema_element_help ? doctored.util.remove_excessive_whitespace(schema_element_help.textContent) : ""};
                     }
                 }
@@ -194,14 +198,15 @@
                             i,
                             child_elements,
                             child_element_name;
-
+                        console.log(nodes);
                         if(depth === undefined) depth = 0;
                         for(i = 0; i < nodes.length; i++){
                             node = nodes[i];
+                            console.log(node);
                             node_attribute_name = undefined;
                             node_attribute_ref  = undefined;
                             if(node.nodeType === node.ELEMENT_NODE){
-                                node_attribute_ref = node.getAttribute("ref");
+                                node_attribute_ref  = node.getAttribute("ref");
                                 node_attribute_base = node.getAttribute("base");
                                 //console.log("REFER", node_attribute_base, node_attribute_ref)
                                 if(node_attribute_ref && _this.schema_defines[node.nodeName][node_attribute_ref]) {
@@ -236,6 +241,7 @@
                 }
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
+                    console.log("what", this.schema_elements[element_name], element_name);
                     if(this.schema_elements[element_name]) {
                         gather_below(this.schema_elements[element_name].childNodes);
                     }
@@ -252,7 +258,6 @@
             this.schema_url = doctored.base + "schemas" + schema_url;
             this.elements = {};
             this.attributes = {};
-            if(this.ready === true) return this_function(this.update_element_chooser, this)();
             this.instance = instance;
             switch(file_extension.toLowerCase()){
                 case "rng":

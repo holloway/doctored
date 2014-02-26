@@ -300,6 +300,7 @@
                 }
                 if(option_value === "(custom)") {
                     element_name = prompt("Custom element:");
+                    console.log("sdfsdf");
                     if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
                 }
                 dialog.target.setAttribute("data-element", element_name);
@@ -499,14 +500,13 @@
         block_label_width_in_pixels:   25,
         duplicate_block_height_pixels: 20,
         edit_element_css_cursor:       "pointer",
-        duplicate_element_css_cursor:  "crosshair",
+        duplicate_element_css_cursor:  "s-resize",
         doctored_container_class:      "doctored",
         xml_declaration:               '<?xml version="1.0" ?>',
         theme_prefix:                  'doctored-theme-',
-        block_or_inline_class_prefix:  'doctored-',
         intentional_linebreak_class:   'doctored-linebreak',
-        root_context: "/"
-
+        root_context: "/",
+        block_or_inline_class_prefix:  'doctored-'
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';

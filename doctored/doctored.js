@@ -40,6 +40,13 @@
             if(selector.substring(0,1) === ".") return scope.getElementsByClassName(selector.substring(1));
             return scope.getElementsByTagName(selector);
         },
+        $xml: function(selector, scope, namespaceURI, namespaceURIprefix){
+            if(!scope) return alert("ERROR: $xml called without a scope");
+            if(selector.indexOf(" ") >= 0 || selector.indexOf("[") >= 0) return scope.querySelectorAll(selector); // FIXME: seemingly not namespace aware
+            if(selector.substring(0,1) === "#") return scope.getElementById(selector.substring(1));
+            if(selector.substring(0,1) === ".") return scope.getElementsByClassName(selector.substring(1));
+            return scope.getElementsByTagNameNS(namespaceURI, selector); //NOTE the "NS"
+        },
         _to_be_initialized: [],
         init: function(selector, options){ //a stub that delays initialization until Doctored is ready. Replaced with the real thing in app.js that listens to the "app:ready" event.
             window.doctored._to_be_initialized.push({selector: selector, options: options});
