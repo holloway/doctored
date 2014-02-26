@@ -301,7 +301,7 @@
                 // typically "BAD_BOUNDARYPOINTS_ERR: DOM Range Exception 1" when selecting across mutiple elements.
                 // E.g. the selection in the following structure where square brackets indicate selection "<p>ok[this</p><p>bit]ok</p>".
                 // So in this case we just display a confusing and bewildering message in a tooltip (if you can think of better wording, let me know!)
-                selection.removeAllRanges();
+                // We leave the text selection there though because they might continue expanding it to make it valid
                 boundaries = element.getBoundingClientRect();
                 if(!mouse) mouse = {x:boundaries.left, y:boundaries.top};
                 doctored.util.this_function(instance.show_tooltip, instance)("Invalid selection", mouse.x + document.body.scrollLeft, mouse.y + document.body.scrollTop);
@@ -647,7 +647,9 @@
             var _escape_chars = {
                     "&": "&amp;",
                     "<": "&lt;",
-                    ">": "&gt;"
+                    ">": "&gt;",
+                    "'": "&apos;",
+                    '"': "&quot;"
                 },
                 _escape = function(char){
                     return _escape_chars[char];

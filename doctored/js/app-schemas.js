@@ -17,10 +17,17 @@
         list: doctored.schemas_manifest,
         get_schema_instance: function(instance, schema_family_id, schema_url){
             var schema_family = doctored.schema_family[schema_family_id],
-                this_function = doctored.util.this_function;
+                this_function = doctored.util.this_function,
+                clone_of_schema_family;
 
             if(!schema_family) return alert("There is no support for the schema family of '" + schema_family_id + "' requested by " + schema_url + "'s config file.");
-            return doctored.util.simple_map_clone(schema_family);
+
+            clone_of_schema_family = doctored.util.simple_map_clone(schema_family);
+            if(!clone_of_schema_family.init)                   clone_of_schema_family.init                   = schema_init;
+            if(!clone_of_schema_family.new_document)           clone_of_schema_family.new_document           = new_document;
+            if(!clone_of_schema_family.update_element_chooser) clone_of_schema_family.update_element_chooser = update_element_chooser;
+            if(!clone_of_schema_family.set_dialog_context)     clone_of_schema_family.set_dialog_context     = set_dialog_context;
+            return clone_of_schema_family;
         }
     };
 
@@ -227,11 +234,9 @@
                 if(element_name === doctored.CONSTANTS.root_context) { //then it's the root node so we use different logic because there is no parent node
                     return {elements: {}, attributes: {}}; //FIXME allow different root nodes
                 }
-                //console.log(element_name);
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
                     if(this.schema_elements[element_name]) {
-                        //console.log("what", context.attributes);
                         gather_below(this.schema_elements[element_name].childNodes);
                     }
                     this.cached_context[element_name] = context;
@@ -297,10 +302,11 @@
             this.instance.set_xml_string(this.new_document_xml);
         },
         set_dialog_context = function(dialog, elements_under_element_name, attributes_for_element_name, existing_attributes){
-            var this_function        = doctored.util.this_function,
-                context_chooser      = dialog.element_chooser.context_chooser || $("optgroup", dialog.element_chooser)[0],
-                element_chooser      = dialog.element_chooser,
+            var this_function       = doctored.util.this_function,
+                context_chooser     = dialog.element_chooser.context_chooser || $("optgroup", dialog.element_chooser)[0],
+                element_chooser     = dialog.element_chooser,
                 number_of_elements,
+                attribute_pair,
                 context,
                 keys,
                 key,
@@ -319,8 +325,10 @@
             }
             if(attributes_for_element_name){
                 //step 1. clear existing attributes that are empty
+                
                 for(i = 0; i < dialog.attributes_div.childNodes.length - 1; i++){ // note the " - 1" because the last row is irrelevant
-                    if($(".doctored-attribute-value", dialog.attributes_div.childNodes[i])[0].value.length) {
+                    attribute_pair = dialog.attributes_div.childNodes[i];
+                    if($(".doctored-attribute-value", attribute_pair)[0].value.length === 0) {
                         dialog.attributes_div.removeChild(dialog.attributes_div.childNodes[i]);
                     }
                 }
@@ -339,64 +347,34 @@
 
     doctored.schema_family = { //a way of grouping multiple schemas into types (e.g. DocBook 4 and 5 are both "docbook")
         docbook: {
-            name:              "DocBook 5",
+            name: "DocBook 5",
+            new_document_xml: '<book version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://wwww.w3.org/1999/xlink/"><title>Book Title</title><chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter></book>',
+            inline_elements: ["abbrev","accel","acronym","address","alt","anchor","annotation","application","author","bibliolist","biblioref","blockquote","bridgehead","calloutlist","caution","citation","citebiblioid","citerefentry","citetitle","classname","classsynopsis","cmdsynopsis","code","command","computeroutput","constant","constraintdef","constructorsynopsis","coref","database","date","destructorsynopsis","editor","email","emphasis","envar","epigraph","equation","errorcode","errorname","errortext","errortype","example","exceptionname","fieldsynopsis","figure","filename","footnote","footnoteref","foreignphrase","funcsynopsis","function","glosslist","guibutton","guiicon","guilabel","guimenu","guimenuitem","guisubmenu","hardware","important","indexterm","info","informalequation","informalexample","informalfigure","initializer","inlineequation","inlinemediaobject","interfacename","itemizedlist","jobtitle","keycap","keycode","keycombo","keysym","link","literal","literallayout","markup","mediaobject","menuchoice","methodname","methodsynopsis","modifier","mousebutton","msgset","nonterminal","note","olink","option","optional","orderedlist","org","orgname","package","parameter","person","personname","phrase","procedure","productionset","productname","productnumber","programlisting","programlistingco","prompt","property","qandaset","quote","remark","replaceable","returnvalue","revhistory","screen","screenco","screenshot","segmentedlist","shortcut","sidebar","simplelist","subscript","superscript","symbol","synopsis","systemitem","tag","task","termdef","tip","token","trademark","type","uri","userinput","variablelist","varname","warning","wordasword","xref"],
             convert_from_html: function(html_string){
-            // Typically called when people paste HTML and this is supposed to convert that to DocBook
-            // this is just a prototype at the moment, not very useful
-            // FIXME: improve this A LOT!
                 var element_mapping   = {"p":    "para", "a": "ulink"},
                     attribute_mapping = {"href": "url"};
                 return doctored.util.simple_transform(html_string, element_mapping, attribute_mapping);
             },
-            new_document: new_document,
-            new_document_xml: '<book version="5.0" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://wwww.w3.org/1999/xlink/">' +
-                                '<title>Book Title</title>' +
-                                '<chapter><para>First paragraph <link xlink:href="http://docvert.org/">with hyperlink</link>.</para></chapter>' +
-                              '</book>',
-            init: schema_init,
-            update_element_chooser: update_element_chooser,
-            set_dialog_context: set_dialog_context,
-            inline_elements: ["abbrev","accel","acronym","address","alt","anchor","annotation","application","author","bibliolist","biblioref","blockquote","bridgehead","calloutlist","caution","citation","citebiblioid","citerefentry","citetitle","classname","classsynopsis","cmdsynopsis","code","command","computeroutput","constant","constraintdef","constructorsynopsis","coref","database","date","destructorsynopsis","editor","email","emphasis","envar","epigraph","equation","errorcode","errorname","errortext","errortype","example","exceptionname","fieldsynopsis","figure","filename","footnote","footnoteref","foreignphrase","funcsynopsis","function","glosslist","guibutton","guiicon","guilabel","guimenu","guimenuitem","guisubmenu","hardware","important","indexterm","info","informalequation","informalexample","informalfigure","initializer","inlineequation","inlinemediaobject","interfacename","itemizedlist","jobtitle","keycap","keycode","keycombo","keysym","link","literal","literallayout","markup","mediaobject","menuchoice","methodname","methodsynopsis","modifier","mousebutton","msgset","nonterminal","note","olink","option","optional","orderedlist","org","orgname","package","parameter","person","personname","phrase","procedure","productionset","productname","productnumber","programlisting","programlistingco","prompt","property","qandaset","quote","remark","replaceable","returnvalue","revhistory","screen","screenco","screenshot","segmentedlist","shortcut","sidebar","simplelist","subscript","superscript","symbol","synopsis","systemitem","tag","task","termdef","tip","token","trademark","type","uri","userinput","variablelist","varname","warning","wordasword","xref"]
         },
         'tei': {
             name: "TEI 2.6.0",
-            ready: false,
-            init: schema_init,
-            update_element_chooser: update_element_chooser,
-            set_dialog_context: set_dialog_context,
-            new_document: new_document,
             inline_elements: ["title", "note", "name", "emph", "term"],
             new_document_xml: '<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Review: an electronic transcription</title></titleStmt><publicationStmt><p>Published as an example for the Introduction module of TBE.</p></publicationStmt><sourceDesc><p>No source: born digital.</p></sourceDesc></fileDesc></teiHeader><text><body><head>Review</head><p><title>Die Leiden des jungen Werther</title><note place="foot">by <name>Goethe</name></note>is an <emph>exceptionally</emph> good example of a book full of <term>Weltschmerz</term>.</p> </body> </text> </TEI>'
         },
         'dita': {
             name: "DITA 1.8",
-            ready: false,
-            init: schema_init,
             dtd: '<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "../../dtd/concept.dtd">',
             file_extension: ".dita",
-            update_element_chooser: update_element_chooser,
-            set_dialog_context: set_dialog_context,
             inline_elements: ["xref", "codeph"],
-            new_document: new_document,
             new_document_xml: '<!-- This file is part of the DITA Open Toolkit project hosted on Sourceforge.net. Common Public License v1.0 --><!-- (c) Copyright IBM Corp. 2004, 2005 All Rights Reserved. --><!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "../../dtd/concept.dtd"><concept id="bookmap-readme" xml:lang="en-us">  <title>Bookmap Readme</title>  <prolog/>  <conbody>    <p>This demonstration provides a proof-of-concept implementation of the DITA bookmap proposal. The proposal adds book output to DITA using a specialized DITA map known as a bookmap. The bookmap organizes the DITA topics with the correct nesting and sequence for the book. In addition, the bookmap assigns roles such as preface, chapter, and appendix to top-level topics within the book. </p>    <p class="- topic/p ">For more detailed information about the proposal, see the detailed posting on the DITA forum at <xref href="news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com" format="news">news://news.software.ibm.com:119/c11fd3$85qq$2@news.boulder.ibm.com</xref>.</p>    <note>This demonstration has the following limitations:<ul>        <li>For XSL-FO formatting and thus PDF generation, only the basics have been implemented. Through specialization, the DITA XHTML-based outputs for DITA map are also available for bookmap.</li>        <li>The design for the book info component of the proposal has been fleshed out based on antecedents in DocBook and IBMIDDoc (see the comments in the <codeph>bookinfo.mod</codeph> file). Most of the elements in bookinfo aren&apos;t processed.</li>        <li>The book list component of the proposal hasn&apos;t been implemented yet. Possible designs for a glossary list have been discussed extensively on the DITA forum (resulting in the proposal posted as <xref href="news://news.software.ibm.com:119/3FA29F54.83AFB251@ca.ibm.com" format="news">news://news.software.ibm.com:119/blfg38$5k0q$1@news.boulder.ibm.com</xref>).</li>        <li>The book style component of the proposal is much more experimental than the bookmap and bookinfo components. Processing for this component is limited.</li>      </ul></note>  </conbody></concept>'
         },
         'marc': {
             name: "MARC21 Slim",
-            init: schema_init,
-            ready: false,
-            update_element_chooser: update_element_chooser,
-            set_dialog_context: set_dialog_context,
-            new_document: new_document,
             new_document_xml: '<?xml version="1.0" encoding="UTF-8"?> <collection xmlns="http://www.loc.gov/MARC21/slim">   <record>     <leader>01142cam  2200301 a 4500</leader>     <controlfield tag="001">   92005291 </controlfield>     <controlfield tag="003">DLC</controlfield>     <controlfield tag="005">19930521155141.9</controlfield>     <controlfield tag="008">920219s1993    caua   j      000 0 eng  </controlfield>     <datafield tag="010" ind1=" " ind2=" ">       <subfield code="a">   92005291 </subfield>     </datafield>     <datafield tag="020" ind1=" " ind2=" ">       <subfield code="a">0152038655 :</subfield>       <subfield code="c">$15.95</subfield>     </datafield>     <datafield tag="040" ind1=" " ind2=" ">       <subfield code="a">DLC</subfield>       <subfield code="c">DLC</subfield>       <subfield code="d">DLC</subfield>     </datafield>     <datafield tag="042" ind1=" " ind2=" ">       <subfield code="a">lcac</subfield>     </datafield>     <datafield tag="050" ind1="0" ind2="0">       <subfield code="a">PS3537.A618</subfield>       <subfield code="b">A88 1993</subfield>     </datafield>     <datafield tag="082" ind1="0" ind2="0">       <subfield code="a">811/.52</subfield>       <subfield code="2">20</subfield>     </datafield>     <datafield tag="100" ind1="1" ind2=" ">       <subfield code="a">Sandburg, Carl,</subfield>       <subfield code="d">1878-1967.</subfield>     </datafield>     <datafield tag="245" ind1="1" ind2="0">       <subfield code="a">Arithmetic /</subfield>       <subfield code="c">Carl Sandburg ; illustrated as an anamorphic adventure by Ted Rand.</subfield>     </datafield>     <datafield tag="250" ind1=" " ind2=" ">       <subfield code="a">1st ed.</subfield>     </datafield>     <datafield tag="260" ind1=" " ind2=" ">       <subfield code="a">San Diego :</subfield>       <subfield code="b">Harcourt Brace Jovanovich,</subfield>       <subfield code="c">c1993.</subfield>     </datafield>     <datafield tag="300" ind1=" " ind2=" ">       <subfield code="a">1 v. (unpaged) :</subfield>       <subfield code="b">ill. (some col.) ;</subfield>       <subfield code="c">26 cm.</subfield>     </datafield>     <datafield tag="500" ind1=" " ind2=" ">       <subfield code="a">One Mylar sheet included in pocket.</subfield>     </datafield>     <datafield tag="520" ind1=" " ind2=" ">       <subfield code="a">A poem about numbers and their characteristics. Features anamorphic, or distorted, drawings which can be restored to normal by viewing from a particular angle or by viewing the image\'s reflection in the provided Mylar cone.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="0">       <subfield code="a">Arithmetic</subfield>       <subfield code="x">Juvenile poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="0">       <subfield code="a">Children\'s poetry, American.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">Arithmetic</subfield>       <subfield code="x">Poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">American poetry.</subfield>     </datafield>     <datafield tag="650" ind1=" " ind2="1">       <subfield code="a">Visual perception.</subfield>     </datafield>     <datafield tag="700" ind1="1" ind2=" ">       <subfield code="a">Rand, Ted,</subfield>       <subfield code="e">ill.</subfield>     </datafield>   </record> </collection>'
         },
         'texml': {
             name: "TeXML",
-            init: schema_init,
-            ready: false,
-            update_element_chooser: update_element_chooser,
-            set_dialog_context: set_dialog_context,
-            new_document: new_document,
-            new_document_xml: '<?xml version="1.0" encoding="UTF-8"?><TeXML><TeXML escape="0">\\documentclass[a4paper]{article}\\usepackage[latin1]{inputenc}\\usepackage[T1]{fontenc}</TeXML><env name="document">NOTE We don\'t support linebreaks very well right now - this format isn\'t very well supported.\nI\'m not afraid of the symbols\n$, ^, > and others.</env></TeXML>'
+            new_document_xml: '<?xml version="1.0" encoding="UTF-8"?><TeXML><TeXML escape="0">\\documentclass[a4paper]{article}\\usepackage[latin1]{inputenc}\\usepackage[T1]{fontenc}</TeXML><env name="document">NOTE We don\'t support linebreaks very well right now - this format isn\'t very well supported.\neI\'m not afraid of the symbols\n$, ^, > and others.</env></TeXML>'
         }
     };
 
