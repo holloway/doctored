@@ -198,11 +198,10 @@
                             i,
                             child_elements,
                             child_element_name;
-                        console.log(nodes);
+
                         if(depth === undefined) depth = 0;
                         for(i = 0; i < nodes.length; i++){
                             node = nodes[i];
-                            console.log(node);
                             node_attribute_name = undefined;
                             node_attribute_ref  = undefined;
                             if(node.nodeType === node.ELEMENT_NODE){
@@ -241,7 +240,6 @@
                 }
                 if(!this.cached_context[element_name]) {
                     context = {elements: {}, attributes: {}};
-                    console.log("what", this.schema_elements[element_name], element_name);
                     if(this.schema_elements[element_name]) {
                         gather_below(this.schema_elements[element_name].childNodes);
                     }
