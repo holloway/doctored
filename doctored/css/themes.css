@@ -120,7 +120,8 @@ samp.doctored-tooltip.doctored-theme-flat {
                 background: #eee;
             }
 
-        menu.doctored-menu.doctored-theme-flat a:hover {
+        menu.doctored-menu.doctored-theme-flat a:hover,
+        menu.doctored-menu.doctored-theme-flat a.doctored-on {
             background-color:#555;
             color: #fff;
         }

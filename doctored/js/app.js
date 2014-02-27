@@ -3,11 +3,12 @@
     "use strict";
 
     var defaults = {
-            autosave_every_milliseconds:   30 * 1000,
-            linting_debounce_milliseconds: 1000,
-            retry_init_after_milliseconds: 50,
-            schema:                        "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js
-            theme:                         "flat" //key from options in hamburger_menu.theme_chooser
+            autosave_every_milliseconds:       30 * 1000,
+            linting_debounce_milliseconds:     1000,
+            retry_init_after_milliseconds:     50,
+            view_source_debounce_milliseconds: 1000 / 60,
+            schema:                            "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js ... a default that may be overridden by per-user settings in localStorage
+            theme:                             "flat" //key from options in hamburger_menu.theme_chooser
         },
         $ = doctored.$,
         $body = $('body')[0];
@@ -60,6 +61,7 @@
                 this.root.addEventListener('mouseup',   this_function(this.click, this), false);
                 this.root.addEventListener('touchend',  this_function(this.click, this), false);
                 this.root.addEventListener('keyup',     this_function(this.keyup_contentEditable, this), false);
+                this.root.addEventListener('keyup',     doctored.util.debounce(this.keyup_contentEditable_sync_view_source, _this.options.view_source_debounce_milliseconds, this), false);
                 this.root.addEventListener('mousemove', this_function(this.mousemove, this), false);
                 this.menu = document.createElement('menu');
                 this.menu.className = "doctored-menu";
@@ -180,6 +182,7 @@
                 this.root.setAttribute("data-element", data_element || "ROOT-ERROR-NO-DATA-ELEMENT");
                 this.root.setAttribute("data-attributes", data_attributes || "");
                 this.root.innerHTML = new_document_root.innerHTML;
+                this.lint_soon();
             },
             save: function(event){
                 var localStorage_key,
@@ -342,22 +345,48 @@
             },
             view_source: function(event){
                 // clicking 'View Source' button
-                var _this    = this,
-                    xml      = this.get_xml_string(),
-                    textarea = document.createElement('textarea');
+                var textarea = this.view_source_textarea,
+                    this_function = doctored.util.this_function,
+                    should_be_visible,
+                    boundaries;
 
-                textarea.classList.add("doctored-view-source-textbox");
-                textarea.textContent = xml;
-                $body.appendChild(textarea);
-                textarea.focus();
-                textarea.addEventListener('blur', function(){
-                    _this.set_xml_string(this.value);
-                    if(this && this.parentNode) {
-                        try {
-                            this.parentNode.removeChild(this); //FIXME: this try/catch is to work around DOM errors where the node doesn't exist despite the if() check. Investigate later.
-                        }catch(exception){}
-                    }}, false);
+                if(!textarea) {
+                    boundaries = this.root.getBoundingClientRect();
+                    textarea = document.createElement('textarea');
+                    textarea.classList.add("doctored-view-source-textbox");
+                    textarea.addEventListener('keyup', this_function(this.view_source_change, this));
+                    textarea.width = (window.innerWidth / 2) - (doctored.CONSTANTS.error_gutter_width_pixels / 2) - boundaries.left;
+                    textarea.style.width = textarea.width + "px";
+                    textarea.style.left = boundaries.left + "px";
+                    this.root.default_marginLeft = this.root.style.marginLeft;
+                    textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
+                    $body.appendChild(textarea);
+                    this.view_source_textarea = textarea;
+                }
+                this.menu.view_source.classList.toggle(doctored.CONSTANTS.menu_option_on);
+                should_be_visible = this.menu.view_source.classList.contains(doctored.CONSTANTS.menu_option_on);
+                if(should_be_visible){
+                    this.root.style.marginLeft = textarea.width + "px";
+                    boundaries = this.root.getBoundingClientRect(); // need to be recalculated (even if already done in if(!textarea) ... ) because the height of the this.root will change when marginLeft is changed
+                    textarea.textContent = this.get_xml_string();
+                    textarea.focus();
+                    textarea.style.top = (document.body.scrollTop + boundaries.top) + "px";
+                    textarea.style.height = boundaries.height + "px";
+                    textarea.style.display = "block";
+                } else {
+                    textarea.style.display = "none";
+                    this.root.style.marginLeft = this.root.default_marginLeft;
+                }
                 event.preventDefault();
+            },
+            view_source_change: function(event){
+                this.set_xml_string(this.view_source_textarea.value);
+            },
+            keyup_contentEditable_sync_view_source: function(event){
+                var textarea = this.view_source_textarea;
+
+                if(!textarea) return;
+                textarea.textContent = this.get_xml_string();
             },
             download: function(event){
                 // clicking the 'Download' button
@@ -505,8 +534,10 @@
         xml_declaration:               '<?xml version="1.0" ?>',
         theme_prefix:                  'doctored-theme-',
         intentional_linebreak_class:   'doctored-linebreak',
-        root_context: "/",
-        block_or_inline_class_prefix:  'doctored-'
+        root_context:                  '/',
+        block_or_inline_class_prefix:  'doctored-',
+        menu_option_on:                'doctored-on',
+        error_gutter_width_pixels:     200
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';

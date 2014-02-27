@@ -101,13 +101,18 @@ menu.doctored-menu {
 }
 
 textarea.doctored-view-source-textbox {
-    position: fixed;
+    position: absolute;
     z-index: 2;
-    top: 3%;
-    left: 3%;
-    width: 92%;
+    width: 99%;
     height:92%;
 }
+
+    textarea.doctored-view-source-textbox:after {
+        position:relative;
+        left:1%;
+        height:100%;
+        background:red;
+    }
 
 menu.doctored-dialog {
     position: absolute;
