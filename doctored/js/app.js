@@ -354,13 +354,15 @@
                     boundaries = this.root.getBoundingClientRect();
                     textarea = document.createElement('textarea');
                     textarea.classList.add("doctored-view-source-textbox");
-                    textarea.addEventListener('keyup', this_function(this.view_source_change, this));
+                    textarea.addEventListener('keyup', doctored.util.debounce(this.view_source_change, this.options.view_source_debounce_milliseconds, this), false);
                     textarea.width = (window.innerWidth / 2) - (doctored.CONSTANTS.error_gutter_width_pixels / 2) - boundaries.left;
                     textarea.style.width = textarea.width + "px";
                     textarea.style.left = boundaries.left + "px";
-                    this.root.default_marginLeft = this.root.style.marginLeft;
-                    textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                     $body.appendChild(textarea);
+                    this.root.default_marginLeft = this.root.style.marginLeft || boundaries.left;
+                    
+                    console.log("marginLeft", this.root.default_marginLeft)
+                    textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                     this.view_source_textarea = textarea;
                 }
                 this.menu.view_source.classList.toggle(doctored.CONSTANTS.menu_option_on);
@@ -375,7 +377,7 @@
                     textarea.style.display = "block";
                 } else {
                     textarea.style.display = "none";
-                    this.root.style.marginLeft = this.root.default_marginLeft;
+                    this.root.style.marginLeft = this.root.default_marginLeft + "px";
                 }
                 event.preventDefault();
             },
@@ -384,9 +386,8 @@
             },
             keyup_contentEditable_sync_view_source: function(event){
                 var textarea = this.view_source_textarea;
-
                 if(!textarea) return;
-                textarea.textContent = this.get_xml_string();
+                textarea.value = this.get_xml_string();
             },
             download: function(event){
                 // clicking the 'Download' button
