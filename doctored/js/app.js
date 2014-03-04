@@ -48,6 +48,7 @@
             init: function(){ //initialize one instance of the editor
                 var _this = this,
                     menu,
+                    boundaries,
                     i,
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme");
@@ -111,12 +112,23 @@
                 this.tooltip.className = "doctored-tooltip";
                 this.tooltip.addEventListener(doctored.util.transition_end_event, this_function(this.hide_tooltip, this), false);
                 this.attributes_template = "";
+                
+                this.view_source_textarea = document.createElement('textarea');
+                this.view_source_resizer = document.createElement('div');
+                this.view_source_textarea.classList.add("doctored-view-source-textbox");
+                this.view_source_textarea.addEventListener('keyup', doctored.util.debounce(this.view_source_change, this.options.view_source_debounce_milliseconds, this), false);
+                
+                
+                this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 doctored.util.set_theme(theme || this.options.theme, this);
                 this.root.parentNode.insertBefore(this.menu, this.root);
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
+                this.root.parentNode.insertBefore(this.view_source_textarea, this.hamburger_menu);
+                this.root.parentNode.insertBefore(this.view_source_resizer, this.view_source_textarea);
+                
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -345,38 +357,36 @@
             },
             view_source: function(event){
                 // clicking 'View Source' button
-                var textarea = this.view_source_textarea,
+                var view_source_textarea = this.view_source_textarea,
+                    view_source_resizer = this.view_source_resizer,
                     this_function = doctored.util.this_function,
                     should_be_visible,
-                    boundaries;
+                    root_boundaries;
 
-                if(!textarea) {
-                    boundaries = this.root.getBoundingClientRect();
-                    textarea = document.createElement('textarea');
-                    textarea.classList.add("doctored-view-source-textbox");
-                    textarea.addEventListener('keyup', doctored.util.debounce(this.view_source_change, this.options.view_source_debounce_milliseconds, this), false);
-                    textarea.width = (window.innerWidth / 2) - (doctored.CONSTANTS.error_gutter_width_pixels / 2) - boundaries.left;
-                    textarea.style.width = textarea.width + "px";
-                    textarea.style.left = boundaries.left + "px";
-                    $body.appendChild(textarea);
-                    this.root.default_marginLeft = this.root.style.marginLeft || boundaries.left;
-                    
-                    console.log("marginLeft", this.root.default_marginLeft)
-                    textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
-                    this.view_source_textarea = textarea;
+                if(!this.root.default_marginLeft) {
+                    root_boundaries = this.root.getBoundingClientRect();
+                    view_source_textarea.style.width = 500 + "px";
+                    view_source_textarea.style.height = 500 + "px";
+                    view_source_textarea.style.display = "block";
+                    view_source_textarea.padding_added_to_width = view_source_textarea.offsetWidth - 500;
+                    view_source_textarea.padding_added_to_height = view_source_textarea.offsetHeight - 500;
+                    this.root.default_marginLeft = this.root.style.marginLeft || root_boundaries.left;
+                    view_source_textarea.width = ((root_boundaries.width - doctored.CONSTANTS.error_gutter_width_pixels - doctored.CONSTANTS.view_source_resizer_width) / 2) - view_source_textarea.padding_added_to_width;
+                    view_source_textarea.style.width = view_source_textarea.width + "px";
+                    view_source_textarea.style.left = this.root.default_marginLeft + "px";
                 }
                 this.menu.view_source.classList.toggle(doctored.CONSTANTS.menu_option_on);
                 should_be_visible = this.menu.view_source.classList.contains(doctored.CONSTANTS.menu_option_on);
                 if(should_be_visible){
-                    this.root.style.marginLeft = textarea.width + "px";
-                    boundaries = this.root.getBoundingClientRect(); // need to be recalculated (even if already done in if(!textarea) ... ) because the height of the this.root will change when marginLeft is changed
-                    textarea.textContent = this.get_xml_string();
-                    textarea.focus();
-                    textarea.style.top = (document.body.scrollTop + boundaries.top) + "px";
-                    textarea.style.height = boundaries.height + "px";
-                    textarea.style.display = "block";
+                    this.root.style.marginLeft = (this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width + doctored.CONSTANTS.view_source_resizer_width) + "px";
+                    root_boundaries = this.root.getBoundingClientRect(); // need to be recalculated (even if already done in if(!this.root.default_marginLeft)...) because the height of the this.root will change when marginLeft is changed
+                    view_source_textarea.value = this.get_xml_string();
+                    view_source_textarea.focus();
+                    view_source_textarea.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
+                    view_source_textarea.style.height = (root_boundaries.height - view_source_textarea.padding_added_to_height) + "px";
+                    view_source_textarea.style.display = "block";
                 } else {
-                    textarea.style.display = "none";
+                    view_source_textarea.style.display = "none";
                     this.root.style.marginLeft = this.root.default_marginLeft + "px";
                 }
                 event.preventDefault();
@@ -538,7 +548,8 @@
         root_context:                  '/',
         block_or_inline_class_prefix:  'doctored-',
         menu_option_on:                'doctored-on',
-        error_gutter_width_pixels:     200
+        error_gutter_width_pixels:     200,
+        view_source_resizer_width:     20
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';

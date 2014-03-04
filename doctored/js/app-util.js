@@ -85,6 +85,7 @@
         },
         set_theme: function(theme_name, instance){
             var filter_themes = function(element){
+                    if(!element) return;
                     element.className = (element.className + " ").replace(/doctored-theme-[^ ]*?/g, '');
                     element.classList.add(theme_name);
                 };
@@ -96,6 +97,8 @@
             filter_themes(instance.menu);
             filter_themes(instance.hamburger_menu);
             filter_themes(instance.tooltip);
+            filter_themes(instance.view_source_textarea);
+            filter_themes(instance.view_source_resizer);
         },
         parse_attributes_string: function(attributes_string){
             // although it would be easier to use the browsers DOM

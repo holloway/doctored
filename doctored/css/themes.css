@@ -132,9 +132,10 @@ samp.doctored-tooltip.doctored-theme-flat {
         }
 
     textarea.doctored-view-source-textbox.doctored-theme-flat {
-        border: none;
+        border: 1px solid #cccccc;
         padding: 0.5%;
         outline: none;
+
     }
 
     menu.doctored-dialog.doctored-theme-flat {
