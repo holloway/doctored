@@ -174,12 +174,14 @@
             var attributes = {},
                 attribute_pair,
                 key,
+                value,
                 i;
 
             for(i = 0; i < attribute_pairs.length; i++){
                 attribute_pair = attribute_pairs[i];
                 key = attribute_pair.childNodes[0].value.replace(/\s/g, '');
-                if(key.length){
+                value = attribute_pair.childNodes[2].value;
+                if(key.length && value.length){
                     attributes[key] = attribute_pair.childNodes[2].value;
                 }
             }
