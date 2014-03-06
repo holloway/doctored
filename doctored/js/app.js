@@ -114,10 +114,17 @@
                 this.attributes_template = "";
                 
                 this.view_source_textarea = document.createElement('textarea');
-                this.view_source_resizer = document.createElement('div');
                 this.view_source_textarea.classList.add("doctored-view-source-textbox");
                 this.view_source_textarea.addEventListener('keyup', doctored.util.debounce(this.view_source_change, this.options.view_source_debounce_milliseconds, this), false);
-                
+                this.view_source_resizer = document.createElement('div');
+                this.view_source_resizer.classList.add("doctored-view-source-resizer");
+                this.view_source_resizer.addEventListener('mousedown', this_function(this.view_source_resizer_drag_start, this), false);
+                this.view_source_resizer.addEventListener('touchstart', this_function(this.view_source_resizer_drag_start, this), false);
+                document.addEventListener('mousemove', this_function(this.view_source_resizer_drag, this), false);
+                document.addEventListener('touchmove', this_function(this.view_source_resizer_drag, this), false);
+                document.addEventListener('mouseup', this_function(this.view_source_resizer_drag_end, this), false);
+                document.addEventListener('touchend', this_function(this.view_source_resizer_drag_end, this), false);
+                this.view_source_resizer.dragging = false;
                 
                 this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
@@ -128,7 +135,6 @@
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
                 this.root.parentNode.insertBefore(this.view_source_textarea, this.hamburger_menu);
                 this.root.parentNode.insertBefore(this.view_source_resizer, this.view_source_textarea);
-                
                 if(window.localStorage) {
                     this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
                 }
@@ -315,7 +321,6 @@
                 }
                 if(option_value === "(custom)") {
                     element_name = prompt("Custom element:");
-                    console.log("sdfsdf");
                     if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
                 }
                 dialog.target.setAttribute("data-element", element_name);
@@ -350,10 +355,13 @@
                 event.preventDefault();
             },
             close_dialog: function(event){
-                // simply, clicking [x] in the dialog
+                // clicking [x] in the dialog
                 this.dialog.style.display = "none";
                 doctored.util.remove_old_selection(this.dialog.target, this);
                 event.preventDefault();
+            },
+            reset_theme: function(){
+                delete this.root.default_marginLeft;
             },
             view_source: function(event){
                 // clicking 'View Source' button
@@ -361,30 +369,34 @@
                     view_source_resizer = this.view_source_resizer,
                     this_function = doctored.util.this_function,
                     should_be_visible,
-                    root_boundaries;
+                    root_boundaries,
+                    resizer_boundaries;
 
-                if(!this.root.default_marginLeft) {
+                
+                if(!this.root.default_marginLeft) { // this block only run once for init
+                    resizer_boundaries = view_source_resizer.getBoundingClientRect();
+                    view_source_resizer.style.display = "block";
+                    view_source_resizer.style.height = 500 + "px";
+                    view_source_resizer.padding_added_to_height = view_source_resizer.offsetHeight - 500;
                     root_boundaries = this.root.getBoundingClientRect();
+                    view_source_resizer.outer_width = resizer_boundaries.width; //may as well cache it in case it requires a lookup
                     view_source_textarea.style.width = 500 + "px";
                     view_source_textarea.style.height = 500 + "px";
                     view_source_textarea.style.display = "block";
                     view_source_textarea.padding_added_to_width = view_source_textarea.offsetWidth - 500;
                     view_source_textarea.padding_added_to_height = view_source_textarea.offsetHeight - 500;
-                    this.root.default_marginLeft = this.root.style.marginLeft || root_boundaries.left;
-                    view_source_textarea.width = ((root_boundaries.width - doctored.CONSTANTS.error_gutter_width_pixels - doctored.CONSTANTS.view_source_resizer_width) / 2) - view_source_textarea.padding_added_to_width;
+                    this.root.default_marginLeft = root_boundaries.left;
+                    view_source_textarea.width = ((root_boundaries.width - doctored.CONSTANTS.error_gutter_width_pixels - view_source_resizer.outer_width) / 2) - view_source_textarea.padding_added_to_width;
                     view_source_textarea.style.width = view_source_textarea.width + "px";
                     view_source_textarea.style.left = this.root.default_marginLeft + "px";
                 }
+
                 this.menu.view_source.classList.toggle(doctored.CONSTANTS.menu_option_on);
                 should_be_visible = this.menu.view_source.classList.contains(doctored.CONSTANTS.menu_option_on);
                 if(should_be_visible){
-                    this.root.style.marginLeft = (this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width + doctored.CONSTANTS.view_source_resizer_width) + "px";
-                    root_boundaries = this.root.getBoundingClientRect(); // need to be recalculated (even if already done in if(!this.root.default_marginLeft)...) because the height of the this.root will change when marginLeft is changed
                     view_source_textarea.value = this.get_xml_string();
                     view_source_textarea.focus();
-                    view_source_textarea.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
-                    view_source_textarea.style.height = (root_boundaries.height - view_source_textarea.padding_added_to_height) + "px";
-                    view_source_textarea.style.display = "block";
+                    this_function(this.view_source_resize, this)();
                 } else {
                     view_source_textarea.style.display = "none";
                     this.root.style.marginLeft = this.root.default_marginLeft + "px";
@@ -392,7 +404,40 @@
                 event.preventDefault();
             },
             view_source_change: function(event){
+                // When there's a text change in the view source textarea (this is typically debounced)
                 this.set_xml_string(this.view_source_textarea.value);
+            },
+            view_source_resizer_drag_start: function(){
+                this.view_source_resizer.dragging = true;
+            },
+            view_source_resizer_drag: function(event){
+                var this_function = doctored.util.this_function,
+                    view_source_textarea = this.view_source_textarea,
+                    view_source_resizer = this.view_source_resizer;
+
+                if(this.view_source_resizer.dragging === false) return;
+                view_source_textarea.width = event.x - (view_source_resizer.outer_width / 2);
+                console.log(event.x, view_source_textarea.width, event);
+                this_function(this.view_source_resize, this)();
+                
+            },
+            view_source_resizer_drag_end: function(){
+                this.view_source_resizer.dragging = false;
+            },
+            view_source_resize: function(){
+                var view_source_textarea = this.view_source_textarea,
+                    view_source_resizer = this.view_source_resizer,
+                    root_boundaries;
+                
+                this.root.style.marginLeft = (this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width + view_source_resizer.outer_width) + "px";
+                root_boundaries = this.root.getBoundingClientRect(); // needs to be recalculated after this.root has its marginLeft changed because the height may change
+                view_source_textarea.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
+                view_source_textarea.style.height = (root_boundaries.height - view_source_textarea.padding_added_to_height) + "px";
+                view_source_textarea.style.width = view_source_textarea.width + "px";
+                view_source_textarea.style.display = "block";
+                view_source_resizer.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
+                view_source_resizer.style.height = (root_boundaries.height - view_source_resizer.padding_added_to_height) + "px";
+                view_source_resizer.style.left = (this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width) + "px";
             },
             keyup_contentEditable_sync_view_source: function(event){
                 var textarea = this.view_source_textarea;
@@ -436,8 +481,7 @@
                 var esc_key = doctored.CONSTANTS.key.esc,
                     enter_key = doctored.CONSTANTS.key.enter,
                     browser_selection,
-                    parentNode,
-                    brs;
+                    parentNode;
 
                 if(event.keyCode === esc_key){
                     browser_selection = doctored.util.get_current_selection();
@@ -548,8 +592,7 @@
         root_context:                  '/',
         block_or_inline_class_prefix:  'doctored-',
         menu_option_on:                'doctored-on',
-        error_gutter_width_pixels:     200,
-        view_source_resizer_width:     20
+        error_gutter_width_pixels:     200
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';

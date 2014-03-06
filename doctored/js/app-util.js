@@ -90,6 +90,8 @@
                     element.classList.add(theme_name);
                 };
 
+            instance.reset_theme();
+
             theme_name = doctored.CONSTANTS.theme_prefix + theme_name.toLowerCase().replace(/[^a-z]/g, '');
 
             filter_themes(instance.root);
@@ -99,6 +101,7 @@
             filter_themes(instance.tooltip);
             filter_themes(instance.view_source_textarea);
             filter_themes(instance.view_source_resizer);
+
         },
         parse_attributes_string: function(attributes_string){
             // although it would be easier to use the browsers DOM
@@ -182,7 +185,7 @@
                 key = attribute_pair.childNodes[0].value.replace(/\s/g, '');
                 value = attribute_pair.childNodes[2].value;
                 if(key.length && value.length){
-                    attributes[key] = attribute_pair.childNodes[2].value;
+                    attributes[key] = value;
                 }
             }
             return attributes;
