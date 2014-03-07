@@ -40,7 +40,7 @@
         }
 
         instance = {
-            doctored: 0.95,
+            doctored: 0.96,
             root: root_element,
             root_selector: selector,
             options: options,
