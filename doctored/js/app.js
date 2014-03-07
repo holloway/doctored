@@ -374,12 +374,12 @@
 
                 
                 if(!this.root.default_marginLeft) { // this block only run once for init
-                    resizer_boundaries = view_source_resizer.getBoundingClientRect();
                     view_source_resizer.style.display = "block";
+                    resizer_boundaries = view_source_resizer.getBoundingClientRect();
                     view_source_resizer.style.height = 500 + "px";
                     view_source_resizer.padding_added_to_height = view_source_resizer.offsetHeight - 500;
-                    root_boundaries = this.root.getBoundingClientRect();
                     view_source_resizer.outer_width = resizer_boundaries.width; //may as well cache it in case it requires a lookup
+                    root_boundaries = this.root.getBoundingClientRect();
                     view_source_textarea.style.width = 500 + "px";
                     view_source_textarea.style.height = 500 + "px";
                     view_source_textarea.style.display = "block";
@@ -407,8 +407,18 @@
                 // When there's a text change in the view source textarea (this is typically debounced)
                 this.set_xml_string(this.view_source_textarea.value);
             },
-            view_source_resizer_drag_start: function(){
-                this.view_source_resizer.dragging = true;
+            view_source_resizer_drag_start: function(event){
+                var root_boundaries,
+                    view_source_textarea = this.view_source_textarea,
+                    view_source_resizer = this.view_source_resizer;
+
+                if(event.which !== doctored.CONSTANTS.left_mouse_button) return;
+                root_boundaries = this.root.getBoundingClientRect();
+                view_source_resizer.dragging = true;
+                view_source_resizer.drag_offset = event.layerX;
+                view_source_textarea.maximum_width = root_boundaries.right - doctored.CONSTANTS.error_gutter_width_pixels - doctored.CONSTANTS.text_area_resizer_maximum_pixels - view_source_resizer.outer_width;
+                console.log(view_source_textarea.maximum_width, root_boundaries);
+
             },
             view_source_resizer_drag: function(event){
                 var this_function = doctored.util.this_function,
@@ -416,10 +426,15 @@
                     view_source_resizer = this.view_source_resizer;
 
                 if(this.view_source_resizer.dragging === false) return;
-                view_source_textarea.width = event.x - (view_source_resizer.outer_width / 2);
-                console.log(event.x, view_source_textarea.width, event);
+
+                view_source_textarea.width = (event.x || event.clientX) - this.root.default_marginLeft - view_source_textarea.padding_added_to_width - this.view_source_resizer.drag_offset;
+                if(view_source_textarea.width < doctored.CONSTANTS.text_area_resizer_minimum_pixels) {
+                    view_source_textarea.width = doctored.CONSTANTS.text_area_resizer_minimum_pixels;
+                } else if(view_source_textarea.width > view_source_textarea.maximum_width){
+                    view_source_textarea.width = view_source_textarea.maximum_width;
+                }
                 this_function(this.view_source_resize, this)();
-                
+                event.preventDefault();
             },
             view_source_resizer_drag_end: function(){
                 this.view_source_resizer.dragging = false;
@@ -580,19 +595,22 @@
             enter: 13,
             esc: 27
         },
-        inline_label_height_in_pixels: 10,
-        block_label_width_in_pixels:   25,
-        duplicate_block_height_pixels: 20,
-        edit_element_css_cursor:       "pointer",
-        duplicate_element_css_cursor:  "s-resize",
-        doctored_container_class:      "doctored",
-        xml_declaration:               '<?xml version="1.0" ?>',
-        theme_prefix:                  'doctored-theme-',
-        intentional_linebreak_class:   'doctored-linebreak',
-        root_context:                  '/',
-        block_or_inline_class_prefix:  'doctored-',
-        menu_option_on:                'doctored-on',
-        error_gutter_width_pixels:     200
+        inline_label_height_in_pixels:    10,
+        block_label_width_in_pixels:      25,
+        duplicate_block_height_pixels:    20,
+        edit_element_css_cursor:          "pointer",
+        duplicate_element_css_cursor:     "s-resize",
+        doctored_container_class:         "doctored",
+        xml_declaration:                  '<?xml version="1.0" ?>',
+        theme_prefix:                     'doctored-theme-',
+        intentional_linebreak_class:      'doctored-linebreak',
+        root_context:                     '/',
+        block_or_inline_class_prefix:     'doctored-',
+        menu_option_on:                   'doctored-on',
+        error_gutter_width_pixels:        200,
+        left_mouse_button:                1,
+        text_area_resizer_minimum_pixels: 100,
+        text_area_resizer_maximum_pixels: 150 /* from right of error gutter*/
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';

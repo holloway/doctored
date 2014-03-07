@@ -108,11 +108,11 @@ textarea.doctored-view-source-textbox {
 
 div.doctored-view-source-resizer {
     position:absolute;
-    background: red;
-    width: 7px;
-    border: 70px solid blue;
-    border-top: none;
-    border-bottom: none;
+    cursor: ew-resize;
+    display:none;
+    background: #cccccc;
+    border: outset 2px #cccccc;
+    width: 20px;
     height: 5px; /* NOTE: will be overridden */
     -webkit-touch-callout: none;
     -webkit-user-select: none;

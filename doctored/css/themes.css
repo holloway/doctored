@@ -138,6 +138,16 @@ samp.doctored-tooltip.doctored-theme-flat {
 
     }
 
+    div.doctored-view-source-resizer.doctored-theme-flat {
+        width:16px;
+        background: none;
+        border: none;
+    }
+
+        div.doctored-view-source-resizer.doctored-theme-flat:hover {
+            background: #aaa;
+        }
+
     menu.doctored-dialog.doctored-theme-flat {
         background: #ffffff;
         border: solid 1px #cccccc;
