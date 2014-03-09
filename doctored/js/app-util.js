@@ -101,6 +101,7 @@
             filter_themes(instance.tooltip);
             filter_themes(instance.view_source_textarea);
             filter_themes(instance.view_source_resizer);
+            filter_themes(instance.tabs);
 
         },
         parse_attributes_string: function(attributes_string){

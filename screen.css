@@ -82,13 +82,11 @@ header s {
     }
 
 
-.doctored-menu {
-    margin: 1em 1em 0.4em 1em;
+
+.editor-container {
+    margin: 1em;
 }
 
-.doctored {
-    margin: 0.2em 1em 1em 1em;
-}
 
 .moreinfo {
     position:absolute;

@@ -2,6 +2,7 @@
     padding:0px;
     outline:none;
     display:block;
+    margin:0px;
 }
 
     .doctored:before {
@@ -91,13 +92,13 @@
 
 menu.doctored-menu {
     display: block;
-    margin-right:200px; /* normally we don't try to set margins but in this case it's necessary so that the menu doesn't overlap the schema validation title/label */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    margin: 0em 200px 10px 0px;
 }
 
 textarea.doctored-view-source-textbox {
@@ -154,6 +155,12 @@ div.doctored-selection {
     display: inline;
 }
 
+ul.doctored-tabs {
+    padding:0px;
+    list-style:none;
+    margin: 0px 0px 0.4em 0px;
+}
+
 samp.doctored-tooltip {
     position:absolute;
     display:none;
@@ -174,6 +181,12 @@ samp.doctored-tooltip {
     samp.doctored-tooltip.doctored-hidden {
         opacity: 0;
     }
+
+a.doctored-hamburger-button {
+    float:right;
+    text-decoration:none;
+    margin: 0px 0px 0.4em 0px;
+}
 
 menu.doctored-hamburger {
     position:absolute;

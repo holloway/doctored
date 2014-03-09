@@ -40,7 +40,7 @@
         }
 
         instance = {
-            doctored: 0.96,
+            doctored: 0.97,
             root: root_element,
             root_selector: selector,
             options: options,
@@ -51,7 +51,8 @@
                     boundaries,
                     i,
                     this_function = doctored.util.this_function,
-                    theme = window.localStorage.getItem("doctored-theme");
+                    theme = window.localStorage.getItem("doctored-theme"),
+                    container = document.createElement("div");
                 
                 this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
@@ -92,9 +93,13 @@
                 this.dialog.attributes_add.childNodes[0].addEventListener("focus", this_function(this.add_attribute_item_key, this), false);
                 this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item_value, this), false);
                 this.dialog.attributes_div.appendChild(this.dialog.attributes_add);
-                this.menu.innerHTML = '<a class="doctored-hamburger" href title="Editor Configuration">&#9776;</a><a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
-                this.menu.hamburger_button = $(".doctored-hamburger", this.menu)[0];
-                this.menu.hamburger_button.addEventListener('click', this_function(this.hamburger_button_click, this), false);
+                this.tabs = document.createElement("ul");
+                this.tabs.innerHTML = '<li>Untitled.xml <a href title="Delete">&times;</a></li>';
+                this.tabs.className = "doctored-tabs";
+                this.menu.innerHTML = '<a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
+                container.innerHTML = '<a class="doctored-hamburger-button" href title="Doctored.js Configuration">&#9776;</a>';
+                this.hamburger_button = container.childNodes[0];
+                this.hamburger_button.addEventListener('click', this_function(this.hamburger_button_click, this), false);
                 this.hamburger_menu = document.createElement("menu");
                 this.hamburger_menu.className = "doctored-hamburger";
                 this.hamburger_menu.innerHTML = '<a href title="Close">&times;</a><select><option value="" disabled selected>Choose Theme</option><option>Flat</option><option>Shadow</option><option>High Contrast</option></select>';
@@ -129,6 +134,9 @@
                 this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
                 doctored.util.set_theme(theme || this.options.theme, this);
+                
+                this.root.parentNode.insertBefore(this.hamburger_button, this.root);
+                this.root.parentNode.insertBefore(this.tabs, this.root);
                 this.root.parentNode.insertBefore(this.menu, this.root);
                 this.root.parentNode.insertBefore(this.dialog, this.menu);
                 this.root.parentNode.insertBefore(this.tooltip, this.dialog);
@@ -332,7 +340,7 @@
                 event.preventDefault();
             },
             hamburger_button_click: function(event){
-                var position = this.menu.hamburger_button.getBoundingClientRect();
+                var position = this.hamburger_button.getBoundingClientRect();
 
                 this.hamburger_menu.style.left = (position.left + position.width) + "px";
                 this.hamburger_menu.style.top = position.top + "px";

@@ -269,6 +269,33 @@ samp.doctored-tooltip.doctored-theme-flat {
         color: #fff;
     }
 
+    ul.doctored-tabs.doctored-theme-flat {
+        display: inline-block;
+        margin-right:4px;
+        background: #dddddd;
+        text-decoration:none;
+        background-color:#ffffff;
+        border: 1px solid #999;
+        color:#777777;
+        border-radius: 2px;
+    }
+
+        ul.doctored-tabs.doctored-theme-flat li {
+            padding: 8px 13px;
+        }
+
+    a.doctored-hamburger-button {
+        display: inline-block;
+        padding:8px 13px;
+        margin-right:4px;
+        background: #dddddd;
+        text-decoration:none;
+        background-color:#ffffff;
+        border: 1px solid #999;
+        color:#777777;
+        border-radius: 2px;
+    }
+
     menu.doctored-hamburger.doctored-theme-flat {
         padding: 0px;
         background: white;
