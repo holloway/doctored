@@ -380,33 +380,37 @@
                     root_boundaries,
                     resizer_boundaries;
 
-                
                 if(!this.root.default_marginLeft) { // this block only run once for init
                     view_source_resizer.style.display = "block";
                     resizer_boundaries = view_source_resizer.getBoundingClientRect();
                     view_source_resizer.style.height = 500 + "px";
                     view_source_resizer.padding_added_to_height = view_source_resizer.offsetHeight - 500;
                     view_source_resizer.outer_width = resizer_boundaries.width; //may as well cache it in case it requires a lookup
-                    root_boundaries = this.root.getBoundingClientRect();
                     view_source_textarea.style.width = 500 + "px";
                     view_source_textarea.style.height = 500 + "px";
                     view_source_textarea.style.display = "block";
                     view_source_textarea.padding_added_to_width = view_source_textarea.offsetWidth - 500;
                     view_source_textarea.padding_added_to_height = view_source_textarea.offsetHeight - 500;
-                    this.root.default_marginLeft = root_boundaries.left;
-                    view_source_textarea.width = ((root_boundaries.width - doctored.CONSTANTS.error_gutter_width_pixels - view_source_resizer.outer_width) / 2) - view_source_textarea.padding_added_to_width;
+                    this.root.parent_boundaries = this.root.parentNode.getBoundingClientRect();
+                    this.root.style.marginLeft = "";
+                    root_boundaries = this.root.getBoundingClientRect();
+                    this.root.default_marginLeft = parseInt(window.getComputedStyle(this.root)['margin-left'], 10);
+                    view_source_textarea.maximum_width = this.root.offsetWidth - doctored.CONSTANTS.error_gutter_width_pixels - doctored.CONSTANTS.text_area_resizer_maximum_pixels - view_source_resizer.outer_width;
+                    view_source_textarea.width = ((root_boundaries.width - view_source_resizer.outer_width) / 2) - view_source_textarea.padding_added_to_width;
                     view_source_textarea.style.width = view_source_textarea.width + "px";
-                    view_source_textarea.style.left = this.root.default_marginLeft + "px";
                 }
 
                 this.menu.view_source.classList.toggle(doctored.CONSTANTS.menu_option_on);
                 should_be_visible = this.menu.view_source.classList.contains(doctored.CONSTANTS.menu_option_on);
                 if(should_be_visible){
+                    view_source_textarea.style.display = "block";
+                    view_source_resizer.style.display = "block";
                     view_source_textarea.value = this.get_xml_string();
                     view_source_textarea.focus();
                     this_function(this.view_source_resize, this)();
                 } else {
                     view_source_textarea.style.display = "none";
+                    view_source_resizer.style.display = "none";
                     this.root.style.marginLeft = this.root.default_marginLeft + "px";
                 }
                 event.preventDefault();
@@ -424,9 +428,6 @@
                 root_boundaries = this.root.getBoundingClientRect();
                 view_source_resizer.dragging = true;
                 view_source_resizer.drag_offset = event.layerX;
-                view_source_textarea.maximum_width = root_boundaries.right - doctored.CONSTANTS.error_gutter_width_pixels - doctored.CONSTANTS.text_area_resizer_maximum_pixels - view_source_resizer.outer_width;
-                console.log(view_source_textarea.maximum_width, root_boundaries);
-
             },
             view_source_resizer_drag: function(event){
                 var this_function = doctored.util.this_function,
@@ -435,9 +436,9 @@
 
                 if(this.view_source_resizer.dragging === false) return;
 
-                view_source_textarea.width = (event.x || event.clientX) - this.root.default_marginLeft - view_source_textarea.padding_added_to_width - this.view_source_resizer.drag_offset;
-                if(view_source_textarea.width < doctored.CONSTANTS.text_area_resizer_minimum_pixels) {
-                    view_source_textarea.width = doctored.CONSTANTS.text_area_resizer_minimum_pixels;
+                view_source_textarea.width = (event.x || event.clientX) - this.root.parent_boundaries.left - this.root.default_marginLeft - view_source_textarea.padding_added_to_width - this.view_source_resizer.drag_offset;
+                if(view_source_textarea.width < doctored.CONSTANTS.text_area_resizer_minimum_pixels - this.root.default_marginLeft) {
+                    view_source_textarea.width = doctored.CONSTANTS.text_area_resizer_minimum_pixels - this.root.default_marginLeft;
                 } else if(view_source_textarea.width > view_source_textarea.maximum_width){
                     view_source_textarea.width = view_source_textarea.maximum_width;
                 }
@@ -448,6 +449,8 @@
                 this.view_source_resizer.dragging = false;
             },
             view_source_resize: function(){
+                // This just applies whatever width is set on view_source_textarea.width which is
+                // different to view_source_textarea.style.width .
                 var view_source_textarea = this.view_source_textarea,
                     view_source_resizer = this.view_source_resizer,
                     root_boundaries;
@@ -458,9 +461,11 @@
                 view_source_textarea.style.height = (root_boundaries.height - view_source_textarea.padding_added_to_height) + "px";
                 view_source_textarea.style.width = view_source_textarea.width + "px";
                 view_source_textarea.style.display = "block";
+                view_source_textarea.style.marginLeft = this.root.default_marginLeft + "px";
                 view_source_resizer.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
                 view_source_resizer.style.height = (root_boundaries.height - view_source_resizer.padding_added_to_height) + "px";
-                view_source_resizer.style.left = (this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width) + "px";
+                console.log("marginleft",  this.root.default_marginLeft, this.root.parent_boundaries.left)
+                view_source_resizer.style.left = (this.root.parent_boundaries.left + this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width) + "px";
             },
             keyup_contentEditable_sync_view_source: function(event){
                 var textarea = this.view_source_textarea;

@@ -133,7 +133,7 @@ samp.doctored-tooltip.doctored-theme-flat {
 
     textarea.doctored-view-source-textbox.doctored-theme-flat {
         border: 1px solid #cccccc;
-        padding: 0.5%;
+        padding: 5px 10px;
         outline: none;
 
     }

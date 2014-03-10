@@ -1,8 +1,8 @@
 .doctored {
     padding:0px;
+    margin:0px;
     outline:none;
     display:block;
-    margin:0px;
 }
 
     .doctored:before {
@@ -114,6 +114,7 @@ div.doctored-view-source-resizer {
     background: #cccccc;
     border: outset 2px #cccccc;
     width: 20px;
+    z-index:3;
     height: 5px; /* NOTE: will be overridden */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
