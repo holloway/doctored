@@ -6,9 +6,8 @@
 }
 
     .doctored:before {
+        float:right;
         margin-top:-1.7em;
-        right: 0px;
-        position:absolute;
         width: 200px;
         content: "Validating...";
     }
@@ -42,7 +41,7 @@
             display:inline-block;
             left: -0.2em;
             top: 0.5em;
-            content: "\271B " attr(data-element); /*\271B \271A \2795 */
+            content: attr(data-element); /*\271B \271A \2795 */
             margin-right: -3em;
             width:3em;
             white-space:nowrap;
@@ -160,6 +159,12 @@ ul.doctored-tabs {
     padding:0px;
     list-style:none;
     margin: 0px 0px 0.4em 0px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 samp.doctored-tooltip {

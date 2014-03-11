@@ -94,7 +94,7 @@
                 this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item_value, this), false);
                 this.dialog.attributes_div.appendChild(this.dialog.attributes_add);
                 this.tabs = document.createElement("ul");
-                this.tabs.innerHTML = '<li>Untitled.xml <a href title="Delete">&times;</a></li>';
+                this.tabs.innerHTML = '<li class="current"><span>Untitled.xml</span> <a href title="Delete">&times;</a></li> <li><span>Untitled more test than should fit.xml</span> <a href title="Delete">&times;</a></li> <li class="doctored-new-document"><a href title="New document">+</a></li>';
                 this.tabs.className = "doctored-tabs";
                 this.menu.innerHTML = '<a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
                 container.innerHTML = '<a class="doctored-hamburger-button" href title="Doctored.js Configuration">&#9776;</a>';

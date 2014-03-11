@@ -90,8 +90,8 @@ samp.doctored-tooltip.doctored-theme-flat {
 
 
     menu.doctored-menu.doctored-theme-flat {
+        margin-top:8px;
         padding: 0px;
-        text-transform:uppercase;
         font-size:small;
         font-weight:bold;
         opacity: 0.9;
@@ -104,21 +104,14 @@ samp.doctored-tooltip.doctored-theme-flat {
 
         menu.doctored-menu.doctored-theme-flat a {
             display: inline-block;
-            padding:8px 13px;
+            padding:5px 9px;
             margin-right:4px;
-            background: #dddddd;
             text-decoration:none;
-            background-color:#ffffff;
-            border: 1px solid #999;
+            background: white;
+            border: 1px solid #ccc;
             color:#777777;
             border-radius: 2px;
         }
-
-            menu.doctored-menu.doctored-theme-flat a:nth-child(2),
-            menu.doctored-menu.doctored-theme-flat a:nth-child(3),
-            menu.doctored-menu.doctored-theme-flat a:nth-child(4) {
-                background: #eee;
-            }
 
         menu.doctored-menu.doctored-theme-flat a:hover,
         menu.doctored-menu.doctored-theme-flat a.doctored-on {
@@ -270,19 +263,67 @@ samp.doctored-tooltip.doctored-theme-flat {
     }
 
     ul.doctored-tabs.doctored-theme-flat {
-        display: inline-block;
-        margin-right:4px;
-        background: #dddddd;
+        text-transform:uppercase;
+        font-size:small;
+        margin-right:60px;
         text-decoration:none;
-        background-color:#ffffff;
-        border: 1px solid #999;
-        color:#777777;
-        border-radius: 2px;
+        font-weight:bold;
+        border-bottom: solid 1px #ccc;
+
     }
 
         ul.doctored-tabs.doctored-theme-flat li {
-            padding: 8px 13px;
+            display: inline-block;
+            position:relative;
+            top: 1px;
+            background: #dddddd;
+            border: 1px solid #ccc;
+            color:#777777;
+            padding: 0px 5px;
+            vertical-align: top;
         }
+
+            ul.doctored-tabs.doctored-theme-flat li.current {
+                background: white;
+                border-bottom: none;
+                position:relative;
+                padding-bottom: 1px;
+                box-shadow: 0px 3px 0px -1px white;
+            }
+
+            ul.doctored-tabs.doctored-theme-flat li span {
+              display: inline-block;
+              text-overflow: ellipsis;
+              width: 100px;
+              white-space: nowrap;
+              overflow: hidden;
+              padding: 8px 0px 5px 8px;
+           }
+
+           ul.doctored-tabs.doctored-theme-flat li a {
+                display: inline-block;
+                vertical-align: top;
+                text-decoration: none;
+                color: black;
+                 font-family: monospace;
+                padding: 8px 5px 5px 5px;
+                font-weight:normal;
+           }
+
+           ul.doctored-tabs.doctored-theme-flat li.doctored-new-document {
+                margin-top:4px;
+                margin-left:4px;
+                background: none;
+                font-size:normal;
+                font-family: monospace;
+                font-weight: 200;
+           }
+
+                ul.doctored-tabs.doctored-theme-flat li.doctored-new-document a {
+                    padding: 4px;
+                    color: #777;
+                    display: block;
+                }
 
     a.doctored-hamburger-button {
         display: inline-block;
@@ -441,9 +482,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
             border: solid 1px white;
             padding:8px 13px;
             margin-right:4px;
-            background: #dddddd;
             text-decoration:none;
-            background-color:#eeeeee;
             color:#777777;
             border-radius: 5px;
             text-shadow:1px 1px 0px #ffffff;
