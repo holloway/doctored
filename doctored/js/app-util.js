@@ -436,6 +436,10 @@
             if(element.classList.contains(doctored.CONSTANTS.block_class) || element.classList.contains(doctored.CONSTANTS.doctored_container_class)) return element;
             return doctored.util.get_closest_block(element.parentNode);
         },
+        get_closest_by_nodeName: function(element, nodeName){
+            if(element.nodeName.toLowerCase() === nodeName.toLowerCase()) return element;
+            return doctored.util.get_closest_by_nodeName(element.parentNode, nodeName);
+        },
         dialog_append_attribute: function(dialog, key, value, title){
             var attributes_item = dialog.attributes_template.cloneNode(true);
             attributes_item.childNodes[0].value = key;
@@ -553,9 +557,6 @@
                 within = doctored.CONSTANTS.edit_element_css_cursor;
             } else if(target.classList.contains(doctored.CONSTANTS.block_class) && position.x < target_offset.left + doctored.CONSTANTS.block_label_width_in_pixels) {
                 within = doctored.CONSTANTS.edit_element_css_cursor;
-                if(position.y - target_offset.top < doctored.CONSTANTS.duplicate_block_height_pixels){
-                    within = doctored.CONSTANTS.duplicate_element_css_cursor;
-                }
             }
             return within;
         },

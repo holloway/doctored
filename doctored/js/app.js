@@ -52,7 +52,9 @@
                     i,
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme"),
-                    container = document.createElement("div");
+                    manifest = window.localStorage.getItem(this.options.localStorage_key),
+                    container = document.createElement("div"),
+                    tab;
                 
                 this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
                 this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
@@ -94,8 +96,13 @@
                 this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item_value, this), false);
                 this.dialog.attributes_div.appendChild(this.dialog.attributes_add);
                 this.tabs = document.createElement("ul");
-                this.tabs.innerHTML = '<li class="current"><span>Untitled.xml</span> <a href title="Delete">&times;</a></li> <li><span>Untitled more test than should fit.xml</span> <a href title="Delete">&times;</a></li> <li class="doctored-new-document"><a href title="New document">+</a></li>';
                 this.tabs.className = "doctored-tabs";
+                this.tabs.tab_item_template = document.createElement("li");
+                this.tabs.tab_item_template.innerHTML = '<span>Untitled.xml</span> <a href title="Delete" class="doctored-delete">&times;</a>';
+                this.tabs.innerHTML = '<li class="doctored-new-document"><a href title="New document">+</a></li>';
+                this.tabs.addEventListener('click', this_function(this.tabs_click, this), false);
+                this.tabs.new_document = $(".doctored-new-document", this.tabs)[0];
+                this.tabs.new_document.addEventListener('click', this_function(this.tabs_add_document, this), false);
                 this.menu.innerHTML = '<a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
                 container.innerHTML = '<a class="doctored-hamburger-button" href title="Doctored.js Configuration">&#9776;</a>';
                 this.hamburger_button = container.childNodes[0];
@@ -116,7 +123,7 @@
                 this.tooltip = document.createElement('samp');
                 this.tooltip.className = "doctored-tooltip";
                 this.tooltip.addEventListener(doctored.util.transition_end_event, this_function(this.hide_tooltip, this), false);
-                this.attributes_template = "";
+                //this.attributes_template = "";
                 
                 this.view_source_textarea = document.createElement('textarea');
                 this.view_source_textarea.classList.add("doctored-view-source-textbox");
@@ -132,7 +139,7 @@
                 this.view_source_resizer.dragging = false;
                 
                 this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
-                this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "");
+                this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "").toLowerCase();
                 doctored.util.set_theme(theme || this.options.theme, this);
                 
                 this.root.parentNode.insertBefore(this.hamburger_button, this.root);
@@ -143,9 +150,18 @@
                 this.root.parentNode.insertBefore(this.hamburger_menu, this.tooltip);
                 this.root.parentNode.insertBefore(this.view_source_textarea, this.hamburger_menu);
                 this.root.parentNode.insertBefore(this.view_source_resizer, this.view_source_textarea);
-                if(window.localStorage) {
-                    this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
+
+                if(manifest) {
+                    console.log(manifest);
+                } else {
+                    tab = this.tabs.tab_item_template.cloneNode(true);
+                    tab.classList.add(doctored.CONSTANTS.current_tab_class);
+                    this.tabs.current_tab = tab;
+                    this.tabs.insertBefore(tab, this.tabs.new_document);
                 }
+
+                this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
+
                 if(this.options.onload) {
                     this_function(this.options.onload, this)();
                 }
@@ -209,6 +225,40 @@
                 this.root.setAttribute("data-attributes", data_attributes || "");
                 this.root.innerHTML = new_document_root.innerHTML;
                 this.lint_soon();
+            },
+            tabs_click: function(event){
+                console.log(event);
+                var li = doctored.util.get_closest_by_nodeName(event.target, "li");
+                if(li.classList.contains("doctored-new-document")) return;
+                if(event.target.classList.contains("doctored-delete")) {
+                    if($("li", this.tabs).length <= 2) {
+                        alert("Can't delete your last document.");
+                    }
+                    else if(confirm("Are you sure you want to delete '" + $("span", li)[0].innerText + "'")){
+                        this.tabs.removeChild(li);
+                        if(li == this.tabs.current_tab) {
+                            this.tabs_select_tab($("li", this.tabs)[0]);
+                        }
+                    }
+                    event.preventDefault();
+                } else {
+                    this.tabs_select_tab(li);
+                }
+                
+            },
+            tabs_select_tab: function(li){
+                this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
+                this.tabs.current_tab = li;
+                this.tabs.current_tab.classList.add(doctored.CONSTANTS.current_tab_class);
+            },
+            tabs_add_document: function(event){
+                var tab;
+
+                this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
+                this.tabs.current_tab = this.tabs.tab_item_template.cloneNode(true);
+                this.tabs.current_tab.classList.add(doctored.CONSTANTS.current_tab_class);
+                this.tabs.insertBefore(this.tabs.current_tab, this.tabs.new_document);
+                event.preventDefault();
             },
             save: function(event){
                 var localStorage_key,
@@ -608,9 +658,9 @@
             enter: 13,
             esc: 27
         },
+        current_tab_class:                "doctored-current",
         inline_label_height_in_pixels:    10,
         block_label_width_in_pixels:      25,
-        duplicate_block_height_pixels:    20,
         edit_element_css_cursor:          "pointer",
         duplicate_element_css_cursor:     "s-resize",
         doctored_container_class:         "doctored",

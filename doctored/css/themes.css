@@ -281,9 +281,10 @@ samp.doctored-tooltip.doctored-theme-flat {
             color:#777777;
             padding: 0px 5px;
             vertical-align: top;
+            margin-right: 5px;
         }
 
-            ul.doctored-tabs.doctored-theme-flat li.current {
+            ul.doctored-tabs.doctored-theme-flat li.doctored-current {
                 background: white;
                 border-bottom: none;
                 position:relative;
@@ -298,31 +299,42 @@ samp.doctored-tooltip.doctored-theme-flat {
               white-space: nowrap;
               overflow: hidden;
               padding: 8px 0px 5px 8px;
+              cursor: pointer;
            }
 
            ul.doctored-tabs.doctored-theme-flat li a {
                 display: inline-block;
                 vertical-align: top;
                 text-decoration: none;
-                color: black;
-                 font-family: monospace;
+                color: #666;
+                font-family: monospace;
                 padding: 8px 5px 5px 5px;
                 font-weight:normal;
            }
 
+                ul.doctored-tabs.doctored-theme-flat li a:hover {
+                    color: #000;
+                }
+
            ul.doctored-tabs.doctored-theme-flat li.doctored-new-document {
-                margin-top:4px;
-                margin-left:4px;
+                margin-top:3px;
+                margin-left:0px;
                 background: none;
-                font-size:normal;
+
                 font-family: monospace;
                 font-weight: 200;
+                border: none;
            }
 
                 ul.doctored-tabs.doctored-theme-flat li.doctored-new-document a {
-                    padding: 4px;
+                    padding: 4px 8px;
+                    border: solid 1px #bbb;
                     color: #777;
                     display: block;
+                }
+
+                ul.doctored-tabs.doctored-theme-flat li.doctored-new-document a:hover {
+                    background: #fff;
                 }
 
     a.doctored-hamburger-button {
