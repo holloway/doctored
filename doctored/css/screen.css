@@ -158,6 +158,7 @@ div.doctored-selection {
 ul.doctored-tabs {
     padding:0px;
     list-style:none;
+    white-space: nowrap;
     margin: 0px 0px 0.4em 0px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;

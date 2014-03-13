@@ -123,8 +123,6 @@
                 this.tooltip = document.createElement('samp');
                 this.tooltip.className = "doctored-tooltip";
                 this.tooltip.addEventListener(doctored.util.transition_end_event, this_function(this.hide_tooltip, this), false);
-                //this.attributes_template = "";
-                
                 this.view_source_textarea = document.createElement('textarea');
                 this.view_source_textarea.classList.add("doctored-view-source-textbox");
                 this.view_source_textarea.addEventListener('keyup', doctored.util.debounce(this.view_source_change, this.options.view_source_debounce_milliseconds, this), false);
@@ -137,11 +135,9 @@
                 document.addEventListener('mouseup', this_function(this.view_source_resizer_drag_end, this), false);
                 document.addEventListener('touchend', this_function(this.view_source_resizer_drag_end, this), false);
                 this.view_source_resizer.dragging = false;
-                
                 this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
                 this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "").toLowerCase();
                 doctored.util.set_theme(theme || this.options.theme, this);
-                
                 this.root.parentNode.insertBefore(this.hamburger_button, this.root);
                 this.root.parentNode.insertBefore(this.tabs, this.root);
                 this.root.parentNode.insertBefore(this.menu, this.root);
@@ -154,10 +150,18 @@
                 if(manifest) {
                     console.log(manifest);
                 } else {
-                    tab = this.tabs.tab_item_template.cloneNode(true);
-                    tab.classList.add(doctored.CONSTANTS.current_tab_class);
-                    this.tabs.current_tab = tab;
-                    this.tabs.insertBefore(tab, this.tabs.new_document);
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
+                    this.tabs_add_document();
                 }
 
                 this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
@@ -227,14 +231,12 @@
                 this.lint_soon();
             },
             tabs_click: function(event){
-                console.log(event);
                 var li = doctored.util.get_closest_by_nodeName(event.target, "li");
                 if(li.classList.contains("doctored-new-document")) return;
                 if(event.target.classList.contains("doctored-delete")) {
                     if($("li", this.tabs).length <= 2) {
                         alert("Can't delete your last document.");
-                    }
-                    else if(confirm("Are you sure you want to delete '" + $("span", li)[0].innerText + "'")){
+                    } else if(confirm("Are you sure you want to delete '" + $("span", li)[0].innerText + "'")){
                         this.tabs.removeChild(li);
                         if(li == this.tabs.current_tab) {
                             this.tabs_select_tab($("li", this.tabs)[0]);
@@ -247,18 +249,63 @@
                 
             },
             tabs_select_tab: function(li){
-                this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
+                if(this.tabs.current_tab) {
+                    this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
+                }
                 this.tabs.current_tab = li;
                 this.tabs.current_tab.classList.add(doctored.CONSTANTS.current_tab_class);
             },
             tabs_add_document: function(event){
-                var tab;
+                var tab,
+                    span,
+                    computed_style,
+                    able_to_fit;
 
-                this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
-                this.tabs.current_tab = this.tabs.tab_item_template.cloneNode(true);
-                this.tabs.current_tab.classList.add(doctored.CONSTANTS.current_tab_class);
-                this.tabs.insertBefore(this.tabs.current_tab, this.tabs.new_document);
-                event.preventDefault();
+                if(this.tabs.count === undefined) this.tabs.count = 0;
+                this.tabs.count += 1;
+                tab = this.tabs.tab_item_template.cloneNode(true);
+                this.tabs.insertBefore(tab, this.tabs.new_document);
+                this.tabs_select_tab(tab);
+                if(this.tabs.default_tab_width === undefined) { // only run this once
+                    span = $("span", tab)[0];
+                    computed_style = window.getComputedStyle(span);
+                    this.tabs.tab_span_default_width = parseInt(computed_style.width, 10);
+                    //this.tabs.tab_span_horizontal_padding = parseInt(computed_style["padding-left"], 10) + parseInt(computed_style["padding-right"], 10);
+                    this.tabs.tab_default_width = tab.offsetWidth;
+                    this.tabs.tab_boilerplate_width = this.tabs.tab_default_width - this.tabs.tab_span_default_width;
+                    computed_style = window.getComputedStyle(tab);
+                    this.tabs.tab_default_horizontal_margin = parseInt(computed_style["margin-left"], 10) + parseInt(computed_style["margin-right"], 10);
+                    computed_style = window.getComputedStyle(this.tabs.new_document);
+                    this.tabs.new_document_width_including_margins = this.tabs.new_document.offsetWidth + parseInt(computed_style["margin-left"], 10) + parseInt(computed_style["margin-right"], 10);
+                }
+                able_to_fit = this.tabs_resize();
+                if(able_to_fit === false) {
+                    this.tabs.removeChild(tab);
+                    this.tabs.count -= 1;
+                    alert("Unable to fit any more tabs. Sorry!");
+                }
+                if(event) {
+                    event.preventDefault();
+                }
+            },
+            tabs_resize: function(){
+                var available_width = this.tabs.offsetWidth - this.tabs.new_document_width_including_margins,
+                    span_available_width = (available_width / this.tabs.count) - this.tabs.tab_boilerplate_width - this.tabs.tab_default_horizontal_margin,
+                    spans,
+                    span,
+                    i;
+
+                if(span_available_width > this.tabs.tab_span_default_width) {
+                    span_available_width = this.tabs.tab_span_default_width;
+                }
+                if(span_available_width < doctored.CONSTANTS.minimum_tab_width) {
+                    return false;
+                }
+                spans = $("span", this.tabs);
+                for(i = 0; i < spans.length; i++){
+                    span = spans[i];
+                    span.style.width = span_available_width + "px";
+                }
             },
             save: function(event){
                 var localStorage_key,
@@ -514,7 +561,6 @@
                 view_source_textarea.style.marginLeft = this.root.default_marginLeft + "px";
                 view_source_resizer.style.top = (document.body.scrollTop + root_boundaries.top) + "px";
                 view_source_resizer.style.height = (root_boundaries.height - view_source_resizer.padding_added_to_height) + "px";
-                console.log("marginleft",  this.root.default_marginLeft, this.root.parent_boundaries.left)
                 view_source_resizer.style.left = (this.root.parent_boundaries.left + this.root.default_marginLeft + view_source_textarea.width + view_source_textarea.padding_added_to_width) + "px";
             },
             keyup_contentEditable_sync_view_source: function(event){
@@ -673,7 +719,8 @@
         error_gutter_width_pixels:        200,
         left_mouse_button:                1,
         text_area_resizer_minimum_pixels: 100,
-        text_area_resizer_maximum_pixels: 150 /* from right of error gutter*/
+        text_area_resizer_maximum_pixels: 150, /* from right of error gutter*/
+        minimum_tab_width:                4
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';
