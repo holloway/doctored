@@ -95,6 +95,22 @@
                 this.dialog.attributes_add.childNodes[0].addEventListener("focus", this_function(this.add_attribute_item_key, this), false);
                 this.dialog.attributes_add.childNodes[2].addEventListener("focus", this_function(this.add_attribute_item_value, this), false);
                 this.dialog.attributes_div.appendChild(this.dialog.attributes_add);
+                this.dialog.add_siblings = document.createElement("div");
+                this.dialog.add_siblings.className = "doctored-add-siblings";
+                this.dialog.appendChild(this.dialog.add_siblings);
+                this.dialog.add_sibling_above = document.createElement("a");
+                this.dialog.add_sibling_above.className = "doctored-add-sibling-above";
+                this.dialog.add_sibling_above.innerHTML = "&#x25B2;";
+                this.dialog.add_sibling_above.setAttribute("title", "Add element before");
+                this.dialog.add_sibling_above.addEventListener("click", this_function(this.clone_element_above, this), false);
+                this.dialog.add_siblings.appendChild(this.dialog.add_sibling_above);
+                this.dialog.add_sibling_below = document.createElement("a");
+                this.dialog.add_sibling_below.className = "doctored-add-sibling-below";
+                this.dialog.add_sibling_below.innerHTML = "&#x25BC;";
+                this.dialog.add_sibling_below.setAttribute("title", "Add element after");
+                this.dialog.add_sibling_below.addEventListener("click", this_function(this.clone_element_below, this), false);
+                this.dialog.add_siblings.appendChild(this.dialog.add_sibling_below);
+
                 this.tabs = document.createElement("ul");
                 this.tabs.className = "doctored-tabs";
                 this.tabs.tab_item_template = document.createElement("li");
@@ -274,9 +290,9 @@
                     this.tabs.tab_default_width = tab.offsetWidth;
                     this.tabs.tab_boilerplate_width = this.tabs.tab_default_width - this.tabs.tab_span_default_width;
                     computed_style = window.getComputedStyle(tab);
-                    this.tabs.tab_default_horizontal_margin = parseInt(computed_style["margin-left"], 10) + parseInt(computed_style["margin-right"], 10);
+                    this.tabs.tab_default_horizontal_margin = parseInt(computed_style["margin-left"] || computed_style["marginLeft"], 10) + parseInt(computed_style["margin-right"] || computed_style["marginRight"], 10);
                     computed_style = window.getComputedStyle(this.tabs.new_document);
-                    this.tabs.new_document_width_including_margins = this.tabs.new_document.offsetWidth + parseInt(computed_style["margin-left"], 10) + parseInt(computed_style["margin-right"], 10);
+                    this.tabs.new_document_width_including_margins = this.tabs.new_document.offsetWidth + parseInt(computed_style["margin-left"] || computed_style["marginLeft"], 10) + parseInt(computed_style["margin-right"] || computed_style["marginRight"], 10);
                 }
                 able_to_fit = this.tabs_resize();
                 if(able_to_fit === false) {
@@ -424,7 +440,7 @@
                     }
                     dialog.target.className = doctored.CONSTANTS.block_or_inline_class_prefix + display_type; //must clobber other values
                 }
-                if(option_value === "(custom)") {
+                if(option_value === doctored.CONSTANTS.custom_element_value) {
                     element_name = prompt("Custom element:");
                     if(!element_name) return doctored.util.remove_old_selection(dialog.target, dialog);
                 }
@@ -439,9 +455,9 @@
             hamburger_button_click: function(event){
                 var position = this.hamburger_button.getBoundingClientRect();
 
-                this.hamburger_menu.style.left = (position.left + position.width) + "px";
-                this.hamburger_menu.style.top = position.top + "px";
                 this.hamburger_menu.style.display = "block";
+                this.hamburger_menu.style.left = (position.left - this.hamburger_menu.offsetWidth) + "px";
+                this.hamburger_menu.style.top = position.top + "px";
                 event.preventDefault();
             },
             hamburger_change_theme: function(event){
@@ -467,6 +483,7 @@
             },
             reset_theme: function(){
                 delete this.root.default_marginLeft;
+                this.tabs_resize();
             },
             view_source: function(event){
                 // clicking 'View Source' button
@@ -645,12 +662,22 @@
                         doctored.util.display_dialog_around_inline(new_doctored_selection, this.dialog, mouse_position, this.schema);
                     } else if(within_pseudoelement === doctored.CONSTANTS.edit_element_css_cursor) {
                         doctored.util.display_element_dialog(target, this.dialog, mouse_position, target.parentNode.getAttribute("data-element"), this.schema);
-                    } else if(within_pseudoelement === doctored.CONSTANTS.duplicate_element_css_cursor){
-                        target_clone = target.cloneNode(true);
-                        target_clone.innerHTML = "";
-                        target.parentNode.insertBefore(target_clone, target.nextSibling);
                     }
                 }
+            },
+            clone_element_below: function(){
+                var target = this.dialog.target,
+                    target_clone = target.cloneNode(true);
+
+                target_clone.innerHTML = "";
+                target.parentNode.insertBefore(target_clone, target.nextSibling);
+            },
+            clone_element_above: function(){
+                var target = this.dialog.target,
+                    target_clone = target.cloneNode(true);
+
+                target_clone.innerHTML = "";
+                target.parentNode.insertBefore(target_clone, target);
             },
             add_attribute_item: function(){
                 var attributes_item = this.dialog.attributes_template.cloneNode(true);
@@ -708,8 +735,8 @@
         inline_label_height_in_pixels:    10,
         block_label_width_in_pixels:      25,
         edit_element_css_cursor:          "pointer",
-        duplicate_element_css_cursor:     "s-resize",
         doctored_container_class:         "doctored",
+        custom_element_value:             "(custom)",
         xml_declaration:                  '<?xml version="1.0" ?>',
         theme_prefix:                     'doctored-theme-',
         intentional_linebreak_class:      'doctored-linebreak',

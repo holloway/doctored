@@ -149,6 +149,17 @@ samp.doctored-tooltip.doctored-theme-flat {
         padding: 2px;
     }
 
+        menu.doctored-dialog.doctored-theme-flat a.doctored-add-sibling-above,
+        menu.doctored-dialog.doctored-theme-flat a.doctored-add-sibling-below {
+            color: #666;
+            margin-top:10px;
+        }
+
+            menu.doctored-dialog.doctored-theme-flat a.doctored-add-sibling-above:hover,
+            menu.doctored-dialog.doctored-theme-flat a.doctored-add-sibling-below:hover {
+                background: #eeeeee;
+            }
+
     menu.doctored-dialog.doctored-theme-flat * {
         font-size:small;
     }
@@ -265,11 +276,9 @@ samp.doctored-tooltip.doctored-theme-flat {
     ul.doctored-tabs.doctored-theme-flat {
         text-transform:uppercase;
         font-size:small;
-        margin-right:60px;
         text-decoration:none;
         font-weight:bold;
         border-bottom: solid 1px #ccc;
-
     }
 
         ul.doctored-tabs.doctored-theme-flat li {
@@ -337,17 +346,7 @@ samp.doctored-tooltip.doctored-theme-flat {
                     background: #fff;
                 }
 
-    a.doctored-hamburger-button {
-        display: inline-block;
-        padding:8px 13px;
-        margin-right:4px;
-        background: #dddddd;
-        text-decoration:none;
-        background-color:#ffffff;
-        border: 1px solid #999;
-        color:#777777;
-        border-radius: 2px;
-    }
+ 
 
     menu.doctored-hamburger.doctored-theme-flat {
         padding: 0px;
@@ -446,7 +445,7 @@ samp.doctored-tooltip.doctored-theme-shadow {
             font-weight:bold;
             font-size:small;
             text-shadow:1px 1px 2px #dddddd;
-            content: "\271A \00A0 " attr(data-element);
+            content: attr(data-element);
         }
 
         .doctored.doctored-theme-shadow div.doctored-block.has_errors:before {
@@ -653,6 +652,25 @@ samp.doctored-tooltip.doctored-theme-shadow {
         text-shadow: 1px 1px 1px #b33;
     }
 
+    ul.doctored-tabs.doctored-theme-shadow {
+        text-transform:uppercase;
+        font-size:small;
+        text-decoration:none;
+        font-weight:bold;
+        border-bottom: solid 1px #ccc;
+    }
+
+        ul.doctored-tabs.doctored-theme-shadow li {
+            display: inline-block;
+            position:relative;
+            top: 1px;
+            border: 1px solid #000;
+            color:#777777;
+            padding: 0px 5px;
+            vertical-align: top;
+            margin-right: 5px;
+        }
+
     menu.doctored-hamburger.doctored-theme-shadow {
         padding: 0px;
         background: black;
@@ -741,7 +759,7 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
             color:#000;
             font-weight:bold;
             font-size:small;
-            content: "\271A \00A0 " attr(data-element);
+            content: attr(data-element);
         }
 
         .doctored.doctored-theme-highcontrast div.doctored-block.has_errors:before {
@@ -931,6 +949,26 @@ samp.doctored-tooltip.doctored-theme-highcontrast {
         background: #000;
         color: #fff;
     }
+
+
+    ul.doctored-tabs.doctored-theme-highcontrast {
+        text-transform:uppercase;
+        font-size:small;
+        text-decoration:none;
+        font-weight:bold;
+        border-bottom: solid 1px #ccc;
+    }
+
+        ul.doctored-tabs.doctored-theme-highcontrast li {
+            display: inline-block;
+            position:relative;
+            top: 1px;
+            border: 1px solid #000;
+            color:#000000;
+            padding: 5px;
+            vertical-align: top;
+            margin-right: 5px;
+        }
 
     menu.doctored-hamburger.doctored-theme-highcontrast {
         padding: 0px;

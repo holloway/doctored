@@ -151,6 +151,25 @@ menu.doctored-dialog {
         display: block;
     }
 
+    menu.doctored-dialog a.doctored-add-sibling-above {
+        margin-right: 5px;
+    }
+
+    menu.doctored-dialog div.doctored-add-siblings {
+        margin: 0px auto;
+        width: 175px;
+    }
+
+    menu.doctored-dialog a.doctored-add-sibling-above,
+    menu.doctored-dialog a.doctored-add-sibling-below {
+        float:none;
+        display: inline-block;
+        width:85px;
+        text-align:center;
+        padding: 10px 0px;
+        cursor: pointer;
+    }
+
 div.doctored-selection {
     display: inline;
 }
@@ -166,7 +185,16 @@ ul.doctored-tabs {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    margin-right:60px;
 }
+
+    ul.doctored-tabs li {
+        display: inline-block;
+    }
+
+    ul.doctored-tabs a {
+        text-decoration: none;
+    }
 
 samp.doctored-tooltip {
     position:absolute;
@@ -192,7 +220,13 @@ samp.doctored-tooltip {
 a.doctored-hamburger-button {
     float:right;
     text-decoration:none;
-    margin: 0px 0px 0.4em 0px;
+    margin: 0px 4px 0.4em 0px;
+    display: block;
+    padding: 8px 13px;
+    background-color:#ffffff;
+    border: 1px solid #999;
+    color:#777777;
+    border-radius: 2px;
 }
 
 menu.doctored-hamburger {

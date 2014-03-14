@@ -324,6 +324,7 @@
         display_element_dialog: function(target, dialog, mouse, context_element, schema){
             var this_function = doctored.util.this_function,
                 is_root       = target.classList.contains("doctored"),
+                is_inline     = target.classList.contains(doctored.CONSTANTS.inline_class),
                 schema_attributes,
                 attributes_string,
                 attributes_item,
@@ -337,6 +338,7 @@
             dialog.root_element_title.style.display   = (is_root ? "" : "none");
             dialog.attributes_div.style.display       = "";
             dialog.attributes_title.style.display     = "";
+            dialog.add_siblings.style.display         = (is_root || is_inline ? "none" : "");
             if(mouse === undefined){
                 target_offset = target.getBoundingClientRect();
                 mouse = {x:target_offset.left, y:target_offset.top};
@@ -497,11 +499,12 @@
             if(mouse){
                 offsets.mouse_differences = {before_x: Math.abs(mouse.x - offsets.before.left), after_x: Math.abs(mouse.x - offsets.after.left)};
             }
-            dialog.schema_chooser.style.display = "none";
+            dialog.schema_chooser.style.display       = "none";
             dialog.schema_chooser_title.style.display = "none";
-            dialog.root_element_title.style.display = "none";
-            dialog.attributes_div.style.display = "none";
-            dialog.attributes_title.style.display = "none";
+            dialog.root_element_title.style.display   = "none";
+            dialog.attributes_div.style.display       = "none";
+            dialog.attributes_title.style.display     = "none";
+            dialog.add_siblings.style.display         = "none";
             dialog.style.display = "block"; //must be visible to obtain width/height
             offsets.dialog = {width: dialog.offsetWidth, height: dialog.offsetHeight};
 
