@@ -104,6 +104,12 @@
             filter_themes(instance.tabs);
 
         },
+        get_tab_index: function(tab){
+            var i = 0;
+
+            while((tab = tab.previousSibling) !== null) i++;
+            return i;
+        },
         parse_attributes_string: function(attributes_string){
             // although it would be easier to use the browsers DOM
             // to parse the attributes string (e.g. in a detached element)

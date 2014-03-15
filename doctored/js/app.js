@@ -85,7 +85,6 @@
                 this.dialog.close = $('a', this.dialog)[0];
                 this.dialog.close.addEventListener('click', this_function(this.close_dialog, this), false);
                 this.dialog.schema_chooser = $('select', this.dialog)[0];
-                this_function(this.schema_chooser_init, this)();
                 this.dialog.schema_chooser.addEventListener('change', this_function(this.schema_chooser_change, this), false);
                 this.dialog.schema_chooser_title = $('h6', this.dialog)[0];
                 this.dialog.attributes_title = $('h6', this.dialog)[2];
@@ -169,13 +168,14 @@
                         tab = this.manifest[i];
                         this_function(this.tabs_add_tab, this)(undefined, tab.filename, tab.uuid, true);
                     }
-                    if(tab_current_index) {
-                        this.tabs_select_tab(this.tabs.childNodes[tab_current_index]);
-                    } else {
-                        this.tabs_select_tab(this.tabs.childNodes[this.tabs.childNodes.length - 1]);
+                    if(!tab_current_index) {
+                        tab_current_index = this.tabs.childNodes.length - 1;
                     }
+                    this_function(this.schema_chooser_init, this)(this.manifest[tab_current_index].schema);
+                    this.tabs_select_tab(this.tabs.childNodes[tab_current_index]);
                 } else {
                     this.manifest = [];
+                    this_function(this.schema_chooser_init, this)();
                     this_function(this.tabs_add_tab, this)(undefined, undefined, undefined, false);
                     this_function(this.schema.new_document, this.schema)();
                 }
@@ -260,7 +260,7 @@
                     localStorage_selected_tab_index = "doctored-tab-current-index-" + this.id,
                     this_function                   = doctored.util.this_function,
                     xml                             = this_function(this.get_xml_string, this)(),
-                    current_tab_index               = this_function(this.tabs_get_current_tab_index, this)(),
+                    current_tab_index               = doctored.util.get_tab_index(this.tabs.current_tab),
                     _this                           = this;
 
                 window.localStorage.setItem(localStorage_manifest,           JSON.stringify(this.manifest));
@@ -269,26 +269,30 @@
                     window.localStorage.setItem(localStorage_file,               xml);
                 }
             },
-            tabs_get_current_tab_index: function(){
-                var i = 0,
-                    child = this.tabs.current_tab;
-
-                while((child = child.previousSibling) !== null) i++;
-                return i;
-            },
             tabs_click: function(event){
                 var tab = doctored.util.get_closest_by_nodeName(event.target, "li"),
-                    filename;
+                    filename,
+                    tab_index,
+                    epoch,
+                    uuid;
 
                 if(tab.classList.contains("doctored-new-document")) return;
                 if(event.target.classList.contains("doctored-delete")) {
+                    epoch = Date.now();
                     if($("li", this.tabs).length <= 2) {
                         alert("Can't delete your last document.");
                     } else if(confirm("Are you sure you want to delete '" + $("span", tab)[0].innerText + "'")){
+                        tab_index = doctored.util.get_tab_index(tab);
+                        uuid = this.manifest[tab_index].uuid;
+                        console.log("UUID", uuid);
+                        window.localStorage.removeItem("doctored-file-" + uuid);
+                        this.manifest.splice(tab_index, 1);
                         this.tabs.removeChild(tab);
                         if(tab === this.tabs.current_tab) {
                             this.tabs_select_tab($("li", this.tabs)[0]);
                         }
+                    } else if(epoch + 5000 > Date.now()) { // the confirm() above should ask the user for an answer but if they respond null and their response was within a few milliseconds then it's likely that the browser is blocking alert/confirm so write an appropriate error message to console.log
+                        console.log("DOCTORED WARNING: Seems that alert/confirm() is disabled.");
                     }
                     event.preventDefault();
                 } else {
@@ -392,10 +396,9 @@
                     span.style.width = span_available_width + "px";
                 }
             },
-            schema_chooser_init: function(){
+            schema_chooser_init: function(manifest_schema){
                 var this_function = doctored.util.this_function,
-                    localStorage_schema = localStorage.getItem("doctored-schema-url"),
-                    prefered_schema = localStorage_schema || this.options.schema,
+                    prefered_schema = manifest_schema || this.options.schema,
                     chosen_schema_option,
                     first_valid_option,
                     option,
