@@ -40,24 +40,30 @@
         }
 
         instance = {
-            doctored: 0.97,
+            doctored: 0.99,
             root: root_element,
             root_selector: selector,
             options: options,
             cache: {},
             init: function(){ //initialize one instance of the editor
                 var _this = this,
-                    menu,
-                    boundaries,
-                    i,
                     this_function = doctored.util.this_function,
                     theme = window.localStorage.getItem("doctored-theme"),
-                    manifest = window.localStorage.getItem(this.options.localStorage_key),
                     container = document.createElement("div"),
-                    tab;
+                    boundaries,
+                    manifest,
+                    tab_current_index,
+                    menu,
+                    tab,
+                    xml,
+                    i;
                 
+                this.root.innerHTML = "";
                 this.lint_soon = doctored.util.debounce(_this.lint, _this.options.linting_debounce_milliseconds, _this);
-                this.id = 'doctored_xxxxxxxxxxxx'.replace(/x/g, function(){return (Math.random()*16|0).toString(16);});
+                this.id = this.options.id || this.root_selector.replace(/[#-\[\]]/g, "").replace(/\s/g, "").toLowerCase();
+                //window.localStorage.removeItem("doctored-manifest-" + this.id);
+                manifest = window.localStorage.getItem("doctored-manifest-" + this.id);
+                tab_current_index = window.localStorage.getItem("doctored-tab-current-index-" + this.id);
                 this.root.contentEditable = true;
                 this.root.className = doctored.CONSTANTS.doctored_container_class;
                 this.root.addEventListener("input",     this_function(this.lint_soon, this), false);
@@ -110,7 +116,6 @@
                 this.dialog.add_sibling_below.setAttribute("title", "Add element after");
                 this.dialog.add_sibling_below.addEventListener("click", this_function(this.clone_element_below, this), false);
                 this.dialog.add_siblings.appendChild(this.dialog.add_sibling_below);
-
                 this.tabs = document.createElement("ul");
                 this.tabs.className = "doctored-tabs";
                 this.tabs.tab_item_template = document.createElement("li");
@@ -118,7 +123,7 @@
                 this.tabs.innerHTML = '<li class="doctored-new-document"><a href title="New document">+</a></li>';
                 this.tabs.addEventListener('click', this_function(this.tabs_click, this), false);
                 this.tabs.new_document = $(".doctored-new-document", this.tabs)[0];
-                this.tabs.new_document.addEventListener('click', this_function(this.tabs_add_document, this), false);
+                this.tabs.new_document.addEventListener('click', this_function(this.tabs_add_tab, this), false);
                 this.menu.innerHTML = '<a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
                 container.innerHTML = '<a class="doctored-hamburger-button" href title="Doctored.js Configuration">&#9776;</a>';
                 this.hamburger_button = container.childNodes[0];
@@ -146,13 +151,8 @@
                 this.view_source_resizer.classList.add("doctored-view-source-resizer");
                 this.view_source_resizer.addEventListener('mousedown', this_function(this.view_source_resizer_drag_start, this), false);
                 this.view_source_resizer.addEventListener('touchstart', this_function(this.view_source_resizer_drag_start, this), false);
-                document.addEventListener('mousemove', this_function(this.view_source_resizer_drag, this), false);
-                document.addEventListener('touchmove', this_function(this.view_source_resizer_drag, this), false);
-                document.addEventListener('mouseup', this_function(this.view_source_resizer_drag_end, this), false);
-                document.addEventListener('touchend', this_function(this.view_source_resizer_drag_end, this), false);
                 this.view_source_resizer.dragging = false;
-                this.view_source_textarea.style.display = "none"; //although it's immediately displayed in if(should_be_visible) below we don't want it visible at this point or it will mess with document height
-                this.options.localStorage_key = this.options.localStorage_key || this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "").toLowerCase();
+                this.view_source_textarea.style.display = "none";
                 doctored.util.set_theme(theme || this.options.theme, this);
                 this.root.parentNode.insertBefore(this.hamburger_button, this.root);
                 this.root.parentNode.insertBefore(this.tabs, this.root);
@@ -164,23 +164,27 @@
                 this.root.parentNode.insertBefore(this.view_source_resizer, this.view_source_textarea);
 
                 if(manifest) {
-                    console.log(manifest);
+                    this.manifest = JSON.parse(manifest);
+                    for(i = 0; i < this.manifest.length; i++){
+                        tab = this.manifest[i];
+                        this_function(this.tabs_add_tab, this)(undefined, tab.filename, tab.uuid, true);
+                    }
+                    if(tab_current_index) {
+                        this.tabs_select_tab(this.tabs.childNodes[tab_current_index]);
+                    } else {
+                        this.tabs_select_tab(this.tabs.childNodes[this.tabs.childNodes.length - 1]);
+                    }
                 } else {
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
-                    this.tabs_add_document();
+                    this.manifest = [];
+                    this_function(this.tabs_add_tab, this)(undefined, undefined, undefined, false);
+                    this_function(this.schema.new_document, this.schema)();
                 }
+                document.addEventListener('mousemove', this_function(this.view_source_resizer_drag, this), false);
+                document.addEventListener('touchmove', this_function(this.view_source_resizer_drag, this), false);
+                document.addEventListener('mouseup', this_function(this.view_source_resizer_drag_end, this), false);
+                document.addEventListener('touchend', this_function(this.view_source_resizer_drag_end, this), false);
 
-                this.save_timer = setInterval(function(){ _this.save.apply(_this); }, this.options.autosave_every_milliseconds);
+                window.addEventListener('beforeunload', this_function(this.beforeunload, this), false);
 
                 if(this.options.onload) {
                     this_function(this.options.onload, this)();
@@ -189,9 +193,11 @@
             lint: function(){
                 // send linting job to one of the workers
                 // NOTE you probably shouldn't call this directly instead call lint_soon()
+                var xml = this.get_xml_string();
+                if(xml === false) return this.lint_soon();
                 this.root.classList.remove("valid");
                 this.root.classList.remove("invalid");
-                doctored.linters.lint(this.get_xml_string(), this.schema.schema_url, this.lint_response, instance);
+                doctored.linters.lint(xml, this.schema.schema_url, this.lint_response, instance);
             },
             lint_response: function(errors){
                 // handle a linting response, and write it to the page
@@ -224,6 +230,8 @@
                 }
             },
             get_xml_string: function(){
+                if(this.root.childNodes.length === 0) return false;
+
                 return doctored.CONSTANTS.xml_declaration +
                        (this.schema.dtd ? this.schema.dtd : "") +
                        doctored.util.descend_building_xml([this.root]);
@@ -246,42 +254,102 @@
                 this.root.innerHTML = new_document_root.innerHTML;
                 this.lint_soon();
             },
+            beforeunload: function(){
+                var localStorage_manifest           = "doctored-manifest-" + this.id,
+                    localStorage_file               = "doctored-file-"     + this.tabs.current_tab.getAttribute("data-uuid"),
+                    localStorage_selected_tab_index = "doctored-tab-current-index-" + this.id,
+                    this_function                   = doctored.util.this_function,
+                    xml                             = this_function(this.get_xml_string, this)(),
+                    current_tab_index               = this_function(this.tabs_get_current_tab_index, this)(),
+                    _this                           = this;
+
+                window.localStorage.setItem(localStorage_manifest,           JSON.stringify(this.manifest));
+                window.localStorage.setItem(localStorage_selected_tab_index, current_tab_index);
+                if(xml) {
+                    window.localStorage.setItem(localStorage_file,               xml);
+                }
+            },
+            tabs_get_current_tab_index: function(){
+                var i = 0,
+                    child = this.tabs.current_tab;
+
+                while((child = child.previousSibling) !== null) i++;
+                return i;
+            },
             tabs_click: function(event){
-                var li = doctored.util.get_closest_by_nodeName(event.target, "li");
-                if(li.classList.contains("doctored-new-document")) return;
+                var tab = doctored.util.get_closest_by_nodeName(event.target, "li"),
+                    filename;
+
+                if(tab.classList.contains("doctored-new-document")) return;
                 if(event.target.classList.contains("doctored-delete")) {
                     if($("li", this.tabs).length <= 2) {
                         alert("Can't delete your last document.");
-                    } else if(confirm("Are you sure you want to delete '" + $("span", li)[0].innerText + "'")){
-                        this.tabs.removeChild(li);
-                        if(li == this.tabs.current_tab) {
+                    } else if(confirm("Are you sure you want to delete '" + $("span", tab)[0].innerText + "'")){
+                        this.tabs.removeChild(tab);
+                        if(tab === this.tabs.current_tab) {
                             this.tabs_select_tab($("li", this.tabs)[0]);
                         }
                     }
                     event.preventDefault();
                 } else {
-                    this.tabs_select_tab(li);
+                    if(this.tabs.current_tab && tab === this.tabs.current_tab) {
+                        filename = $("span", tab)[0].textContent;
+                        filename = prompt("New filename?", filename);
+                        if(filename) {
+                            $("span", tab)[0].textContent = filename;
+                            tab.setAttribute("title", filename);
+                        }
+                    } else {
+                        this.tabs_select_tab(tab);
+                    }
                 }
                 
             },
-            tabs_select_tab: function(li){
+            tabs_select_tab: function(tab){
+                var xml;
+
                 if(this.tabs.current_tab) {
                     this.tabs.current_tab.classList.remove(doctored.CONSTANTS.current_tab_class);
+                    xml = this.get_xml_string();
+                    if(xml){
+                        window.localStorage.setItem("doctored-file-" + this.tabs.current_tab.getAttribute("data-uuid"), xml);
+                    }
                 }
-                this.tabs.current_tab = li;
+                this.tabs.current_tab = tab;
                 this.tabs.current_tab.classList.add(doctored.CONSTANTS.current_tab_class);
+                xml = window.localStorage.getItem("doctored-file-" + tab.getAttribute("data-uuid"));
+                if(xml) {
+                    this.set_xml_string(xml);
+                }
             },
-            tabs_add_document: function(event){
-                var tab,
-                    span,
+            tabs_add_tab: function(event, filename, uuid, dont_select_tab){
+                var this_function = doctored.util.this_function,
                     computed_style,
-                    able_to_fit;
+                    able_to_fit,
+                    span,
+                    tab;
 
                 if(this.tabs.count === undefined) this.tabs.count = 0;
                 this.tabs.count += 1;
                 tab = this.tabs.tab_item_template.cloneNode(true);
+                if(filename){
+                    $("span", tab)[0].textContent = filename;
+                } else {
+                    filename = $("span", tab)[0].textContent;
+                    uuid = doctored.util.get_uuid();
+                    this.manifest.push({
+                        uuid:     uuid,
+                        filename: filename,
+                        schema:   this.dialog.schema_chooser.options[this.dialog.schema_chooser.selectedIndex].value
+                    });
+                }
+                tab.setAttribute("data-uuid", uuid);
+                tab.setAttribute("title", filename);
                 this.tabs.insertBefore(tab, this.tabs.new_document);
-                this.tabs_select_tab(tab);
+                if(!dont_select_tab){
+                    this.tabs_select_tab(tab);
+                    this_function(this.schema.new_document, this.schema)();
+                }
                 if(this.tabs.default_tab_width === undefined) { // only run this once
                     span = $("span", tab)[0];
                     computed_style = window.getComputedStyle(span);
@@ -298,6 +366,7 @@
                 if(able_to_fit === false) {
                     this.tabs.removeChild(tab);
                     this.tabs.count -= 1;
+                    // we don't this.manifest.pop() because we leave entries there so as not to lose them
                     alert("Unable to fit any more tabs. Sorry!");
                 }
                 if(event) {
@@ -322,13 +391,6 @@
                     span = spans[i];
                     span.style.width = span_available_width + "px";
                 }
-            },
-            save: function(event){
-                var localStorage_key,
-                    xml;
-
-                localStorage_key = this.options.localStorage_key;
-                window.localStorage.setItem(localStorage_key, this.get_xml_string());
             },
             schema_chooser_init: function(){
                 var this_function = doctored.util.this_function,
@@ -356,7 +418,7 @@
                 }
                 if(!chosen_schema_option) return alert("Doctored.js can't find a valid default schema.");
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
-                this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, true);
+                this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, false);
                 this_function(this.lint_soon, this)();
             },
             schema_chooser_change: function(event){
@@ -671,6 +733,7 @@
 
                 target_clone.innerHTML = "";
                 target.parentNode.insertBefore(target_clone, target.nextSibling);
+                this.lint_soon();
             },
             clone_element_above: function(){
                 var target = this.dialog.target,
@@ -678,6 +741,7 @@
 
                 target_clone.innerHTML = "";
                 target.parentNode.insertBefore(target_clone, target);
+                this.lint_soon();
             },
             add_attribute_item: function(){
                 var attributes_item = this.dialog.attributes_template.cloneNode(true);

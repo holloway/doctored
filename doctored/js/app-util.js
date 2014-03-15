@@ -321,6 +321,12 @@
         remove_excessive_whitespace: function(content){
             return content.trim().replace(/[\n\t]/g, " ").replace(/  /g, " ");
         },
+        get_uuid: function(){
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { // credit to http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+                var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+                return v.toString(16);
+            });
+        },
         display_element_dialog: function(target, dialog, mouse, context_element, schema){
             var this_function = doctored.util.this_function,
                 is_root       = target.classList.contains("doctored"),
