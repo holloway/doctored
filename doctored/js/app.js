@@ -325,6 +325,8 @@
                 if(xml) {
                     this.set_xml_string(xml);
                 }
+                this.schema_chooser_init(this.manifest[doctored.util.get_tab_index(this.tabs.current_tab)].schema);
+                this.dialog.style.display = "none";
             },
             tabs_add_tab: function(event, filename, uuid, dont_select_tab){
                 var this_function = doctored.util.this_function,
@@ -396,9 +398,9 @@
                     span.style.width = span_available_width + "px";
                 }
             },
-            schema_chooser_init: function(manifest_schema){
+            schema_chooser_init: function(schema_url){
                 var this_function = doctored.util.this_function,
-                    prefered_schema = manifest_schema || this.options.schema,
+                    prefered_schema = schema_url || this.options.schema,
                     chosen_schema_option,
                     first_valid_option,
                     option,
@@ -425,14 +427,14 @@
                 this_function(this.lint_soon, this)();
             },
             schema_chooser_change: function(event){
-                var new_document         = confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)") !== null,
+                var new_document         = !!confirm("Do you want a new document for that schema?\n(WARNING: current document will be lost!)"),
                     chosen_schema_option = this.dialog.schema_chooser.options[this.dialog.schema_chooser.selectedIndex],
                     this_function        = doctored.util.this_function;
 
                 if(!chosen_schema_option) return alert("No schema chosen");
-                localStorage.setItem("doctored-schema-url", chosen_schema_option.value);
                 this.schema = doctored.schemas.get_schema_instance(this, chosen_schema_option.getAttribute('data-schema-family'), chosen_schema_option.value);
                 this_function(this.schema.init, this.schema)(this, chosen_schema_option.value, new_document);
+                this.manifest[doctored.util.get_tab_index(this.tabs.current_tab)].schema = chosen_schema_option.value;
                 this.dialog.style.display = "none";
                 this.root.focus();
             },
