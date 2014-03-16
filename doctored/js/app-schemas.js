@@ -5,7 +5,7 @@
     // DO NOT EDIT THE FOLLOWING
     // it is dynamically inserted by schemas/rebuild-schema-manifest.js
     // {MANIFEST-START}
-    doctored.schemas_manifest = [{"schema_family":"DITA","children":[{"schema_family":"1.8","children":[{"schema":"/DITA/1.8/DITA Base.xsd","label":"DITA Base","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Bookmap.xsd","label":"DITA Bookmap","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Topic.xsd","label":"DITA Topic","schema_family":"dita"}]}]},{"schema_family":"DocBook","children":[{"schema":"/DocBook/DocBook 5.0.rng","label":"DocBook 5.0","schema_family":"docbook"}]},{"schema_family":"MARC","children":[{"schema":"/MARC/MARC21.xsd","label":"MARC21","schema_family":"marc"}]},{"schema_family":"TEI","children":[{"schema":"/TEI/TEI 2.6.rng","label":"TEI 2.6","schema_family":"tei"}]},{"schema_family":"TeXML","children":[{"schema":"/TeXML/texml.rng","label":"texml","schema_family":"texml"}]}];
+    doctored.schemas_manifest = [{"schema_family":"DITA","children":[{"schema_family":"1.8","children":[{"schema":"/DITA/1.8/DITA Base.xsd","label":"DITA Base","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Bookmap.xsd","label":"DITA Bookmap","schema_family":"dita"},{"schema":"/DITA/1.8/DITA Topic.xsd","label":"DITA Topic","schema_family":"dita"}]}]},{"schema_family":"DocBook","children":[{"schema":"/DocBook/DocBook 5.0.rng","label":"DocBook 5.0","schema_family":"docbook"}]},{"schema_family":"HTML","children":[{"schema":"/HTML/XHTML 1.xsd","label":"XHTML 1","schema_family":"html"},{"schema":"/HTML/XHTML 5.rng","label":"XHTML 5","schema_family":"html"}]},{"schema_family":"MARC","children":[{"schema":"/MARC/MARC21.xsd","label":"MARC21","schema_family":"marc"}]},{"schema_family":"TEI","children":[{"schema":"/TEI/TEI 2.6.rng","label":"TEI 2.6","schema_family":"tei"}]},{"schema_family":"TeXML","children":[{"schema":"/TeXML/texml.rng","label":"texml","schema_family":"texml"}]}];
     // {MANIFEST-END}
     // DO NOT EDIT THE PRECEDING
 }());
@@ -378,6 +378,10 @@
         'texml': {
             name: "TeXML",
             new_document_xml: '<?xml version="1.0" encoding="UTF-8"?><TeXML><TeXML escape="0">\\documentclass[a4paper]{article}\\usepackage[latin1]{inputenc}\\usepackage[T1]{fontenc}</TeXML><env name="document">NOTE We don\'t support linebreaks very well right now - this format isn\'t very well supported.\neI\'m not afraid of the symbols\n$, ^, > and others.</env></TeXML>'
+        },
+        'html': {
+            name: "HTML",
+            new_document_xml: '<?xml version="1.0" encoding="UTF-8"?><html><body><p>Test Document</p></body></html>'
         }
     };
 
