@@ -196,6 +196,13 @@ ul.doctored-tabs {
         text-decoration: none;
     }
 
+    ul.doctored-tabs li.doctored-current.doctored-dragging-tab,
+    ul.doctored-tabs li.doctored-dragging-tab {
+        position:absolute;
+        z-index:2;
+        top: auto;
+    }
+
 samp.doctored-tooltip {
     position:absolute;
     display:none;

@@ -7,7 +7,7 @@
             linting_debounce_milliseconds:     1000,
             retry_init_after_milliseconds:     50,
             view_source_debounce_milliseconds: 1000 / 60,
-            schema:                            "/DocBook/DocBook 5.0.rng", //key from doctored.sc in app-formats.js ... a default that may be overridden by per-user settings in localStorage
+            schema:                            "/DocBook/DocBook 5.0.rng", //default... a key from doctored.schemas in app-formats.js ... may be overridden in call to init() or by per-user settings in localStorage
             theme:                             "flat" //key from options in hamburger_menu.theme_chooser
         },
         $ = doctored.$,
@@ -120,7 +120,10 @@
                 this.tabs.tab_item_template = document.createElement("li");
                 this.tabs.tab_item_template.innerHTML = '<span>Untitled.xml</span> <a href title="Delete" class="doctored-delete">&times;</a>';
                 this.tabs.innerHTML = '<li class="doctored-new-document"><a href title="New document">+</a></li>';
-                this.tabs.addEventListener('click', this_function(this.tabs_click, this), false);
+                //this.tabs.addEventListener('click', this_function(this.tabs_click, this), false);
+                this.tabs.addEventListener('mousedown', this_function(this.tabs_drag_start, this), false);
+                this.tabs.addEventListener('touchstart', this_function(this.tabs_drag_start, this), false);
+                this.tabs.dragging = false;
                 this.tabs.new_document = $(".doctored-new-document", this.tabs)[0];
                 this.tabs.new_document.addEventListener('click', this_function(this.tabs_add_tab, this), false);
                 this.menu.innerHTML = '<a class="doctored-properties" href="" title="Document Properties">Document</a><a class="doctored-view-source" href="">View Source</a><a class="doctored-download" href="">Download</a>';
@@ -168,8 +171,8 @@
                         tab = this.manifest[i];
                         this_function(this.tabs_add_tab, this)(undefined, tab.filename, tab.uuid, true);
                     }
-                    if(!tab_current_index) {
-                        tab_current_index = this.tabs.childNodes.length - 1;
+                    if(!tab_current_index || tab_current_index >= this.manifest.length) {
+                        tab_current_index = this.manifest.length - 1;
                     }
                     this_function(this.schema_chooser_init, this)(this.manifest[tab_current_index].schema);
                     this.tabs_select_tab(this.tabs.childNodes[tab_current_index]);
@@ -179,11 +182,10 @@
                     this_function(this.tabs_add_tab, this)(undefined, undefined, undefined, false);
                     this_function(this.schema.new_document, this.schema)();
                 }
-                document.addEventListener('mousemove', this_function(this.view_source_resizer_drag, this), false);
-                document.addEventListener('touchmove', this_function(this.view_source_resizer_drag, this), false);
-                document.addEventListener('mouseup', this_function(this.view_source_resizer_drag_end, this), false);
-                document.addEventListener('touchend', this_function(this.view_source_resizer_drag_end, this), false);
-
+                document.addEventListener('mousemove', this_function(this.drag, this), false);
+                document.addEventListener('touchmove', this_function(this.drag, this), false);
+                document.addEventListener('mouseup', this_function(this.drag_end, this), false);
+                document.addEventListener('touchend', this_function(this.drag_end, this), false);
                 window.addEventListener('beforeunload', this_function(this.beforeunload, this), false);
 
                 if(this.options.onload) {
@@ -610,7 +612,53 @@
                 view_source_resizer.dragging = true;
                 view_source_resizer.drag_offset = event.layerX;
             },
-            view_source_resizer_drag: function(event){
+            tabs_drag_start: function(event){
+                if(event.which !== doctored.CONSTANTS.left_mouse_button) return;
+                this.tabs.dragging = true;
+                this.tabs.dragging_tab = doctored.util.get_closest_by_nodeName(event.target, "li");
+                this.tabs.dragging_started = false;
+                this.tabs.dragging_start_offset = {x: event.layerX};
+                if(this.tabs.drop_target === undefined){
+                    this.tabs.drop_target = document.createElement("li");
+                    this.tabs.drop_target.className = "doctored-drop-target";
+                }
+                this.tabs.tab_offsetWidth = this.tabs.dragging_tab.offsetWidth;
+                this.tabs.drop_target.style.width = this.tabs.tab_offsetWidth + "px";
+                this.tabs.drop_target.style.height = this.tabs.dragging_tab.offsetHeight + "px";
+                this.tabs.left = this.tabs.getBoundingClientRect().left;
+                this.tabs.dragging_mouse_start_position = {x: (event.x || event.clientX)};
+            },
+            drag: function(event){
+                var this_function = doctored.util.this_function;
+                
+                if(this.view_source_resizer.dragging === true) {
+                    return this_function(this.drag_view_source, this)(event);
+                } else if(this.tabs.dragging === true) {
+                    return this_function(this.drag_tabs, this)(event);
+                }
+            },
+            drag_tabs: function(event){
+                var mouse_position = {x: (event.x || event.clientX)};
+
+                if(this.tabs.dragging_started === false) {
+                    if(mouse_position.x < this.tabs.dragging_mouse_start_position.x - doctored.CONSTANTS.drag_distance_activates_pixels ||
+                       mouse_position.x > this.tabs.dragging_mouse_start_position.x + doctored.CONSTANTS.drag_distance_activates_pixels){
+                        this.tabs.dragging_started = true;
+                        this.tabs.dragging_tab.classList.add("doctored-dragging-tab");
+                        this.tabs.insertBefore(this.tabs.drop_target, this.tabs.dragging_tab);
+                    
+                    }
+                }
+                if(this.tabs.dragging_started === true) { // NOTE don't join this if() with above because the above might set this.tabs.dragging_started = true
+                    this.tabs.dragging_tab.style.left = (mouse_position.x - this.tabs.dragging_start_offset.x) + "px";
+                    this.tabs.drop_target_index = Math.floor((mouse_position.x - this.tabs.left) / this.tabs.tab_offsetWidth);
+                    this.tabs.insertBefore(this.tabs.drop_target, this.tabs.childNodes[this.tabs.drop_target_index]);
+                  
+                    
+                }
+                event.preventDefault();
+            },
+            drag_view_source: function(event){
                 var this_function = doctored.util.this_function,
                     view_source_textarea = this.view_source_textarea,
                     view_source_resizer = this.view_source_resizer;
@@ -626,8 +674,16 @@
                 this_function(this.view_source_resize, this)();
                 event.preventDefault();
             },
-            view_source_resizer_drag_end: function(){
-                this.view_source_resizer.dragging = false;
+            drag_end: function(){
+                if(this.tabs.dragging === true){
+                    this.tabs.dragging = false;
+                    this.tabs.dragging_tab.style.left = "0px";
+                    this.tabs.dragging_tab.classList.remove("doctored-dragging-tab");
+                    this.tabs.removeChild(this.tabs.drop_target);
+                    this.tabs.insertBefore(this.tabs.dragging_tab, this.tabs.childNodes[this.tabs.drop_target_index]);
+                } else if (this.view_source_resizer.dragging === true){
+                    this.view_source_resizer.dragging = false;
+                }
             },
             view_source_resize: function(){
                 // This just applies whatever width is set on view_source_textarea.width which is
@@ -806,7 +862,7 @@
         edit_element_css_cursor:          "pointer",
         doctored_container_class:         "doctored",
         custom_element_value:             "(custom)",
-        xml_declaration:                  '<?xml version="1.0" ?>',
+        xml_declaration:                  '<?xml version="1.0"?>',
         theme_prefix:                     'doctored-theme-',
         intentional_linebreak_class:      'doctored-linebreak',
         root_context:                     '/',
@@ -816,7 +872,8 @@
         left_mouse_button:                1,
         text_area_resizer_minimum_pixels: 100,
         text_area_resizer_maximum_pixels: 150, /* from right of error gutter*/
-        minimum_tab_width:                4
+        minimum_tab_width:                4,
+        drag_distance_activates_pixels:   25
     };
     doctored.CONSTANTS.block_class  = doctored.CONSTANTS.block_or_inline_class_prefix + 'block';
     doctored.CONSTANTS.inline_class = doctored.CONSTANTS.block_or_inline_class_prefix + 'inline';
