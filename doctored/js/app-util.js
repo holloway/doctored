@@ -104,6 +104,33 @@
             filter_themes(instance.tabs);
 
         },
+        prevent_default: function(event){
+            event.preventDefault();
+        },
+        alert: function(text){
+            var epoch = Date.now();
+            var result = alert(text);
+            if(epoch + doctored.CONSTANTS.dialog_supression_wait_milliseconds > Date.now()) { // the confirm() above should ask the user for an answer but if they respond null and their response was within a few milliseconds then it's likely that the browser is blocking alert/confirm so write an appropriate error message to console.log
+                console.log("DOCTORED.JS WARNING: Seems that window.confirm() is supressed by the browser.");
+            }
+            return result;
+        },
+        confirm: function(text){
+            var epoch = Date.now();
+            var result = confirm(text);
+            if(epoch + doctored.CONSTANTS.dialog_supression_wait_milliseconds > Date.now()) { // the confirm() above should ask the user for an answer but if they respond null and their response was within a few milliseconds then it's likely that the browser is blocking alert/confirm so write an appropriate error message to console.log
+                console.log("DOCTORED.JS WARNING: Seems that window.confirm() is supressed by the browser.");
+            }
+            return result;
+        },
+        prompt: function(text, value){
+            var epoch = Date.now();
+            var result = prompt(text, value);
+            if(epoch + doctored.CONSTANTS.dialog_supression_wait_milliseconds > Date.now()) { // the confirm() above should ask the user for an answer but if they respond null and their response was within a few milliseconds then it's likely that the browser is blocking alert/confirm so write an appropriate error message to console.log
+                console.log("DOCTORED.JS WARNING: Seems that window.prompt() is supressed by the browser.");
+            }
+            return result;
+        },
         get_tab_index: function(tab){
             var i = 0;
 

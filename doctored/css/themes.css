@@ -309,6 +309,7 @@ samp.doctored-tooltip.doctored-theme-flat {
             ul.doctored-tabs.doctored-theme-flat li.doctored-current.doctored-drop-target,
             ul.doctored-tabs.doctored-theme-flat li.doctored-drop-target {
                 border: dashed 1px #999999;
+                background: transparent;
                 width:100px;
             }
             
