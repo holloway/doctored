@@ -33,4 +33,4 @@ http.createServer(function(request, response) {
   });
 }).listen(parseInt(port, 10));
 
-console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown");
+console.log("Static file server running at\n  => http://localhost:" + port + "/\nCTRL + C to shutdown. WARNING this is for development purposes only -- you'd have to be a fool to run this on the web.");

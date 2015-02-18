@@ -21,12 +21,16 @@
         
     <script src="doctored/doctored.js"></script>
     <script>
-        var callback = function(){console.log("Doctored.js: initialized " + this.id + "!")};
+        var callback = function(){
+            if(window.console && window.console.log) console.log("Doctored.js: initialized " + this.id + "!")
+        };
 
         doctored.init("#editor1", {
             onload: callback,
-            id:     "editor1" // unique id per domain used for saving data (localStorage key)
+            id:     "editor1" // unique id per domain used for saving data (localStorage key). Doesn't need to be the same as the element Id.
         });
+
+        
     </script>
 </body>
 </html>

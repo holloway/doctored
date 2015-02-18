@@ -22,7 +22,7 @@
             instance = doctored._to_be_initialized[i];
             doctored.init(instance.selector, instance.options);
         }
-        delete doctored._to_be_initialized; //don't need this anymore
+        delete doctored._to_be_initialized; //don't need this anymore.. delete and let it be garbage collected
         doctored.ready = true;
     });
 
@@ -855,8 +855,8 @@
 
                 this.tooltip.innerHTML = text;
                 this.tooltip.style.left = x + "px";
-                this.tooltip.style.top = y + "px";
-                this.tooltip.style.display = "block";
+                this.tooltip.style.top = y +  "px";
+                this.tooltip.style.display =  "block";
                 this.tooltip.classList.remove("doctored-hidden");
                 if(this.tooltip.timer) clearTimeout(this.tooltip.timer);
                 this.tooltip.timer = setTimeout(function(){
@@ -867,10 +867,26 @@
                 this.tooltip.style.display = "none";
             }
         };
-        instance.init();
         doctored.instances = doctored.instances || [];
         doctored.instances.push(instance);
+        instance.init();
         return instance;
+    };
+
+    doctored.getInstanceByNode = function(node){
+        var i,
+            instance;
+
+        if(!doctored.instances) return false;
+        for(i = 0; i < doctored.instances.length; i++){
+            instance = doctored.instances[i];
+            if(instance.root === node) return instance;
+        }
+        return false;
+    };
+
+    doctored.getInstanceBySelector = function(selector){
+        return doctored.getInstanceByNode($(selector));
     };
 
     doctored.CONSTANTS = {
