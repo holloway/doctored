@@ -16,3 +16,4 @@ XML Spy for Windows (which has a free trial and can run in Wine) can flatten fil
 1. Run ./node rebuild-schema-manifest.js which will modify js/app-schemas.js
 1. Open js/app-schemas.js and find doctored.schema_family and default document for that schema, name the inline-level elements (by default all elements are block-level, so you only name the inline-level elements), etc.
 
+This is a bit convoluted, I know. If you can think of a better way, or if you can contribute code to make it better, then that would be lovely.
