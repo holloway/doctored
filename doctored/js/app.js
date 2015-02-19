@@ -731,14 +731,13 @@
                 textarea.value = this.get_xml_string();
             },
             download: function(event){
-                // clicking the 'Download' button
-                var xml      = this.get_xml_string(),
-                    filename = this.root_selector.replace(/[#-]/g, "").replace(/\s/g, "") + xml.replace(/<[^>]*?>/g, "").replace(/\s/g, "");
-
-                if(filename.length > 10) filename = filename.substr(0, 10);
-                else if(filename.length < 4) filename = "download";
-                filename += ".xml";
                 event.preventDefault();
+                // clicking the 'Download' button
+                var xml               = this.get_xml_string(),
+                    current_tab_index = doctored.util.get_tab_index(this.tabs.current_tab),
+                    filename          = this.manifest[current_tab_index].filename;
+
+                if(filename.indexOf(".xml") === -1) filename += ".xml";
                 doctored.util.offer_download(xml, filename);
             },
             keyup_dialog_esc: function(event){
@@ -892,7 +891,7 @@
     doctored.CONSTANTS = {
         key: {
             enter: 13,
-            esc: 27
+            esc:   27
         },
         current_tab_class:                "doctored-current",
         inline_label_height_in_pixels:    10,
