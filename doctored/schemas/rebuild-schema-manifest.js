@@ -11,7 +11,7 @@
         app_schemas_marker = /\{MANIFEST\-START\}[\s\S]*?\{MANIFEST\-END\}/g,
         app_schemas_path = path.join(path.dirname(approot), 'js', 'app-schemas.js'),
         manifest_path = path.join(approot, 'manifest.json'),
-        blacklist = [path.basename(__filename), 'manifest.json', 'options.json', 'README.txt'],
+        blacklist = [path.basename(__filename), 'manifest.json', 'options.json', 'README.md'],
         manifest = {},
         get_schema_family = function(full_path){
             var file_options = full_path.substr(0, full_path.length - path.extname(full_path).length) + '.json',
