@@ -38,6 +38,7 @@
                 file = files[i];
                 if(blacklist.indexOf(file) >= 0) continue;
                 if(path.extname(file) === ".json") continue;
+                if (path.basename(file) === ".DS_Store") continue;
                 full_path = path.join(current_directory, file);
                 if(fs.lstatSync(full_path).isDirectory()) {
                     manifest.push({
